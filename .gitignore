@@ -29,7 +29,7 @@ pnpm-debug.log*
 .sass-cache/
 connect.lock
 coverage/
-lib/
+
 test.ts
 
 # Nx

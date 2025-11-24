@@ -9,7 +9,9 @@
     "@angular/core": "^19.0.0"
   },
   "dependencies": {
-    "tslib": "^2.3.0"
+    "@angular/forms": "^19.2.15",
+    "tslib": "^2.3.0",
+    "@repo/utils": "workspace:*"
   },
   "devDependencies": {
     "@angular/compiler-cli": "^19.0.0",
