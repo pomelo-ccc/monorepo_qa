@@ -1,0 +1,40 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build Output
+dist
+tmp
+out-tsc
+bazel-out
+
+# IDEs
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Angular
+.angular/
+.sass-cache/
+connect.lock
+coverage/
+lib/
+test.ts
+
+# Nx
+.nx/
+
+# Environment
+.env
+.env.local

@@ -1,0 +1,6 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": ["monorepo", "pnpm", "angular", "nestjs", "linter", "commitlint", "zone.js", "rxjs"],
+  "ignorePaths": ["node_modules/**", "dist/**", "coverage/**", ".angular/**"]
+}
