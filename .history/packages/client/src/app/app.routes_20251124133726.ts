@@ -1,9 +1,4 @@
-import {
-  Routes,
-  CanActivateFn,
-  RouterStateSnapshot,
-  ActivatedRouteSnapshot,
-} from '@angular/router';
+import { Routes } from '@angular/router';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { FaqListComponent } from './faq-list/faq-list.component';
@@ -15,7 +10,7 @@ import { ConfigManagementComponent } from './admin/config-management/config-mana
 import { AuthService } from './services/auth.service';
 
 // Admin guard function
-const adminGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+const adminGuard = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
@@ -23,8 +18,8 @@ const adminGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterS
     return true;
   }
 
-  // Redirect to login with returnUrl
-  router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+  alert('只有管理员才能访问此页面');
+  router.navigate(['/']);
   return false;
 };
 

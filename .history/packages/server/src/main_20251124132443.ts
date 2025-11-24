@@ -44,7 +44,7 @@ async function saveFaqs(faqs: FaqItem[]): Promise<void> {
 (async () => {
   try {
     await fs.mkdir(path.dirname(DATA_FILE), { recursive: true });
-
+    
     // Initialize FAQs
     try {
       await fs.access(DATA_FILE);
@@ -58,16 +58,13 @@ async function saveFaqs(faqs: FaqItem[]): Promise<void> {
           tags: ['校验', '异步', '表单提交'],
           errorCode: 'ASYNC_VALIDATE_FAIL',
           summary: '异步验证器返回错误状态后，提交按钮未被禁用，用户仍可提交错误数据。',
-          phenomenon:
-            '复现步骤：\n1. 创建一个带有异步验证器（如检查用户名唯一性）的表单字段。\n2. 输入触发验证错误的值。\n3. 错误信息显示，但提交按钮仍然可用。\n4. 点击提交，无效数据被发送。',
-          solution:
-            '根本原因通常是验证器状态更新处理不当。修复方法是结合 `asyncValidators` 使用 `updateValueAndValidity()` 方法，并根据表单整体的 `status` 属性（PENDING/VALID/INVALID）来控制提交按钮的禁用状态，而不仅仅是检查 `valid` 属性。',
-          troubleshootingFlow:
-            'graph TD; A[开始] --> B{表单提交?}; B --> C{表单状态是 PENDING?}; C -- 是 --> D[禁用提交按钮]; D --> E{等待异步校验完成}; E --> F{表单状态是 VALID?}; F -- 是 --> G[启用按钮 & 允许提交]; F -- 否 --> H[保持禁用, 显示错误]; C -- 否 --> F;',
+          phenomenon: '复现步骤：\n1. 创建一个带有异步验证器（如检查用户名唯一性）的表单字段。\n2. 输入触发验证错误的值。\n3. 错误信息显示，但提交按钮仍然可用。\n4. 点击提交，无效数据被发送。',
+          solution: '根本原因通常是验证器状态更新处理不当。修复方法是结合 `asyncValidators` 使用 `updateValueAndValidity()` 方法，并根据表单整体的 `status` 属性（PENDING/VALID/INVALID）来控制提交按钮的禁用状态，而不仅仅是检查 `valid` 属性。',
+          troubleshootingFlow: 'graph TD; A[开始] --> B{表单提交?}; B --> C{表单状态是 PENDING?}; C -- 是 --> D[禁用提交按钮]; D --> E{等待异步校验完成}; E --> F{表单状态是 VALID?}; F -- 是 --> G[启用按钮 & 允许提交]; F -- 否 --> H[保持禁用, 显示错误]; C -- 否 --> F;',
           validationMethod: '验证异步校验失败后，提交按钮变为禁用状态，直到字段值修正并通过校验。',
           views: 128,
-          solveTimeMinutes: 10,
-        },
+          solveTimeMinutes: 10
+        }
       ];
       await writeJsonFile(DATA_FILE, initialData);
     }
@@ -84,14 +81,14 @@ async function saveFaqs(faqs: FaqItem[]): Promise<void> {
             { id: 'project', name: '项目' },
             { id: 'table', name: 'Table' },
             { id: 'form', name: 'Form' },
-            { id: 'other', name: '其他' },
-          ],
+            { id: 'other', name: '其他' }
+          ]
         },
         {
           id: 'backend',
           name: '后端',
-          children: [],
-        },
+          children: []
+        }
       ];
       await writeJsonFile(MODULES_FILE, initialModules);
     }
@@ -101,48 +98,11 @@ async function saveFaqs(faqs: FaqItem[]): Promise<void> {
       await fs.access(TAGS_FILE);
     } catch {
       const initialTags = [
-        '校验',
-        '异步',
-        '表单提交',
-        '动态表单',
-        'FormArray',
-        '数据绑定',
-        '分页',
-        '状态管理',
-        'API',
-        '构建',
-        '依赖',
-        'npm',
-        '性能',
-        '超时',
-        '导出',
-        'Select',
-        '对象绑定',
-        '回显',
-        'VirtualScroll',
-        'Performance',
-        'Auth',
-        'Interceptor',
-        'CORS',
-        'HTTP',
-        '路由',
-        '懒加载',
-        '样式',
-        'CSS',
-        '响应式',
-        '兼容性',
-        '浏览器',
-        '调试',
-        '测试',
-        '单元测试',
-        'E2E',
-        '优化',
-        '打包',
-        'Webpack',
-        'Vite',
+        '校验', '异步', '表单提交', '动态表单', 'FormArray', '数据绑定', '分页', '状态管理', 'API', '构建', '依赖', 'npm', '性能', '超时', '导出', 'Select', '对象绑定', '回显', 'VirtualScroll', 'Performance', 'Auth', 'Interceptor', 'CORS', 'HTTP', '路由', '懒加载', '样式', 'CSS', '响应式', '兼容性', '浏览器', '调试', '测试', '单元测试', 'E2E', '优化', '打包', 'Webpack', 'Vite'
       ];
       await writeJsonFile(TAGS_FILE, initialTags);
     }
+
   } catch (e) {
     console.error('Failed to initialize data directory', e);
   }
@@ -238,30 +198,31 @@ app.put('/api/tags/:oldTag', async (req, res) => {
   const tags = await readJsonFile(TAGS_FILE, []);
   const oldTag = decodeURIComponent(req.params.oldTag);
   const newTag = req.body.newTag;
-
+  
   const index = tags.indexOf(oldTag);
   if (index !== -1 && newTag) {
     tags[index] = newTag;
     await writeJsonFile(TAGS_FILE, tags);
-
+    
     // Update FAQs that use this tag
     const faqs = await getFaqs();
     let faqsChanged = false;
     faqs.forEach((faq: FaqItem) => {
       if (faq.tags && faq.tags.includes(oldTag)) {
-        faq.tags = faq.tags.map((t: string) => (t === oldTag ? newTag : t));
+        faq.tags = faq.tags.map((t: string) => t === oldTag ? newTag : t);
         faqsChanged = true;
       }
     });
     if (faqsChanged) {
       await saveFaqs(faqs);
     }
-
+    
     res.json(tags);
   } else {
     res.status(404).send('Tag not found');
   }
 });
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

@@ -62,6 +62,8 @@ import { AuthService } from './services/auth.service';
 
           <a routerLink="/" class="nav-link">首页</a>
 
+          <a routerLink="/" class="nav-link">首页</a>
+
           @if (authService.isAdmin()) {
             <a routerLink="/admin" class="nav-link">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">

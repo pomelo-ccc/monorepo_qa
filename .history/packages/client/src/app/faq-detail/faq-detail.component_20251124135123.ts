@@ -24,7 +24,7 @@ interface ModuleGroup {
           <div class="header-main">
             <button class="back-btn" (click)="goBack()" title="返回列表">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M19 12H5M12 19l-7-7 7-7" />
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
               </svg>
             </button>
             <div class="header-icon">
@@ -94,7 +94,7 @@ interface ModuleGroup {
           <aside class="left-sidebar">
             <div class="sidebar-section nav-tree">
               <h3 class="section-title">问题导航</h3>
-
+              
               @for (group of moduleGroups; track group.name) {
                 <div class="nav-group">
                   <div class="nav-group-header" (click)="toggleGroup(group)">
@@ -102,15 +102,14 @@ interface ModuleGroup {
                     <span class="group-name">{{ group.name }}</span>
                     <span class="count">{{ group.faqs.length }}</span>
                   </div>
-
+                  
                   @if (group.expanded) {
                     <div class="nav-group-items">
                       @for (item of group.faqs; track item.id) {
-                        <a
-                          [routerLink]="['/detail', item.id]"
+                        <a 
+                          [routerLink]="['/detail', item.id]" 
                           class="nav-item"
-                          [class.active]="item.id === faq.id"
-                        >
+                          [class.active]="item.id === faq.id">
                           {{ item.title }}
                         </a>
                       }
@@ -171,7 +170,7 @@ interface ModuleGroup {
             <!-- 关联信息 (Moved from left) -->
             <div class="sidebar-card meta-card">
               <h3 class="card-title">关联信息</h3>
-
+              
               <div class="info-item">
                 <label>所属模块</label>
                 <div class="info-value">
@@ -417,7 +416,7 @@ interface ModuleGroup {
         background: #fff;
         border-radius: 12px;
         padding: 1rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
       }
 
       .nav-group {
@@ -652,7 +651,7 @@ interface ModuleGroup {
         overflow: hidden;
         text-overflow: ellipsis;
       }
-
+      
       /* Meta Info Styles (Moved from left) */
       .info-item {
         margin-bottom: 1.5rem;
@@ -764,12 +763,12 @@ export class FaqDetailComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     // Load all FAQs to build the nav tree
-    this.faqService.getFaqs().subscribe((faqs) => {
+    this.faqService.getFaqs().subscribe(faqs => {
       this.buildNavTree(faqs);
     });
 
     // Subscribe to route params to update current FAQ
-    this.route.paramMap.subscribe((params) => {
+    this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (id) {
         this.loadFaq(id);
@@ -781,9 +780,9 @@ export class FaqDetailComponent implements OnInit, AfterViewInit {
     this.faqService.getFaq(id).subscribe((data) => {
       this.faq = data;
       this.faqService.updateFaq(id, { views: data.views + 1 }).subscribe();
-
+      
       // Expand the group containing this FAQ
-      const group = this.moduleGroups.find((g) => g.name === data.component);
+      const group = this.moduleGroups.find(g => g.name === data.component);
       if (group) {
         group.expanded = true;
       }
@@ -795,8 +794,8 @@ export class FaqDetailComponent implements OnInit, AfterViewInit {
 
   buildNavTree(faqs: FaqItem[]) {
     const groups = new Map<string, FaqItem[]>();
-
-    faqs.forEach((item) => {
+    
+    faqs.forEach(item => {
       const comp = item.component || 'Other';
       if (!groups.has(comp)) {
         groups.set(comp, []);
@@ -808,7 +807,7 @@ export class FaqDetailComponent implements OnInit, AfterViewInit {
       .map(([name, items]) => ({
         name,
         faqs: items,
-        expanded: false,
+        expanded: false
       }))
       .sort((a, b) => a.name.localeCompare(b.name));
   }
@@ -826,7 +825,7 @@ export class FaqDetailComponent implements OnInit, AfterViewInit {
       // Clear previous content
       this.mermaidDiv.nativeElement.innerHTML = this.faq.troubleshootingFlow;
       this.mermaidDiv.nativeElement.removeAttribute('data-processed');
-
+      
       mermaid.run({
         nodes: [this.mermaidDiv.nativeElement],
       });

@@ -1,21 +1,48 @@
 [
   {
+    "title": "【table】配置了可编辑，但是不生效",
+    "component": "table",
+    "version": "3.0.x",
+    "tags": [
+      "校验",
+      "异步"
+    ],
+    "summary": "1",
+    "phenomenon": "1",
+    "solution": "1",
+    "troubleshootingFlow": "",
+    "validationMethod": "1",
+    "errorCode": "TAB_校验_7384",
+    "views": 20,
+    "solveTimeMinutes": 0,
+    "id": "1763961167392"
+  },
+  {
     "title": "ddd",
-    "component": "ccc",
-    "version": "1.x.x",
+    "component": "other",
+    "version": "1.2.x",
     "tags": [
       "UI",
       "异常",
-      "兼容性"
+      "兼容性",
+      "构建",
+      "API"
     ],
-    "errorCode": "CCC_UI_2547",
+    "errorCode": "OTH_UI_5767",
     "summary": "12",
     "phenomenon": "21",
     "solution": "212",
-    "troubleshootingFlow": "graph: td\n ",
+    "troubleshootingFlow": "graph TD;\n  A[开始] --> B{检查看模型上是否配置了 mode=edit 列上是否配置了 editable 或者 cellEditExpression?};\n  B -->|是| C[操作];\n  B -->|否| D[其他];\n  C --> E[结束];\n  D --> E;",
     "validationMethod": "2323",
-    "views": 19,
+    "views": 41,
     "solveTimeMinutes": 0,
-    "id": "1763952468839"
+    "id": "1763952468839",
+    "author": "张三 (Dev)",
+    "createTime": "2024-03-20 14:30",
+    "status": "resolved",
+    "contributors": [
+      "KD",
+      "Li"
+    ]
   }
 ]

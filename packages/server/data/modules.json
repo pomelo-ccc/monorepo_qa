@@ -1,0 +1,29 @@
+[
+  {
+    "id": "frontend",
+    "name": "前端",
+    "children": [
+      {
+        "id": "project",
+        "name": "项目"
+      },
+      {
+        "id": "table",
+        "name": "Table"
+      },
+      {
+        "id": "form",
+        "name": "Form"
+      },
+      {
+        "id": "other",
+        "name": "其他"
+      }
+    ]
+  },
+  {
+    "id": "backend",
+    "name": "后端",
+    "children": []
+  }
+]

@@ -62,6 +62,14 @@ import { AuthService } from './services/auth.service';
 
           <a routerLink="/" class="nav-link">首页</a>
 
+          <a routerLink="/create" class="nav-link nav-link-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            新建问题
+          </a>
+
           @if (authService.isAdmin()) {
             <a routerLink="/admin" class="nav-link">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -71,13 +79,6 @@ import { AuthService } from './services/auth.service';
                 />
               </svg>
               系统配置
-            </a>
-            <a routerLink="/create" class="nav-link nav-link-primary">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              新建问题
             </a>
           }
 

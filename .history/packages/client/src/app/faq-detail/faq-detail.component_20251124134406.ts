@@ -6,12 +6,6 @@ import { FaqItem } from '../models/faq.model';
 import { AuthService } from '../services/auth.service';
 import mermaid from 'mermaid';
 
-interface ModuleGroup {
-  name: string;
-  faqs: FaqItem[];
-  expanded: boolean;
-}
-
 @Component({
   selector: 'app-faq-detail',
   standalone: true,
@@ -22,11 +16,6 @@ interface ModuleGroup {
         <!-- 顶部 Header -->
         <header class="page-header">
           <div class="header-main">
-            <button class="back-btn" (click)="goBack()" title="返回列表">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-              </svg>
-            </button>
             <div class="header-icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -90,34 +79,42 @@ interface ModuleGroup {
         </header>
 
         <div class="layout-grid">
-          <!-- 左侧边栏：导航树 -->
+          <!-- 左侧边栏：关联信息 -->
           <aside class="left-sidebar">
-            <div class="sidebar-section nav-tree">
-              <h3 class="section-title">问题导航</h3>
+            <div class="sidebar-section">
+              <h3 class="section-title">关联信息</h3>
 
-              @for (group of moduleGroups; track group.name) {
-                <div class="nav-group">
-                  <div class="nav-group-header" (click)="toggleGroup(group)">
-                    <span class="arrow" [class.expanded]="group.expanded">▶</span>
-                    <span class="group-name">{{ group.name }}</span>
-                    <span class="count">{{ group.faqs.length }}</span>
-                  </div>
+              <div class="info-item">
+                <label>所属模块</label>
+                <div class="info-value">
+                  <span class="dot"></span>
+                  {{ faq.component }}
+                </div>
+              </div>
 
-                  @if (group.expanded) {
-                    <div class="nav-group-items">
-                      @for (item of group.faqs; track item.id) {
-                        <a
-                          [routerLink]="['/detail', item.id]"
-                          class="nav-item"
-                          [class.active]="item.id === faq.id"
-                        >
-                          {{ item.title }}
-                        </a>
-                      }
-                    </div>
+              <div class="info-item">
+                <label>标签</label>
+                <div class="tags-wrapper">
+                  @for (tag of faq.tags; track tag) {
+                    <span class="tag">{{ tag }}</span>
                   }
                 </div>
-              }
+              </div>
+
+              <div class="info-item">
+                <label>贡献者</label>
+                <div class="contributors">
+                  @if (faq.contributors && faq.contributors.length) {
+                    @for (contributor of faq.contributors; track contributor) {
+                      <div class="avatar" [title]="contributor">
+                        {{ contributor.slice(0, 2).toUpperCase() }}
+                      </div>
+                    }
+                  } @else {
+                    <div class="avatar">KD</div>
+                  }
+                </div>
+              </div>
             </div>
           </aside>
 
@@ -166,45 +163,8 @@ interface ModuleGroup {
             </section>
           </main>
 
-          <!-- 右侧边栏：流程图与元数据 -->
+          <!-- 右侧边栏：流程图 -->
           <aside class="right-sidebar">
-            <!-- 关联信息 (Moved from left) -->
-            <div class="sidebar-card meta-card">
-              <h3 class="card-title">关联信息</h3>
-
-              <div class="info-item">
-                <label>所属模块</label>
-                <div class="info-value">
-                  <span class="dot"></span>
-                  {{ faq.component }}
-                </div>
-              </div>
-
-              <div class="info-item">
-                <label>标签</label>
-                <div class="tags-wrapper">
-                  @for (tag of faq.tags; track tag) {
-                    <span class="tag">{{ tag }}</span>
-                  }
-                </div>
-              </div>
-
-              <div class="info-item">
-                <label>贡献者</label>
-                <div class="contributors">
-                  @if (faq.contributors && faq.contributors.length) {
-                    @for (contributor of faq.contributors; track contributor) {
-                      <div class="avatar" [title]="contributor">
-                        {{ contributor.slice(0, 2).toUpperCase() }}
-                      </div>
-                    }
-                  } @else {
-                    <div class="avatar">KD</div>
-                  }
-                </div>
-              </div>
-            </div>
-
             <div class="sidebar-card">
               <div class="card-header">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -268,28 +228,6 @@ interface ModuleGroup {
       .header-main {
         display: flex;
         gap: 1rem;
-        align-items: center;
-      }
-
-      .back-btn {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        border: 1px solid #e5e7eb;
-        background: #fff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        color: #6b7280;
-        transition: all 0.2s;
-        margin-right: 0.5rem;
-      }
-
-      .back-btn:hover {
-        background: #f3f4f6;
-        color: #111827;
-        border-color: #d1d5db;
       }
 
       .header-icon {
@@ -397,109 +335,90 @@ interface ModuleGroup {
       /* Layout Grid */
       .layout-grid {
         display: grid;
-        grid-template-columns: 280px 1fr 320px;
+        grid-template-columns: 240px 1fr 320px;
         gap: 1.5rem;
         align-items: start;
       }
 
-      /* Left Sidebar - Nav Tree */
+      /* Left Sidebar */
       .left-sidebar {
         display: flex;
         flex-direction: column;
         gap: 1.5rem;
-        position: sticky;
-        top: 80px;
-        max-height: calc(100vh - 100px);
-        overflow-y: auto;
       }
 
-      .nav-tree {
-        background: #fff;
-        border-radius: 12px;
-        padding: 1rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-      }
-
-      .nav-group {
-        margin-bottom: 0.5rem;
-      }
-
-      .nav-group-header {
-        display: flex;
-        align-items: center;
-        padding: 0.5rem;
-        cursor: pointer;
-        border-radius: 6px;
-        color: #4b5563;
-        font-weight: 500;
-        font-size: 0.9rem;
-      }
-
-      .nav-group-header:hover {
-        background: #f3f4f6;
-        color: #111827;
-      }
-
-      .arrow {
-        font-size: 0.7rem;
-        margin-right: 0.5rem;
-        transition: transform 0.2s;
-        color: #9ca3af;
-      }
-
-      .arrow.expanded {
-        transform: rotate(90deg);
-      }
-
-      .group-name {
-        flex: 1;
-      }
-
-      .count {
-        font-size: 0.75rem;
-        color: #9ca3af;
-        background: #f3f4f6;
-        padding: 1px 6px;
-        border-radius: 10px;
-      }
-
-      .nav-group-items {
-        padding-left: 1.5rem;
-        margin-top: 0.25rem;
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-      }
-
-      .nav-item {
-        display: block;
-        padding: 0.4rem 0.6rem;
-        font-size: 0.85rem;
-        color: #6b7280;
-        text-decoration: none;
-        border-radius: 4px;
-        transition: all 0.2s;
-        border-left: 2px solid transparent;
-      }
-
-      .nav-item:hover {
-        background: #f9fafb;
-        color: #374151;
-      }
-
-      .nav-item.active {
-        background: #eff6ff;
-        color: #2563eb;
-        border-left-color: #2563eb;
-        font-weight: 500;
+      .sidebar-section {
+        /* background: #fff; */
+        /* padding: 1rem; */
+        /* border-radius: 8px; */
       }
 
       .section-title {
         font-size: 0.875rem;
         color: #6b7280;
         margin: 0 0 1rem 0;
+        font-weight: 500;
+      }
+
+      .info-item {
+        margin-bottom: 1.5rem;
+      }
+
+      .info-item label {
+        display: block;
+        font-size: 0.75rem;
+        color: #9ca3af;
+        margin-bottom: 0.5rem;
+      }
+
+      .info-value {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
+      }
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        background: #3b82f6;
+        border-radius: 50%;
+      }
+
+      .tags-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .tag {
+        padding: 2px 8px;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        color: #4b5563;
+      }
+
+      .contributors {
+        display: flex;
+        gap: -8px;
+      }
+
+      .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #e5e7eb;
+        border: 2px solid #f5f7fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        color: #6b7280;
         font-weight: 600;
-        padding-left: 0.5rem;
       }
 
       /* Center Content */
@@ -604,13 +523,6 @@ interface ModuleGroup {
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
       }
 
-      .meta-card .card-title {
-        font-size: 0.875rem;
-        color: #6b7280;
-        margin: 0 0 1rem 0;
-        font-weight: 600;
-      }
-
       .sidebar-card .card-header {
         padding: 0 0 1rem 0;
         border-bottom: none;
@@ -653,68 +565,6 @@ interface ModuleGroup {
         text-overflow: ellipsis;
       }
 
-      /* Meta Info Styles (Moved from left) */
-      .info-item {
-        margin-bottom: 1.5rem;
-      }
-
-      .info-item label {
-        display: block;
-        font-size: 0.75rem;
-        color: #9ca3af;
-        margin-bottom: 0.5rem;
-      }
-
-      .info-value {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: #374151;
-      }
-
-      .dot {
-        width: 8px;
-        height: 8px;
-        background: #3b82f6;
-        border-radius: 50%;
-      }
-
-      .tags-wrapper {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-      }
-
-      .tag {
-        padding: 2px 8px;
-        background: #fff;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        font-size: 0.75rem;
-        color: #4b5563;
-      }
-
-      .contributors {
-        display: flex;
-        gap: -8px;
-      }
-
-      .avatar {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background: #e5e7eb;
-        border: 2px solid #f5f7fa;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.75rem;
-        color: #6b7280;
-        font-weight: 600;
-      }
-
       @media (max-width: 1200px) {
         .layout-grid {
           grid-template-columns: 240px 1fr;
@@ -736,17 +586,12 @@ interface ModuleGroup {
           width: 100%;
           justify-content: flex-end;
         }
-        .left-sidebar {
-          position: static;
-          max-height: none;
-        }
       }
     `,
   ],
 })
 export class FaqDetailComponent implements OnInit, AfterViewInit {
   faq?: FaqItem;
-  moduleGroups: ModuleGroup[] = [];
   @ViewChild('mermaidDiv') mermaidDiv?: ElementRef;
 
   constructor(
@@ -763,70 +608,24 @@ export class FaqDetailComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
-    // Load all FAQs to build the nav tree
-    this.faqService.getFaqs().subscribe((faqs) => {
-      this.buildNavTree(faqs);
-    });
-
-    // Subscribe to route params to update current FAQ
-    this.route.paramMap.subscribe((params) => {
-      const id = params.get('id');
-      if (id) {
-        this.loadFaq(id);
-      }
-    });
-  }
-
-  loadFaq(id: string) {
-    this.faqService.getFaq(id).subscribe((data) => {
-      this.faq = data;
-      this.faqService.updateFaq(id, { views: data.views + 1 }).subscribe();
-
-      // Expand the group containing this FAQ
-      const group = this.moduleGroups.find((g) => g.name === data.component);
-      if (group) {
-        group.expanded = true;
-      }
-
-      // Re-render mermaid after view update
-      setTimeout(() => this.renderMermaid(), 100);
-    });
-  }
-
-  buildNavTree(faqs: FaqItem[]) {
-    const groups = new Map<string, FaqItem[]>();
-
-    faqs.forEach((item) => {
-      const comp = item.component || 'Other';
-      if (!groups.has(comp)) {
-        groups.set(comp, []);
-      }
-      groups.get(comp)?.push(item);
-    });
-
-    this.moduleGroups = Array.from(groups.entries())
-      .map(([name, items]) => ({
-        name,
-        faqs: items,
-        expanded: false,
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name));
-  }
-
-  toggleGroup(group: ModuleGroup) {
-    group.expanded = !group.expanded;
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.faqService.getFaq(id).subscribe((data) => {
+        this.faq = data;
+        this.faqService.updateFaq(id, { views: data.views + 1 }).subscribe();
+      });
+    }
   }
 
   ngAfterViewInit() {
-    // Initial render if needed
+    // Use setTimeout to ensure DOM is ready
+    setTimeout(() => {
+      this.renderMermaid();
+    }, 100);
   }
 
   renderMermaid() {
     if (this.mermaidDiv && this.faq?.troubleshootingFlow) {
-      // Clear previous content
-      this.mermaidDiv.nativeElement.innerHTML = this.faq.troubleshootingFlow;
-      this.mermaidDiv.nativeElement.removeAttribute('data-processed');
-
       mermaid.run({
         nodes: [this.mermaidDiv.nativeElement],
       });
