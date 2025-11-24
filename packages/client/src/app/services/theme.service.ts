@@ -13,83 +13,57 @@ export interface Theme {
         textSecondary: string;
         border: string;
         accent: string;
+        glass?: string; // For glassmorphism
     };
 }
 
 export const THEMES: Theme[] = [
     {
-        id: 'dark-blue',
-        name: '深蓝夜空',
+        id: 'cyberpunk',
+        name: '赛博朋克黑',
         colors: {
-            primary: '#667eea',
-            primaryLight: '#7c8ff5',
-            background: '#0f172a',
-            surface: '#1e293b',
-            surfaceHover: '#334155',
-            text: '#f1f5f9',
-            textSecondary: '#94a3b8',
-            border: '#334155',
-            accent: '#3b82f6'
+            primary: '#ff0080',
+            primaryLight: '#ff3399',
+            background: '#0a0e27',
+            surface: '#1a1f3a',
+            surfaceHover: '#252b4a',
+            text: '#00ffff',
+            textSecondary: '#8b9dc3',
+            border: '#2d3561',
+            accent: '#00ff41',
+            glass: 'rgba(26, 31, 58, 0.7)'
         }
     },
     {
-        id: 'purple-dream',
-        name: '紫色梦幻',
+        id: 'elegant',
+        name: '优雅蓝白',
         colors: {
-            primary: '#a855f7',
-            primaryLight: '#c084fc',
-            background: '#1a0b2e',
-            surface: '#2d1b4e',
-            surfaceHover: '#3d2a5f',
-            text: '#f5f3ff',
-            textSecondary: '#c4b5fd',
-            border: '#3d2a5f',
-            accent: '#d946ef'
-        }
-    },
-    {
-        id: 'green-forest',
-        name: '森林绿意',
-        colors: {
-            primary: '#10b981',
-            primaryLight: '#34d399',
-            background: '#0a2e1f',
-            surface: '#1a3d2e',
-            surfaceHover: '#2a4d3e',
-            text: '#ecfdf5',
-            textSecondary: '#86efac',
-            border: '#2a4d3e',
-            accent: '#14b8a6'
-        }
-    },
-    {
-        id: 'orange-sunset',
-        name: '橙色日落',
-        colors: {
-            primary: '#f97316',
-            primaryLight: '#fb923c',
-            background: '#1c1917',
-            surface: '#292524',
-            surfaceHover: '#3f3f46',
-            text: '#fef3c7',
-            textSecondary: '#fcd34d',
-            border: '#3f3f46',
-            accent: '#fb923c'
-        }
-    },
-    {
-        id: 'light',
-        name: '明亮白昼',
-        colors: {
-            primary: '#3b82f6',
-            primaryLight: '#60a5fa',
+            primary: '#2563eb',
+            primaryLight: '#3b82f6',
             background: '#f8fafc',
             surface: '#ffffff',
             surfaceHover: '#f1f5f9',
             text: '#0f172a',
             textSecondary: '#64748b',
             border: '#e2e8f0',
-            accent: '#0ea5e9'
+            accent: '#0ea5e9',
+            glass: 'rgba(255, 255, 255, 0.8)'
+        }
+    },
+    {
+        id: 'glass',
+        name: '拟态玻璃',
+        colors: {
+            primary: '#a78bfa',
+            primaryLight: '#c4b5fd',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            surface: 'rgba(255, 255, 255, 0.1)',
+            surfaceHover: 'rgba(255, 255, 255, 0.15)',
+            text: '#ffffff',
+            textSecondary: '#e0e7ff',
+            border: 'rgba(255, 255, 255, 0.2)',
+            accent: '#fbbf24',
+            glass: 'rgba(255, 255, 255, 0.1)'
         }
     }
 ];
@@ -131,5 +105,12 @@ export class ThemeService {
         Object.entries(theme.colors).forEach(([key, value]) => {
             root.style.setProperty(`--color-${key}`, value);
         });
+
+        // Special handling for glass theme background
+        if (theme.id === 'glass') {
+            root.style.setProperty('--bg-gradient', theme.colors.background);
+        } else {
+            root.style.setProperty('--bg-gradient', 'none');
+        }
     }
 }
