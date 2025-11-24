@@ -57,6 +57,13 @@ import { AuthService } from './services/auth.service';
           <a routerLink="/" class="nav-link">首页</a>
           
           @if (authService.isAdmin()) {
+            <a routerLink="/admin" class="nav-link">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 1v6m0 6v6m5.2-13.2l-4.2 4.2m-2 2l-4.2 4.2M23 12h-6m-6 0H5m13.2 5.2l-4.2-4.2m-2-2l-4.2-4.2"/>
+              </svg>
+              系统配置
+            </a>
             <a routerLink="/create" class="nav-link nav-link-primary">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <line x1="12" y1="5" x2="12" y2="19"/>

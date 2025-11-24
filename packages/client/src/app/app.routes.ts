@@ -5,6 +5,7 @@ import { FaqListComponent } from './faq-list/faq-list.component';
 import { FaqEditComponent } from './faq-edit/faq-edit.component';
 import { FaqDetailComponent } from './faq-detail/faq-detail.component';
 import { LoginComponent } from './login/login.component';
+import { AdminComponent } from './admin/admin.component';
 import { AuthService } from './services/auth.service';
 
 // Auth guard function
@@ -40,5 +41,6 @@ export const routes: Routes = [
     { path: 'detail/:id', component: FaqDetailComponent, canActivate: [authGuard] },
     { path: 'create', component: FaqEditComponent, canActivate: [adminGuard] },
     { path: 'edit/:id', component: FaqEditComponent, canActivate: [adminGuard] },
+    { path: 'admin', component: AdminComponent, canActivate: [adminGuard] },
     { path: '**', redirectTo: '' }
 ];
