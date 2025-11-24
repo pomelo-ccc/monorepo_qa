@@ -1,0 +1,147 @@
+[
+    {
+        "id": "form-async-validation",
+        "title": "[Form] 异步校验失败后仍可提交表单",
+        "component": "Form",
+        "version": "1.2.x",
+        "tags": [
+            "校验",
+            "异步",
+            "表单提交"
+        ],
+        "errorCode": "ASYNC_VALIDATE_FAIL",
+        "summary": "异步验证器返回错误状态后，提交按钮未被禁用，用户仍可提交错误数据。",
+        "phenomenon": "复现步骤：\n1. 创建一个带有异步验证器（如检查用户名唯一性）的表单字段。\n2. 输入触发验证错误的值。\n3. 错误信息显示，但提交按钮仍然可用。\n4. 点击提交，无效数据被发送。",
+        "solution": "根本原因通常是验证器状态更新处理不当。修复方法是结合 `asyncValidators` 使用 `updateValueAndValidity()` 方法，并根据表单整体的 `status` 属性（PENDING/VALID/INVALID）来控制提交按钮的禁用状态，而不仅仅是检查 `valid` 属性。",
+        "troubleshootingFlow": "graph TD;\n  A[开始] --> B{表单提交?};\n  B --> C{表单状态是 PENDING?};\n  C -->|是| D[禁用提交按钮];\n  D --> E{等待异步校验完成};\n  E --> F{表单状态是 VALID?};\n  F -->|是| G[启用按钮并允许提交];\n  F -->|否| H[保持禁用显示错误];\n  C -->|否| F;",
+        "validationMethod": "验证异步校验失败后，提交按钮变为禁用状态，直到字段值修正并通过校验。",
+        "views": 128,
+        "solveTimeMinutes": 10
+    },
+    {
+        "id": "form-dynamic-fields",
+        "title": "[Form] 动态添加字段后值不同步",
+        "component": "Form",
+        "version": "1.3.x",
+        "tags": [
+            "动态表单",
+            "FormArray",
+            "数据绑定"
+        ],
+        "summary": "向 FormArray 动态添加控件时，其初始值未反映在父表单的 value 对象中。",
+        "phenomenon": "1. 创建带有 FormArray 的表单。\n2. 点击按钮动态 push 一个新的 FormGroup。\n3. 检查父表单的 `value` 属性，发现新添加的部分缺失。",
+        "solution": "通常是因为新控件未正确注册。创建新 FormGroup/FormControl 时，确保立即将其 push 到 FormArray。之后调用 `markAsDirty()` 或 `updateValueAndValidity()` 触发变更检测。",
+        "troubleshootingFlow": "graph TD;\n  A[点击添加按钮] --> B[创建新 FormGroup];\n  B --> C{Push 到 FormArray?};\n  C -->|是| D[检查父级 form.value];\n  D --> E{新字段值是否存在?};\n  E -->|是| F[成功];\n  E -->|否| G[调用 updateValueAndValidity];\n  G --> D;",
+        "validationMethod": "点击"添加字段"后，控制台打印 `form.value`，应包含新字段及其默认值。",
+        "views": 245,
+        "solveTimeMinutes": 5
+    },
+    {
+        "id": "table-pagination-data",
+        "title": "[Table] 切换分页后数据未更新",
+        "component": "Table",
+        "version": "1.0.x",
+        "tags": [
+            "分页",
+            "状态管理",
+            "API"
+        ],
+        "errorCode": "PAGINATION_NO_REFRESH",
+        "summary": "点击表格分页控件的页码，数据停留在第一页，未获取新数据。",
+        "phenomenon": "1. 加载多页数据的表格。\n2. 点击"第2页"或"下一页"。\n3. 分页器状态变了，但表格内容没变。",
+        "solution": "组件未在页码变更时重新请求数据。需要在分页事件处理函数（`pageChange`）中调用 API，并更新数据源 Signal 或 Observable。",
+        "troubleshootingFlow": "graph TD;\n  A[点击页码] --> B[触发 Pagination 事件];\n  B --> C{是否有事件处理函数?};\n  C -->|是| D{是否调用带新页码的 API?};\n  D -->|是| E{数据源是否更新?};\n  E -->|否| F[在 API 回调中更新数据源];\n  E -->|是| G[成功];",
+        "validationMethod": "切换不同页码，表格行内容应随之变化，网络请求参数中 page 字段应正确变化。",
+        "views": 412,
+        "solveTimeMinutes": 5
+    },
+    {
+        "id": "project-build-fail",
+        "title": "[Project] 依赖冲突导致构建失败",
+        "component": "Project",
+        "version": "N/A",
+        "tags": [
+            "构建",
+            "依赖",
+            "npm"
+        ],
+        "summary": "CI/CD 流水线报错 \"Peer dependency missing\" 或版本不兼容。",
+        "phenomenon": "本地 `npm install` 成功，但推送到 GitLab CI 后构建失败，提示某些包版本不匹配。",
+        "solution": "通常是因为 `package-lock.json` 未提交或本地使用了 `--legacy-peer-deps`。强制统一依赖版本，检查 `package.json` 中的 override 配置，并确保 lock 文件已提交。",
+        "troubleshootingFlow": "graph TD;\n  A[构建失败] --> B{本地能否构建?};\n  B -->|是| C[检查 package-lock.json 是否提交];\n  C -->|未提交| D[提交 lock 文件];\n  C -->|已提交| E[检查 Node 版本一致性];\n  B -->|否| F[删除 node_modules 重装];",
+        "validationMethod": "在全新的环境中执行 `npm ci` 能够成功安装依赖并运行 `npm run build`。",
+        "views": 89,
+        "solveTimeMinutes": 30
+    },
+    {
+        "id": "backend-500-timeout",
+        "title": "[Backend] 大数据量导出导致 504 Gateway Timeout",
+        "component": "Backend",
+        "version": "2.1.0",
+        "tags": [
+            "性能",
+            "超时",
+            "导出"
+        ],
+        "errorCode": "HTTP_504",
+        "summary": "用户导出超过 10000 条数据时，接口请求超时，前端报 504 错误。",
+        "phenomenon": "点击导出按钮，Loading 转圈约 60秒后，提示"网关超时"。",
+        "solution": "同步导出接口处理时间过长。应改为"异步任务模式"：点击导出 -> 后端创建任务返回 TaskID -> 前端轮询任务状态 -> 任务完成显示下载链接。或者优化 SQL 查询与流式输出。",
+        "troubleshootingFlow": "graph TD;\n  A[发起导出] --> B[后端处理数据];\n  B --> C{处理时间超过Nginx超时?};\n  C -->|是| D[返回 504];\n  D --> E[方案: 改为异步任务队列];\n  C -->|否| F[正常返回文件流];",
+        "validationMethod": "导出 20000 条数据，前端立即收到"任务已创建"提示，可在任务中心下载文件，无超时报错。",
+        "views": 560,
+        "solveTimeMinutes": 120
+    },
+    {
+        "id": "form-mat-select-compare",
+        "title": "[Form] MatSelect 对象绑定回显失败",
+        "component": "Form",
+        "version": "Material",
+        "tags": [
+            "Select",
+            "对象绑定",
+            "回显"
+        ],
+        "summary": "Select 绑定对象数组，设置了正确的值却无法自动选中对应选项。",
+        "phenomenon": "Options 是 `[{id:1, name:\"A\"}]`，Control 值是 `{id:1, name:\"A\"}`，但下拉框显示空白。",
+        "solution": "Angular 默认比较对象引用。必须提供 `compareWith` 函数，告诉 Select 如何比较两个对象（例如比较 id）。",
+        "troubleshootingFlow": "graph TD;\n  A[绑定对象值] --> B{是否设置 compareWith?};\n  B -->|否| C[默认引用比较失败];\n  B -->|是| D[比较函数是否正确?];\n  D -->|是| E[回显成功];",
+        "validationMethod": "添加 compareWith input 后，下拉框正确显示 \"A\"。",
+        "views": 310,
+        "solveTimeMinutes": 5
+    },
+    {
+        "id": "table-virtual-scroll-height",
+        "title": "[Table] 虚拟滚动出现大量空白或抖动",
+        "component": "Table",
+        "version": "CDK",
+        "tags": [
+            "VirtualScroll",
+            "Performance"
+        ],
+        "summary": "开启虚拟滚动后，滚动条位置跳动，或者底部出现大片空白。",
+        "phenomenon": "滚动到底部，明明还有数据却滚不下去了，或者列表高度计算错误。",
+        "solution": "虚拟滚动需要固定的 `itemSize`。如果行高不固定，需要使用 `autosize` 策略或自行实现高度缓存。确保容器高度显式设置。",
+        "troubleshootingFlow": "graph TD;\n  A[滚动异常] --> B[检查 itemSize];\n  B -->|固定?| C[检查容器高度];\n  B -->|不固定| D[使用 autosize 策略];",
+        "validationMethod": "快速拖拽滚动条，列表平滑无白屏，无跳动。",
+        "views": 270,
+        "solveTimeMinutes": 60
+    },
+    {
+        "id": "backend-token-refresh-403",
+        "title": "[Backend] Token 过期未自动刷新",
+        "component": "Backend",
+        "version": "HTTP",
+        "tags": [
+            "Auth",
+            "Interceptor"
+        ],
+        "summary": "Token 过期后，用户直接被踢出，而不是静默刷新 Token。",
+        "phenomenon": "请求报 401，Interceptor 未捕获或刷新逻辑失败。",
+        "solution": "实现 HttpInterceptor。捕获 401 错误 -> 暂停请求 -> 调用刷新接口 -> 刷新成功重放请求。注意处理并发刷新时的锁机制。",
+        "troubleshootingFlow": "graph TD;\n  A[请求 401] --> B[Interceptor 捕获];\n  B --> C{正在刷新?};\n  C -->|是| D[加入队列];\n  C -->|否| E[调用 Refresh API];\n  E --> F[重放队列请求];",
+        "validationMethod": "Token 过期后，用户无感知，请求自动恢复。",
+        "views": 510,
+        "solveTimeMinutes": 180
+    }
+]

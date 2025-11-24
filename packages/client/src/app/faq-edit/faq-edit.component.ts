@@ -49,74 +49,74 @@ export class FaqEditComponent implements OnInit {
     formFields: FormField[] = [
         {
             key: 'title',
-            label: 'Title',
+            label: '标题',
             type: 'text',
             required: true,
-            placeholder: 'e.g., [Form] Async validation issue'
+            placeholder: '例如：[Form] 异步校验失败后仍可提交表单'
         },
         {
             key: 'component',
-            label: 'Component',
+            label: '所属模块',
             type: 'text',
             required: true,
-            placeholder: 'e.g., Form, Table, Project'
+            placeholder: '例如：Form, Table, Project'
         },
         {
             key: 'version',
-            label: 'Version',
+            label: '版本',
             type: 'text',
-            placeholder: 'e.g., 1.2.x, ALL'
+            placeholder: '例如：1.2.x, ALL'
         },
         {
             key: 'tags',
-            label: 'Tags',
+            label: '标签',
             type: 'text',
-            description: 'Comma-separated tags',
-            placeholder: 'e.g., validation, async, form'
+            description: '多个标签用逗号分隔',
+            placeholder: '例如：校验, 异步, 表单提交'
         },
         {
             key: 'errorCode',
-            label: 'Error Code (Optional)',
+            label: '错误代码（可选）',
             type: 'text',
-            placeholder: 'e.g., ASYNC_VALIDATE_FAIL'
+            placeholder: '例如：ASYNC_VALIDATE_FAIL'
         },
         {
             key: 'summary',
-            label: 'Summary',
+            label: '问题概述',
             type: 'textarea',
             required: true,
             rows: 3,
-            description: 'Brief description of the issue'
+            description: '简要描述问题'
         },
         {
             key: 'phenomenon',
-            label: 'Phenomenon',
+            label: '现象描述',
             type: 'textarea',
             required: true,
             rows: 4,
-            description: 'How to reproduce the issue'
+            description: '如何复现该问题'
         },
         {
             key: 'solution',
-            label: 'Solution',
+            label: '解决方案',
             type: 'textarea',
             required: true,
             rows: 4,
-            description: 'How to fix the issue'
+            description: '如何修复该问题'
         },
         {
             key: 'troubleshootingFlow',
-            label: 'Troubleshooting Flow',
+            label: '排查流程',
             type: 'flow-builder',
-            description: 'Mermaid flowchart diagram',
-            placeholder: 'graph TD;\n  A[Start] --> B{Check?};\n  B -->|Yes| C[Action];\n  B -->|No| D[Other];'
+            description: 'Mermaid 流程图',
+            placeholder: 'graph TD;\n  A[开始] --> B{检查?};\n  B -->|是| C[操作];\n  B -->|否| D[其他];'
         },
         {
             key: 'validationMethod',
-            label: 'Validation Method',
+            label: '验证方法',
             type: 'textarea',
             rows: 2,
-            description: 'How to verify the fix works'
+            description: '如何验证修复是否有效'
         }
     ];
 
