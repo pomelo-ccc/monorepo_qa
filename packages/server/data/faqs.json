@@ -8,13 +8,13 @@
       "异常",
       "兼容性"
     ],
-    "errorCode": "",
+    "errorCode": "CCC_UI_2547",
     "summary": "12",
     "phenomenon": "21",
     "solution": "212",
-    "troubleshootingFlow": "",
+    "troubleshootingFlow": "graph: td\n ",
     "validationMethod": "2323",
-    "views": 0,
+    "views": 13,
     "solveTimeMinutes": 0,
     "id": "1763952468839"
   }

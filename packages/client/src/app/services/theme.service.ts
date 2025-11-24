@@ -65,6 +65,22 @@ export const THEMES: Theme[] = [
             accent: '#fbbf24',
             glass: 'rgba(255, 255, 255, 0.1)'
         }
+    },
+    {
+        id: 'sunset',
+        name: '暖色渐变',
+        colors: {
+            primary: '#f59e0b',
+            primaryLight: '#fbbf24',
+            background: 'linear-gradient(135deg, #667eea 0%, #f093fb 50%, #f5576c 100%)',
+            surface: 'rgba(255, 255, 255, 0.15)',
+            surfaceHover: 'rgba(255, 255, 255, 0.25)',
+            text: '#ffffff',
+            textSecondary: '#fce7f3',
+            border: 'rgba(255, 255, 255, 0.3)',
+            accent: '#ec4899',
+            glass: 'rgba(255, 255, 255, 0.15)'
+        }
     }
 ];
 
