@@ -233,10 +233,13 @@ import { ThemeService } from './services/theme.service';
 })
 export class AppComponent {
   showThemeMenu = false;
-  themes = this.themeService.getThemes();
-  currentTheme = this.themeService.getCurrentTheme();
+  themes: any[];
+  currentTheme: any;
 
   constructor(public themeService: ThemeService) {
+    this.themes = this.themeService.getThemes();
+    this.currentTheme = this.themeService.getCurrentTheme();
+
     // Close theme menu when clicking outside
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
