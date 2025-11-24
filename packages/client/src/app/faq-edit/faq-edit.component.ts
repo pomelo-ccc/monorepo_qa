@@ -179,8 +179,53 @@ export class FaqEditComponent implements OnInit {
     }
 
     onFlowBuilderOpen(fieldKey: string) {
-        // TODO: Open a modal/dialog with visual flow builder
-        const defaultFlow = FlowGenerator.generateMermaid(FlowGenerator.getDefaultFlow());
-        alert('流程图构建器：这将打开一个可视化编辑器。\n\n当前模板：\n\n' + defaultFlow);
+        const examples = [
+            {
+                title: '简单流程',
+                code: `graph TD;
+  A[开始] --> B{检查条件};
+  B -->|是| C[执行操作];
+  B -->|否| D[跳过];
+  C --> E[结束];
+  D --> E;`
+            },
+            {
+                title: '问题排查流程',
+                code: `graph TD;
+  A[发现问题] --> B{能否复现?};
+  B -->|是| C[记录复现步骤];
+  B -->|否| D[收集更多信息];
+  C --> E{查看日志};
+  E -->|有错误| F[定位错误代码];
+  E -->|无错误| G[检查配置];
+  F --> H[修复并测试];
+  G --> H;
+  D --> B;`
+            },
+            {
+                title: '表单验证流程',
+                code: `graph TD;
+  A[提交表单] --> B{表单状态?};
+  B -->|PENDING| C[禁用提交按钮];
+  B -->|INVALID| D[显示错误信息];
+  B -->|VALID| E[发送请求];
+  C --> F{异步验证完成?};
+  F -->|通过| E;
+  F -->|失败| D;
+  E --> G[处理响应];`
+            }
+        ];
+
+        const exampleText = examples.map((ex, i) =>
+            `${i + 1}. ${ex.title}:\n${ex.code}\n`
+        ).join('\n');
+
+        const message = `流程图示例（点击确定后可复制）：\n\n${exampleText}\n\n提示：复制示例代码到"排查流程"字段中`;
+
+        if (confirm(message)) {
+            // Copy first example to clipboard
+            navigator.clipboard.writeText(examples[0].code);
+            alert('已复制第一个示例到剪贴板！');
+        }
     }
 }

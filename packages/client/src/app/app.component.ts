@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, RouterOutlet } from '@angular/router';
+import { Router, RouterModule, RouterOutlet } from '@angular/router';
 import { ThemeService } from './services/theme.service';
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -54,13 +55,35 @@ import { ThemeService } from './services/theme.service';
           </div>
 
           <a routerLink="/" class="nav-link">首页</a>
-          <a routerLink="/create" class="nav-link nav-link-primary">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            新建问题
-          </a>
+          
+          @if (authService.isAdmin()) {
+            <a routerLink="/create" class="nav-link nav-link-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              新建问题
+            </a>
+          }
+          
+          @if (authService.isLoggedIn()) {
+            <div class="user-menu">
+              <span class="username">{{ authService.getCurrentUser()()?.username }}</span>
+              @if (authService.isAdmin()) {
+                <span class="role-badge">管理员</span>
+              }
+              <button class="logout-btn" (click)="logout()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                登出
+              </button>
+            </div>
+          } @else {
+            <a routerLink="/login" class="nav-link nav-link-primary">登录</a>
+          }
         </div>
       </header>
 
@@ -226,6 +249,50 @@ import { ThemeService } from './services/theme.service';
       background: var(--color-primaryLight);
     }
 
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 1rem;
+      background: var(--color-surfaceHover);
+      border-radius: 8px;
+    }
+
+    .username {
+      color: var(--color-text);
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .role-badge {
+      padding: 0.25rem 0.6rem;
+      background: var(--color-primary);
+      color: white;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.8rem;
+      background: transparent;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      color: var(--color-text);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+
+    .logout-btn:hover {
+      background: #dc3545;
+      border-color: #dc3545;
+      color: white;
+    }
+
     .app-main {
       flex: 1;
     }
@@ -236,7 +303,11 @@ export class AppComponent {
   themes: any[];
   currentTheme: any;
 
-  constructor(public themeService: ThemeService) {
+  constructor(
+    public themeService: ThemeService,
+    public authService: AuthService,
+    private router: Router
+  ) {
     this.themes = this.themeService.getThemes();
     this.currentTheme = this.themeService.getCurrentTheme();
 
@@ -256,5 +327,10 @@ export class AppComponent {
   selectTheme(theme: any) {
     this.themeService.setTheme(theme);
     this.showThemeMenu = false;
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }
