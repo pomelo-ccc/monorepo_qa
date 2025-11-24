@@ -8,8 +8,8 @@
     "build:all": "nx run-many --target=build",
     "test:all": "nx run-many --target=test",
     "lint:all": "nx run-many --target=lint",
-    "start:client": "nx serve client",
-    "start:server": "nx serve server"
+    "start:client": "pnpm --filter @repo/client start",
+    "start:server": "pnpm --filter @repo/server start"
   },
   "lint-staged": {
     "*.{ts,js,html,json,scss,css,md}": [
