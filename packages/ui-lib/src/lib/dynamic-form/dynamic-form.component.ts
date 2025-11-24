@@ -330,7 +330,7 @@ export class DynamicFormComponent implements OnInit {
   }
 
   onCancel() {
-    formCancel.emit();
+    this.formCancel.emit();
   }
 
   openFlowBuilder(fieldKey: string) {

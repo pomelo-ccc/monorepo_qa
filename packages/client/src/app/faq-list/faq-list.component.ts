@@ -81,7 +81,7 @@ import { ThemeService } from '../services/theme.service';
         @if (filteredFaqs().length > 0) {
           <div class="faq-grid">
             @for (faq of filteredFaqs(); track faq.id) {
-              <div class="faq-card" [routerLink]="['/edit', faq.id]">
+              <div class="faq-card" [routerLink]="['/detail', faq.id]">
                 <div class="card-header">
                   <h3 class="card-title">{{ faq.title }}</h3>
                   <div class="card-meta">
