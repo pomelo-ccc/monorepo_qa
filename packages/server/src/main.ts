@@ -4,12 +4,15 @@ import routes from './routes';
 import { ensureDataDir } from './utils/file.util';
 import { versionService } from './services';
 
+import * as path from 'path';
+
 const app = express();
 const PORT = 3000;
 
 // 中间件
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // API 路由
 app.use('/api', routes);

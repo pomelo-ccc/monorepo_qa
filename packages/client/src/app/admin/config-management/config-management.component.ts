@@ -10,6 +10,7 @@ import {
   TableColumn,
   TableAction,
 } from '@repo/ui-lib';
+import { FileManagementComponent } from '../file-management/file-management.component';
 
 @Component({
   selector: 'app-config-management',
@@ -21,6 +22,7 @@ import {
     ButtonComponent,
     CardComponent,
     DataTableComponent,
+    FileManagementComponent,
   ],
   template: `
     <div class="config-page">
@@ -75,100 +77,130 @@ import {
           </svg>
           版本管理
         </button>
+        <button
+          class="tab-item"
+          [class.active]="activeTab === 'files'"
+          (click)="activeTab = 'files'"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+            <polyline points="13 2 13 9 20 9"></polyline>
+          </svg>
+          文件管理
+        </button>
       </div>
 
       <!-- 内容区 -->
       <main class="main-content">
         <!-- Modules Management -->
-        <div *ngIf="activeTab === 'modules'" class="tab-content">
-          <lib-card title="模块列表" [hasHeader]="true">
-            <ng-container ngProjectAs="[header-extra]">
-              <lib-button variant="primary" (click)="addModule()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                添加模块
-              </lib-button>
-            </ng-container>
+        @if (activeTab === 'modules') {
+          <div class="tab-content">
+            <lib-card title="模块列表" [hasHeader]="true">
+              <ng-container ngProjectAs="[header-extra]">
+                <lib-button variant="primary" (click)="addModule()">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  添加模块
+                </lib-button>
+              </ng-container>
 
-            <lib-data-table
-              [columns]="moduleColumns"
-              [data]="flatModules"
-              [actions]="moduleActions"
-              [pagination]="false"
-            ></lib-data-table>
-          </lib-card>
-        </div>
+              <lib-data-table
+                [columns]="moduleColumns"
+                [data]="flatModules"
+                [actions]="moduleActions"
+                [pagination]="false"
+              ></lib-data-table>
+            </lib-card>
+          </div>
+        }
 
         <!-- Tags Management -->
-        <div *ngIf="activeTab === 'tags'" class="tab-content">
-          <lib-card title="标签列表" [hasHeader]="true">
-            <div class="add-tag-section">
-              <input
-                [(ngModel)]="newTagName"
-                (keyup.enter)="addTag()"
-                placeholder="输入新标签名称并回车"
-                class="add-input"
-              />
-              <lib-button variant="primary" (click)="addTag()" [disabled]="!newTagName">
-                添加标签
-              </lib-button>
-            </div>
-
-            <div class="tags-grid">
-              <div *ngFor="let tag of tags" class="tag-card">
-                <div *ngIf="editingTag !== tag" class="tag-view">
-                  <span class="tag-name">{{ tag }}</span>
-                  <div class="tag-actions">
-                    <button class="btn-icon-sm" (click)="startEditTag(tag)">
-                      <svg
-                        width="12"
-                        height="12"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                      >
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                      </svg>
-                    </button>
-                    <button class="btn-icon-sm danger" (click)="deleteTag(tag)">
-                      <svg
-                        width="12"
-                        height="12"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                      >
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                <div *ngIf="editingTag === tag" class="tag-edit">
-                  <input
-                    [(ngModel)]="editTagName"
-                    (keyup.enter)="saveTagEdit()"
-                    (keyup.escape)="cancelEditTag()"
-                    class="edit-input-sm"
-                    #editInput
-                  />
-                  <button class="btn-icon-sm success" (click)="saveTagEdit()">✓</button>
-                  <button class="btn-icon-sm" (click)="cancelEditTag()">✕</button>
-                </div>
+        @if (activeTab === 'tags') {
+          <div class="tab-content">
+            <lib-card title="标签列表" [hasHeader]="true">
+              <div class="add-tag-section">
+                <input
+                  [(ngModel)]="newTagName"
+                  (keyup.enter)="addTag()"
+                  placeholder="输入新标签名称并回车"
+                  class="add-input"
+                />
+                <lib-button variant="primary" (click)="addTag()" [disabled]="!newTagName">
+                  添加标签
+                </lib-button>
               </div>
-            </div>
-          </lib-card>
-        </div>
+
+              <div class="tags-grid">
+                @for (tag of tags; track tag) {
+                  <div class="tag-card">
+                    @if (editingTag !== tag) {
+                      <div class="tag-view">
+                        <span class="tag-name">{{ tag }}</span>
+                        <div class="tag-actions">
+                          <button class="btn-icon-sm" (click)="startEditTag(tag)">
+                            <svg
+                              width="12"
+                              height="12"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                            >
+                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                          </button>
+                          <button class="btn-icon-sm danger" (click)="deleteTag(tag)">
+                            <svg
+                              width="12"
+                              height="12"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                            >
+                              <line x1="18" y1="6" x2="6" y2="18"></line>
+                              <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    }
+                    @if (editingTag === tag) {
+                      <div class="tag-edit">
+                        <input
+                          [(ngModel)]="editTagName"
+                          (keyup.enter)="saveTagEdit()"
+                          (keyup.escape)="cancelEditTag()"
+                          class="edit-input-sm"
+                          #editInput
+                        />
+                        <button class="btn-icon-sm success" (click)="saveTagEdit()">✓</button>
+                        <button class="btn-icon-sm" (click)="cancelEditTag()">✕</button>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </lib-card>
+          </div>
+        }
 
         <!-- Versions Management (Placeholder) -->
-        <div *ngIf="activeTab === 'versions'" class="tab-content">
-          <lib-card title="版本列表">
-            <div class="empty-state">暂无版本数据</div>
-          </lib-card>
-        </div>
+        @if (activeTab === 'versions') {
+          <div class="tab-content">
+            <lib-card title="版本列表">
+              <div class="empty-state">暂无版本数据</div>
+            </lib-card>
+          </div>
+        }
+
+        <!-- File Management -->
+        @if (activeTab === 'files') {
+          <div class="tab-content">
+            <app-file-management></app-file-management>
+          </div>
+        }
       </main>
     </div>
   `,
@@ -389,7 +421,7 @@ import {
   ],
 })
 export class ConfigManagementComponent implements OnInit {
-  activeTab: 'modules' | 'tags' | 'versions' = 'modules';
+  activeTab: 'modules' | 'tags' | 'versions' | 'files' = 'modules';
 
   // Modules Data
   modules: any[] = [];
