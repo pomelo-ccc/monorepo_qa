@@ -11,10 +11,31 @@ router.get('/', async (req, res) => {
   res.json(files);
 });
 
+router.get('/:id/download-token', (req, res) => {
+  const token = fileService.generateDownloadToken(req.params.id);
+  res.json({ token });
+});
+
+router.get('/download/:token', async (req, res) => {
+  const token = req.params.token;
+  const fileId = fileService.verifyDownloadToken(token);
+
+  if (!fileId) {
+    return res.status(403).send('Invalid or expired token');
+  }
+
+  const fileInfo = await fileService.getFilePathById(fileId);
+  if (!fileInfo) {
+    return res.status(404).send('File not found');
+  }
+
+  res.download(fileInfo.absolutePath, fileInfo.filename);
+});
+
 router.get('/check', async (req, res) => {
   const hash = req.query.hash as string;
   if (!hash) {
-     return res.status(400).send('Hash is required');
+    return res.status(400).send('Hash is required');
   }
   const result = await fileService.checkFile(hash);
   res.json(result);
@@ -25,7 +46,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     const { hash, index } = req.body;
     const file = req.file;
     if (!file || !hash || index === undefined) {
-       return res.status(400).send('Missing parameters');
+      return res.status(400).send('Missing parameters');
     }
     await fileService.saveChunk(file, hash, parseInt(index));
     res.json({ success: true });
@@ -38,7 +59,13 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 router.post('/merge', async (req, res) => {
   try {
     const { hash, filename, totalChunks, originalName, mimeType } = req.body;
-    const file = await fileService.mergeChunks(hash, filename, parseInt(totalChunks), originalName, mimeType);
+    const file = await fileService.mergeChunks(
+      hash,
+      filename,
+      parseInt(totalChunks),
+      originalName,
+      mimeType,
+    );
     res.json(file);
   } catch (err) {
     const error = err as Error;

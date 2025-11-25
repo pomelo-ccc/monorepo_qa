@@ -13,3 +13,5 @@ export * from './lib/mermaid/mermaid.component';
 export * from './lib/tree/tree.component';
 export * from './lib/select/select.component';
 export * from './lib/checkbox/checkbox.component';
+export * from './lib/message/message.component';
+export * from './lib/dialog/dialog.component';

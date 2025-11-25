@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -7,13 +7,23 @@ import {
   TableAction,
   ButtonComponent,
   CardComponent,
+  MessageService,
 } from '@repo/ui-lib';
-import { MODULES, PREDEFINED_TAGS, VERSION_OPTIONS } from '../models/config';
+import { ConfigService } from '../services/config.service';
 
 interface ConfigItem {
   id: string;
   name: string;
   type?: string;
+  parentId?: string; // For modules
+  description?: string;
+}
+
+interface FormData {
+  id?: string;
+  name?: string;
+  parentId?: string;
+  description?: string;
 }
 
 @Component({
@@ -103,8 +113,18 @@ interface ConfigItem {
 
       <!-- Add/Edit Dialog -->
       @if (showDialog) {
-        <div class="dialog-overlay" (click)="closeDialog()">
-          <div class="dialog-wrapper" (click)="$event.stopPropagation()">
+        <div
+          class="dialog-overlay"
+          (click)="closeDialog()"
+          (keyup.escape)="closeDialog()"
+          tabindex="0"
+        >
+          <div
+            class="dialog-wrapper"
+            (click)="$event.stopPropagation()"
+            (keyup)="(null)"
+            tabindex="-1"
+          >
             <lib-card [title]="(editingItem ? '编辑' : '添加') + dialogTitle" [hasHeader]="true">
               <ng-container ngProjectAs="[header-icon]">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -114,26 +134,89 @@ interface ConfigItem {
               </ng-container>
 
               <form (ngSubmit)="saveItem()">
-                <div class="form-group">
-                  <label>名称</label>
-                  <input
-                    type="text"
-                    [(ngModel)]="formData.name"
-                    name="name"
-                    required
-                    placeholder="输入名称"
-                    class="form-input"
-                  />
-                </div>
+                <!-- Module Fields -->
                 @if (dialogType === 'module') {
                   <div class="form-group">
-                    <label>类型</label>
-                    <select [(ngModel)]="formData.type" name="type" class="form-input">
-                      <option value="frontend">前端</option>
-                      <option value="backend">后端</option>
-                    </select>
+                    <label for="module-id">模块ID</label>
+                    <input
+                      id="module-id"
+                      type="text"
+                      [(ngModel)]="formData.id"
+                      name="id"
+                      required
+                      [disabled]="!!editingItem"
+                      placeholder="输入模块ID"
+                      class="form-input"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="module-name">名称</label>
+                    <input
+                      id="module-name"
+                      type="text"
+                      [(ngModel)]="formData.name"
+                      name="name"
+                      required
+                      placeholder="输入名称"
+                      class="form-input"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="module-parent">父模块ID (可选，留空为顶级模块)</label>
+                    <input
+                      id="module-parent"
+                      type="text"
+                      [(ngModel)]="formData.parentId"
+                      name="parentId"
+                      placeholder="输入父模块ID"
+                      class="form-input"
+                    />
                   </div>
                 }
+
+                <!-- Tag Fields -->
+                @if (dialogType === 'tag') {
+                  <div class="form-group">
+                    <label for="tag-name">标签名称</label>
+                    <input
+                      id="tag-name"
+                      type="text"
+                      [(ngModel)]="formData.name"
+                      name="name"
+                      required
+                      placeholder="输入标签名称"
+                      class="form-input"
+                    />
+                  </div>
+                }
+
+                <!-- Version Fields -->
+                @if (dialogType === 'version') {
+                  <div class="form-group">
+                    <label for="version-name">版本号</label>
+                    <input
+                      id="version-name"
+                      type="text"
+                      [(ngModel)]="formData.name"
+                      name="name"
+                      required
+                      placeholder="例如 1.0.0"
+                      class="form-input"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="version-desc">描述</label>
+                    <textarea
+                      id="version-desc"
+                      [(ngModel)]="formData.description"
+                      name="description"
+                      placeholder="版本描述"
+                      class="form-input"
+                      rows="3"
+                    ></textarea>
+                  </div>
+                }
+
                 <div class="dialog-actions">
                   <lib-button variant="ghost" type="button" (click)="closeDialog()"
                     >取消</lib-button
@@ -264,11 +347,14 @@ interface ConfigItem {
   ],
 })
 export class AdminComponent implements OnInit {
+  private configService = inject(ConfigService);
+  private messageService = inject(MessageService);
+
   activeTab: 'modules' | 'tags' | 'versions' = 'modules';
   showDialog = false;
   dialogType: 'module' | 'tag' | 'version' = 'module';
   editingItem: ConfigItem | null = null;
-  formData: any = {};
+  formData: FormData = {};
 
   // Module data
   moduleData: ConfigItem[] = [];
@@ -292,10 +378,7 @@ export class AdminComponent implements OnInit {
 
   // Tag data
   tagData: ConfigItem[] = [];
-  tagColumns: TableColumn[] = [
-    { key: 'id', label: 'ID', width: '100px' },
-    { key: 'name', label: '标签名称' },
-  ];
+  tagColumns: TableColumn[] = [{ key: 'name', label: '标签名称' }];
   tagActions: TableAction[] = [
     {
       label: '编辑',
@@ -312,8 +395,8 @@ export class AdminComponent implements OnInit {
   // Version data
   versionData: ConfigItem[] = [];
   versionColumns: TableColumn[] = [
-    { key: 'id', label: 'ID', width: '100px' },
     { key: 'name', label: '版本号' },
+    { key: 'description', label: '描述' },
   ];
   versionActions: TableAction[] = [
     {
@@ -334,16 +417,39 @@ export class AdminComponent implements OnInit {
 
   loadData() {
     // Load modules
-    this.moduleData = [
-      ...MODULES.frontend.children.map((m) => ({ id: m.id, name: m.name, type: '前端' })),
-      { id: MODULES.backend.id, name: MODULES.backend.name, type: '后端' },
-    ];
+    this.configService.getModules().subscribe((modules) => {
+      const flatModules: ConfigItem[] = [];
+      modules.forEach((parent) => {
+        // Add parent module (optional, if we want to show them)
+        // flatModules.push({ id: parent.id, name: parent.name, type: '顶级模块' });
+
+        if (parent.children) {
+          parent.children.forEach((child) => {
+            flatModules.push({
+              id: child.id,
+              name: child.name,
+              type: parent.name, // Use parent name as type
+              parentId: parent.id,
+            });
+          });
+        }
+      });
+      this.moduleData = flatModules;
+    });
 
     // Load tags
-    this.tagData = PREDEFINED_TAGS.map((tag, i) => ({ id: `tag-${i}`, name: tag }));
+    this.configService.getTags().subscribe((tags) => {
+      this.tagData = tags.map((tag) => ({ id: tag, name: tag }));
+    });
 
     // Load versions
-    this.versionData = VERSION_OPTIONS.map((v, i) => ({ id: `ver-${i}`, name: v }));
+    this.configService.getVersions().subscribe((versions) => {
+      this.versionData = versions.map((v) => ({
+        id: v.id,
+        name: v.name,
+        description: v.description,
+      }));
+    });
   }
 
   get dialogTitle() {
@@ -354,7 +460,7 @@ export class AdminComponent implements OnInit {
   showAddDialog(type: 'module' | 'tag' | 'version') {
     this.dialogType = type;
     this.editingItem = null;
-    this.formData = type === 'module' ? { name: '', type: 'frontend' } : { name: '' };
+    this.formData = {};
     this.showDialog = true;
   }
 
@@ -366,18 +472,145 @@ export class AdminComponent implements OnInit {
   }
 
   deleteItem(type: 'module' | 'tag' | 'version', item: ConfigItem) {
-    if (confirm(`确定要删除 "${item.name}" 吗？`)) {
-      // TODO: Implement actual delete logic
-      alert('删除功能待实现（需要后端 API 支持）');
+    if (!confirm(`确定要删除 "${item.name}" 吗？`)) return;
+
+    if (type === 'module') {
+      if (item.parentId) {
+        this.configService.deleteModuleChild(item.parentId, item.id).subscribe({
+          next: () => {
+            this.messageService.success('删除成功');
+            this.loadData();
+          },
+          error: (err) => this.messageService.error('删除失败: ' + err.message),
+        });
+      }
+    } else if (type === 'tag') {
+      this.configService.deleteTag(item.name).subscribe({
+        next: () => {
+          this.messageService.success('删除成功');
+          this.loadData();
+        },
+        error: (err) => this.messageService.error('删除失败: ' + err.message),
+      });
+    } else if (type === 'version') {
+      this.configService.deleteVersion(item.id).subscribe({
+        next: () => {
+          this.messageService.success('删除成功');
+          this.loadData();
+        },
+        error: (err) => this.messageService.error('删除失败: ' + err.message),
+      });
     }
   }
 
   saveItem() {
-    // TODO: Implement actual save logic
-    alert(
-      '保存功能待实现（需要后端 API 支持）\n\n当前数据：' + JSON.stringify(this.formData, null, 2),
-    );
-    this.closeDialog();
+    if (this.dialogType === 'module') {
+      this.saveModule();
+    } else if (this.dialogType === 'tag') {
+      this.saveTag();
+    } else if (this.dialogType === 'version') {
+      this.saveVersion();
+    }
+  }
+
+  private saveModule() {
+    if (this.editingItem) {
+      // Update
+      this.configService
+        .updateModuleName(this.editingItem.id, this.formData.name || '', this.editingItem.parentId)
+        .subscribe({
+          next: () => {
+            this.messageService.success('更新成功');
+            this.closeDialog();
+            this.loadData();
+          },
+          error: (err) => this.messageService.error('更新失败: ' + err.message),
+        });
+    } else {
+      // Create
+      if (this.formData.parentId) {
+        // Add child
+        this.configService
+          .addModuleChild(this.formData.parentId, {
+            id: this.formData.id || '',
+            name: this.formData.name || '',
+          })
+          .subscribe({
+            next: () => {
+              this.messageService.success('添加成功');
+              this.closeDialog();
+              this.loadData();
+            },
+            error: (err) => this.messageService.error('添加失败: ' + err.message),
+          });
+      } else {
+        // Add parent
+        this.configService
+          .createModuleParent({ id: this.formData.id || '', name: this.formData.name || '' })
+          .subscribe({
+            next: () => {
+              this.messageService.success('添加成功');
+              this.closeDialog();
+              this.loadData();
+            },
+            error: (err) => this.messageService.error('添加失败: ' + err.message),
+          });
+      }
+    }
+  }
+
+  private saveTag() {
+    if (this.editingItem) {
+      this.configService.updateTag(this.editingItem.name, this.formData.name || '').subscribe({
+        next: () => {
+          this.messageService.success('更新成功');
+          this.closeDialog();
+          this.loadData();
+        },
+        error: (err) => this.messageService.error('更新失败: ' + err.message),
+      });
+    } else {
+      this.configService.addTag(this.formData.name || '').subscribe({
+        next: () => {
+          this.messageService.success('添加成功');
+          this.closeDialog();
+          this.loadData();
+        },
+        error: (err) => this.messageService.error('添加失败: ' + err.message),
+      });
+    }
+  }
+
+  private saveVersion() {
+    if (this.editingItem) {
+      this.configService
+        .updateVersion(this.editingItem.id, {
+          name: this.formData.name || '',
+          description: this.formData.description || '',
+        })
+        .subscribe({
+          next: () => {
+            this.messageService.success('更新成功');
+            this.closeDialog();
+            this.loadData();
+          },
+          error: (err) => this.messageService.error('更新失败: ' + err.message),
+        });
+    } else {
+      this.configService
+        .addVersion({
+          name: this.formData.name || '',
+          description: this.formData.description || '',
+        })
+        .subscribe({
+          next: () => {
+            this.messageService.success('添加成功');
+            this.closeDialog();
+            this.loadData();
+          },
+          error: (err) => this.messageService.error('添加失败: ' + err.message),
+        });
+    }
   }
 
   closeDialog() {

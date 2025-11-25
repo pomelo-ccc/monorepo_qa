@@ -12,7 +12,7 @@ const PORT = 3000;
 // 中间件
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // API 路由
 app.use('/api', routes);

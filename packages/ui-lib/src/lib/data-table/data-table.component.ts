@@ -1,7 +1,14 @@
 import { Component, Input, OnChanges, SimpleChanges, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AgGridAngular, ICellRendererAngularComp } from 'ag-grid-angular';
-import { ColDef, ModuleRegistry, AllCommunityModule, ICellRendererParams } from 'ag-grid-community';
+import {
+  ColDef,
+  ModuleRegistry,
+  AllCommunityModule,
+  ICellRendererParams,
+  themeQuartz,
+  iconSetQuartz,
+} from 'ag-grid-community';
 import { ButtonComponent } from '../button/button.component';
 
 // Register all community modules
@@ -13,6 +20,7 @@ export interface TableColumn {
   width?: string | number;
   sortable?: boolean;
   filter?: boolean;
+  formatter?: (value: any) => string;
 }
 
 export interface TableAction {
@@ -42,9 +50,10 @@ export interface TableAction {
     `
       .actions-cell {
         display: flex;
-        gap: 0.5rem;
+        gap: 0.75rem;
         align-items: center;
         height: 100%;
+        padding: 8px 0;
       }
     `,
   ],
@@ -92,8 +101,8 @@ export class ActionCellRendererComponent implements ICellRendererAngularComp {
         [defaultColDef]="defaultColDef"
         [pagination]="pagination"
         [paginationPageSize]="10"
-        [domLayout]="'autoHeight'"
-        class="ag-theme-quartz"
+        [domLayout]="autoHeight ? 'autoHeight' : 'normal'"
+        [theme]="theme"
       >
       </ag-grid-angular>
     </div>
@@ -102,35 +111,12 @@ export class ActionCellRendererComponent implements ICellRendererAngularComp {
     `
       .table-container {
         width: 100%;
-        --ag-background-color: var(--color-surface, #fff);
-        --ag-foreground-color: var(--color-text, #333);
-        --ag-header-background-color: var(--color-background, #f8fafc);
-        --ag-row-hover-color: var(--color-surfaceHover, #f1f5f9);
-        --ag-border-color: var(--color-border, #e2e8f0);
-        --ag-header-foreground-color: var(--color-textSecondary, #64748b);
-        --ag-row-border-color: var(--color-border, #e2e8f0);
-        --ag-input-focus-border-color: var(--color-primary, #3b82f6);
-        --ag-range-selection-border-color: var(--color-primary, #3b82f6);
-        --ag-selected-row-background-color: rgba(59, 130, 246, 0.1);
-      }
-
-      .ag-theme-quartz {
-        font-family: inherit;
-      }
-
-      .ag-theme-quartz .ag-header-cell-label {
-        font-weight: 600;
-      }
-
-      .ag-theme-quartz .ag-cell {
-        display: flex;
-        align-items: center;
-        font-size: 0.9rem;
-      }
-
-      /* Hide pagination border if needed */
-      .ag-theme-quartz .ag-paging-panel {
-        border-top: 1px solid var(--ag-border-color);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow:
+          0 1px 3px 0 rgba(0, 0, 0, 0.1),
+          0 1px 2px -1px rgba(0, 0, 0, 0.1);
+        background: var(--color-surface);
       }
     `,
   ],
@@ -141,6 +127,7 @@ export class DataTableComponent implements OnChanges {
   @Input() actions?: TableAction[];
   @Input() rowKey?: string;
   @Input() pagination = true;
+  @Input() autoHeight = true;
 
   columnDefs: ColDef[] = [];
 
@@ -151,6 +138,24 @@ export class DataTableComponent implements OnChanges {
     flex: 1,
     minWidth: 100,
   };
+
+  theme = themeQuartz.withParams({
+    spacing: 12,
+    accentColor: 'var(--color-primary)',
+    backgroundColor: 'var(--color-surface)',
+    foregroundColor: 'var(--color-text)',
+    headerBackgroundColor: 'var(--color-background)',
+    headerTextColor: 'var(--color-text)',
+    borderColor: 'var(--color-border)',
+    rowHeight: 56,
+    headerHeight: 48,
+    fontSize: 15,
+    cellHorizontalPaddingScale: 1.5,
+    headerFontSize: 14,
+    headerFontWeight: 600,
+    rowHoverColor: 'var(--color-surfaceHover)',
+    oddRowBackgroundColor: 'color-mix(in srgb, var(--color-surface) 98%, var(--color-border))',
+  });
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['columns'] || changes['actions']) {
@@ -173,6 +178,7 @@ export class DataTableComponent implements OnChanges {
         width: width,
         sortable: col.sortable !== false,
         filter: col.filter !== false,
+        valueFormatter: col.formatter ? (params) => col.formatter!(params.value) : undefined,
       };
     });
 
@@ -187,7 +193,7 @@ export class DataTableComponent implements OnChanges {
         sortable: false,
         filter: false,
         pinned: 'right',
-        width: 200,
+        width: 220,
         flex: 0,
       });
     }

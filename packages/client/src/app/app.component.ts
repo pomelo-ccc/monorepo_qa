@@ -48,6 +48,7 @@ import { filter } from 'rxjs/operators';
                 <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">首页</a>
                 @if (authService.isAdmin()) {
                   <a routerLink="/admin" routerLinkActive="active" class="nav-link">系统配置</a>
+                  <a routerLink="/admin/files" routerLinkActive="active" class="nav-link">文件管理</a>
                 }
               </nav>
             </div>

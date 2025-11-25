@@ -1,11 +1,15 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import 'multer'; // Ensure Multer types are available
+import * as crypto from 'crypto';
 import { FileRecord } from '../models/file.model';
 
 const DATA_FILE = path.join(__dirname, '../../data/files.json');
 const UPLOAD_DIR = path.join(__dirname, '../../uploads');
 const TEMP_DIR = path.join(UPLOAD_DIR, 'temp');
+
+// In-memory token store: token -> { fileId, expires }
+const downloadTokens = new Map<string, { fileId: string; expires: number }>();
 
 // Ensure directories exist
 fs.ensureDirSync(UPLOAD_DIR);
@@ -122,4 +126,46 @@ export const deleteFile = async (id: string): Promise<void> => {
 
   files.splice(index, 1);
   await fs.writeJSON(DATA_FILE, files, { spaces: 2 });
+};
+
+export const generateDownloadToken = (fileId: string): string => {
+  const token = crypto.randomUUID();
+  // Token valid for 5 minutes
+  const expires = Date.now() + 5 * 60 * 1000;
+  downloadTokens.set(token, { fileId, expires });
+
+  // Clean up expired tokens occasionally
+  if (downloadTokens.size > 1000) {
+    const now = Date.now();
+    for (const [t, data] of downloadTokens.entries()) {
+      if (data.expires < now) {
+        downloadTokens.delete(t);
+      }
+    }
+  }
+
+  return token;
+};
+
+export const verifyDownloadToken = (token: string): string | null => {
+  const data = downloadTokens.get(token);
+  if (!data) return null;
+
+  if (Date.now() > data.expires) {
+    downloadTokens.delete(token);
+    return null;
+  }
+
+  return data.fileId;
+};
+
+export const getFilePathById = async (
+  id: string,
+): Promise<{ absolutePath: string; filename: string } | null> => {
+  const file = await getFile(id);
+  if (!file) return null;
+  return {
+    absolutePath: path.join(UPLOAD_DIR, file.filename),
+    filename: file.originalName,
+  };
 };

@@ -41,3 +41,6 @@ test.ts
 
 # VS Code Local History
 .history
+
+# Uploads
+packages/server/uploads/
