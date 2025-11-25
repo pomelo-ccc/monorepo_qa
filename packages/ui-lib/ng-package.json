@@ -3,5 +3,6 @@
   "dest": "../../dist/packages/ui-lib",
   "lib": {
     "entryFile": "src/public-api.ts"
-  }
+  },
+  "allowedNonPeerDependencies": ["@repo/utils", "mermaid", "ag-grid-angular", "ag-grid-community"]
 }

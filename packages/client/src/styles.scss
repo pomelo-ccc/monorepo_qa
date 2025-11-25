@@ -1,3 +1,6 @@
+@import 'ag-grid-community/styles/ag-grid.css';
+@import 'ag-grid-community/styles/ag-theme-quartz.css';
+
 /* CSS Variables - will be overridden by ThemeService */
 :root {
   --color-primary: #667eea;
@@ -9,6 +12,18 @@
   --color-textSecondary: #94a3b8;
   --color-border: #334155;
   --color-accent: #3b82f6;
+  /* 拟物化玻璃效果默认值 */
+  --color-glassHighlight: transparent;
+  --color-glassShadow: transparent;
+  --color-glassInnerShadow: none;
+  --color-glassBorderTop: transparent;
+  --color-glassBorderBottom: transparent;
+  --color-glassReflection: none;
+  --color-glassBlur: 0px;
+  --color-cardShadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --color-buttonShadow: none;
+  --color-inputShadow: none;
+  --bg-gradient: none;
 }
 
 * {
@@ -21,8 +36,11 @@ body {
     'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: var(--color-background);
+  background: var(--bg-gradient, var(--color-background));
+  background-attachment: fixed;
+  background-size: cover;
   color: var(--color-text);
+  min-height: 100vh;
 }
 
 /* Scrollbar styling */

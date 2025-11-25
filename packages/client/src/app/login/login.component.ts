@@ -3,16 +3,19 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { ButtonComponent, CardComponent } from '@repo/ui-lib';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ButtonComponent, CardComponent],
   template: `
     <div class="login-container">
-      <div class="login-card">
-        <h2>FAQ 管理系统</h2>
-        <p class="subtitle">请登录以继续</p>
+      <lib-card class="login-card">
+        <div class="login-header">
+          <h2>FAQ 管理系统</h2>
+          <p class="subtitle">请登录以继续</p>
+        </div>
 
         <form (ngSubmit)="onLogin()" class="login-form">
           <div class="form-group">
@@ -23,6 +26,7 @@ import { AuthService } from '../services/auth.service';
               name="username"
               placeholder="输入用户名"
               required
+              class="form-input"
             />
           </div>
 
@@ -34,6 +38,7 @@ import { AuthService } from '../services/auth.service';
               name="password"
               placeholder="输入密码"
               required
+              class="form-input"
             />
           </div>
 
@@ -41,7 +46,7 @@ import { AuthService } from '../services/auth.service';
             <div class="error-message">{{ errorMessage }}</div>
           }
 
-          <button type="submit" class="login-btn">登录</button>
+          <lib-button variant="primary" [block]="true" type="submit">登录</lib-button>
         </form>
 
         <div class="demo-info">
@@ -49,7 +54,7 @@ import { AuthService } from '../services/auth.service';
           <p>管理员: admin / admin123</p>
           <p>普通用户: user / user123</p>
         </div>
-      </div>
+      </lib-card>
     </div>
   `,
   styles: [
@@ -59,31 +64,31 @@ import { AuthService } from '../services/auth.service';
         display: flex;
         align-items: center;
         justify-content: center;
-        background: var(--color-background);
+        background: transparent;
         padding: 2rem;
       }
 
       .login-card {
-        background: var(--color-surface);
-        border: 1px solid var(--color-border);
-        border-radius: 16px;
-        padding: 3rem;
-        max-width: 400px;
         width: 100%;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        max-width: 400px;
+        backdrop-filter: blur(var(--color-glassBlur, 0px));
+        -webkit-backdrop-filter: blur(var(--color-glassBlur, 0px));
+      }
+
+      .login-header {
+        text-align: center;
+        margin-bottom: 2rem;
       }
 
       h2 {
         margin: 0 0 0.5rem 0;
         color: var(--color-text);
         font-size: 2rem;
-        text-align: center;
       }
 
       .subtitle {
-        margin: 0 0 2rem 0;
+        margin: 0;
         color: var(--color-textSecondary);
-        text-align: center;
       }
 
       .login-form {
@@ -104,46 +109,36 @@ import { AuthService } from '../services/auth.service';
         font-size: 0.95rem;
       }
 
-      input {
+      .form-input {
         padding: 0.875rem;
-        background: var(--color-background);
+        background: var(--color-glass, var(--color-background));
         border: 1px solid var(--color-border);
-        border-radius: 8px;
+        border-top-color: var(--color-glassBorderBottom, var(--color-border));
+        border-bottom-color: var(--color-glassBorderTop, var(--color-border));
+        border-radius: 10px;
         color: var(--color-text);
         font-size: 1rem;
         transition: all 0.2s;
+        width: 100%;
+        box-sizing: border-box;
+        box-shadow: var(--color-inputShadow, none);
       }
 
-      input:focus {
+      .form-input:focus {
         outline: none;
         border-color: var(--color-primary);
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        box-shadow:
+          var(--color-inputShadow, none),
+          0 0 0 3px color-mix(in srgb, var(--color-primary), transparent 80%);
       }
 
       .error-message {
         padding: 0.75rem;
-        background: rgba(220, 53, 69, 0.1);
-        border: 1px solid #dc3545;
+        background: color-mix(in srgb, var(--color-error), transparent 90%);
+        border: 1px solid var(--color-error);
         border-radius: 6px;
-        color: #dc3545;
+        color: var(--color-error);
         font-size: 0.9rem;
-      }
-
-      .login-btn {
-        padding: 1rem;
-        background: var(--color-primary);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s;
-      }
-
-      .login-btn:hover {
-        background: var(--color-primaryLight);
-        transform: translateY(-2px);
       }
 
       .demo-info {

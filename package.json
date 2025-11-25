@@ -9,7 +9,8 @@
     "test:all": "nx run-many --target=test",
     "lint:all": "nx run-many --target=lint",
     "start:client": "pnpm --filter @repo/client start",
-    "start:server": "pnpm --filter @repo/server start"
+    "start:server": "pnpm --filter @repo/server start",
+    "dev": "nx run-many --target=start --projects=@repo/client,@repo/server --parallel"
   },
   "lint-staged": {
     "*.{ts,js,html,json,scss,css,md}": [

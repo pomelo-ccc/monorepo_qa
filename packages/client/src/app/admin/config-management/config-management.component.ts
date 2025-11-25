@@ -3,15 +3,29 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ConfigService, ModuleNode } from '../../services/config.service';
 import { RouterModule } from '@angular/router';
+import {
+  ButtonComponent,
+  CardComponent,
+  DataTableComponent,
+  TableColumn,
+  TableAction,
+} from '@repo/ui-lib';
 
 @Component({
   selector: 'app-config-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    ButtonComponent,
+    CardComponent,
+    DataTableComponent,
+  ],
   template: `
     <div class="config-layout">
       <header class="page-header">
-        <h1>配置管理</h1>
+        <h1>系统配置管理</h1>
         <div class="tabs">
           <button
             class="tab-btn"
@@ -27,175 +41,106 @@ import { RouterModule } from '@angular/router';
           >
             标签管理
           </button>
+          <button
+            class="tab-btn"
+            [class.active]="activeTab === 'versions'"
+            (click)="activeTab = 'versions'"
+          >
+            版本管理
+          </button>
         </div>
       </header>
 
       <main class="main-content">
         <!-- Modules Management -->
         <div *ngIf="activeTab === 'modules'" class="tab-content">
-          <div class="actions-bar">
-            <button class="btn-primary" (click)="addTopLevelModule()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-              添加一级模块
-            </button>
-            <button class="btn-success" (click)="saveModules()" [disabled]="!modulesChanged">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                <polyline points="7 3 7 8 15 8"></polyline>
-              </svg>
-              保存更改
-            </button>
-          </div>
+          <lib-card title="模块列表" [hasHeader]="true">
+            <ng-container ngProjectAs="[header-extra]">
+              <lib-button variant="primary" (click)="addModule()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                添加模块
+              </lib-button>
+            </ng-container>
 
-          <div class="modules-tree">
-            <div *ngFor="let module of modules; let i = index" class="module-item">
-              <div class="module-row">
-                <div class="module-info">
-                  <span class="expand-icon" (click)="toggleExpand(module)">
-                    {{ module.expanded ? '▼' : '▶' }}
-                  </span>
-                  <input
-                    [(ngModel)]="module.name"
-                    (ngModelChange)="markModulesChanged()"
-                    class="edit-input"
-                    placeholder="模块名称"
-                  />
-                  <span class="module-id">ID: {{ module.id }}</span>
-                </div>
-                <div class="module-actions">
-                  <button class="btn-icon" (click)="addSubModule(module)" title="添加子模块">
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                    >
-                      <line x1="12" y1="5" x2="12" y2="19"></line>
-                      <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                  </button>
-                  <button class="btn-icon danger" (click)="deleteModule(modules, i)" title="删除">
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                    >
-                      <polyline points="3 6 5 6 21 6"></polyline>
-                      <path
-                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                      ></path>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Submodules -->
-              <div class="sub-modules" *ngIf="module.expanded">
-                <div *ngFor="let sub of module.children; let j = index" class="module-item sub">
-                  <div class="module-row">
-                    <div class="module-info">
-                      <span class="dot"></span>
-                      <input
-                        [(ngModel)]="sub.name"
-                        (ngModelChange)="markModulesChanged()"
-                        class="edit-input"
-                        placeholder="子模块名称"
-                      />
-                      <span class="module-id">ID: {{ sub.id }}</span>
-                    </div>
-                    <div class="module-actions">
-                      <button
-                        class="btn-icon danger"
-                        (click)="deleteModule(module.children!, j)"
-                        title="删除"
-                      >
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                        >
-                          <polyline points="3 6 5 6 21 6"></polyline>
-                          <path
-                            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                          ></path>
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <div class="empty-sub" *ngIf="!module.children?.length">暂无子模块</div>
-              </div>
-            </div>
-          </div>
+            <lib-data-table
+              [columns]="moduleColumns"
+              [data]="flatModules"
+              [actions]="moduleActions"
+              [pagination]="false"
+            ></lib-data-table>
+          </lib-card>
         </div>
 
         <!-- Tags Management -->
         <div *ngIf="activeTab === 'tags'" class="tab-content">
-          <div class="add-tag-section">
-            <input
-              [(ngModel)]="newTagName"
-              (keyup.enter)="addTag()"
-              placeholder="输入新标签名称并回车"
-              class="add-input"
-            />
-            <button class="btn-primary" (click)="addTag()" [disabled]="!newTagName">
-              添加标签
-            </button>
-          </div>
+          <lib-card title="标签列表" [hasHeader]="true">
+            <div class="add-tag-section">
+              <input
+                [(ngModel)]="newTagName"
+                (keyup.enter)="addTag()"
+                placeholder="输入新标签名称并回车"
+                class="add-input"
+              />
+              <lib-button variant="primary" (click)="addTag()" [disabled]="!newTagName">
+                添加标签
+              </lib-button>
+            </div>
 
-          <div class="tags-grid">
-            <div *ngFor="let tag of tags" class="tag-card">
-              <div *ngIf="editingTag !== tag" class="tag-view">
-                <span class="tag-name">{{ tag }}</span>
-                <div class="tag-actions">
-                  <button class="btn-icon-sm" (click)="startEditTag(tag)">
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                    >
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                    </svg>
-                  </button>
-                  <button class="btn-icon-sm danger" (click)="deleteTag(tag)">
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                    >
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                  </button>
+            <div class="tags-grid">
+              <div *ngFor="let tag of tags" class="tag-card">
+                <div *ngIf="editingTag !== tag" class="tag-view">
+                  <span class="tag-name">{{ tag }}</span>
+                  <div class="tag-actions">
+                    <button class="btn-icon-sm" (click)="startEditTag(tag)">
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                      >
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                      </svg>
+                    </button>
+                    <button class="btn-icon-sm danger" (click)="deleteTag(tag)">
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                      >
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <div *ngIf="editingTag === tag" class="tag-edit">
+                  <input
+                    [(ngModel)]="editTagName"
+                    (keyup.enter)="saveTagEdit()"
+                    (keyup.escape)="cancelEditTag()"
+                    class="edit-input-sm"
+                    #editInput
+                  />
+                  <button class="btn-icon-sm success" (click)="saveTagEdit()">✓</button>
+                  <button class="btn-icon-sm" (click)="cancelEditTag()">✕</button>
                 </div>
               </div>
-              <div *ngIf="editingTag === tag" class="tag-edit">
-                <input
-                  [(ngModel)]="editTagName"
-                  (keyup.enter)="saveTagEdit()"
-                  (keyup.escape)="cancelEditTag()"
-                  class="edit-input-sm"
-                  #editInput
-                />
-                <button class="btn-icon-sm success" (click)="saveTagEdit()">✓</button>
-                <button class="btn-icon-sm" (click)="cancelEditTag()">✕</button>
-              </div>
             </div>
-          </div>
+          </lib-card>
+        </div>
+
+        <!-- Versions Management (Placeholder) -->
+        <div *ngIf="activeTab === 'versions'" class="tab-content">
+          <lib-card title="版本列表">
+            <div class="empty-state">暂无版本数据</div>
+          </lib-card>
         </div>
       </main>
     </div>
@@ -206,7 +151,7 @@ import { RouterModule } from '@angular/router';
         min-height: calc(100vh - 64px);
         background: var(--color-background);
         padding: 2rem;
-        max-width: 1200px;
+        max-width: 1400px;
         margin: 0 auto;
       }
 
@@ -218,16 +163,17 @@ import { RouterModule } from '@angular/router';
         font-size: 1.8rem;
         margin-bottom: 1.5rem;
         color: var(--color-text);
+        font-weight: 700;
       }
 
       .tabs {
         display: flex;
-        gap: 1rem;
+        gap: 2rem;
         border-bottom: 1px solid var(--color-border);
       }
 
       .tab-btn {
-        padding: 0.75rem 1.5rem;
+        padding: 0.75rem 0;
         background: none;
         border: none;
         border-bottom: 2px solid transparent;
@@ -235,6 +181,7 @@ import { RouterModule } from '@angular/router';
         font-size: 1rem;
         cursor: pointer;
         transition: all 0.2s;
+        font-weight: 500;
       }
 
       .tab-btn:hover {
@@ -248,117 +195,7 @@ import { RouterModule } from '@angular/router';
       }
 
       .tab-content {
-        background: var(--color-surface);
-        border-radius: 12px;
-        padding: 2rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-      }
-
-      /* Modules Styles */
-      .actions-bar {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 2rem;
-      }
-
-      .modules-tree {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-      }
-
-      .module-item {
-        border: 1px solid var(--color-border);
-        border-radius: 8px;
-        overflow: hidden;
-      }
-
-      .module-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.75rem 1rem;
-        background: #f8fafc;
-      }
-
-      .module-item.sub .module-row {
-        background: #fff;
-        border-top: 1px solid var(--color-border);
-      }
-
-      .module-info {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        flex: 1;
-      }
-
-      .expand-icon {
-        cursor: pointer;
-        width: 20px;
-        color: var(--color-textSecondary);
-        font-size: 0.8rem;
-      }
-
-      .dot {
-        width: 20px;
-        display: flex;
-        justify-content: center;
-      }
-      .dot::before {
-        content: '';
-        width: 6px;
-        height: 6px;
-        background: var(--color-border);
-        border-radius: 50%;
-      }
-
-      .edit-input {
-        padding: 0.4rem 0.8rem;
-        border: 1px solid transparent;
-        border-radius: 4px;
-        background: transparent;
-        font-size: 0.95rem;
-        color: var(--color-text);
-        transition: all 0.2s;
-      }
-
-      .edit-input:hover,
-      .edit-input:focus {
-        background: #fff;
-        border-color: var(--color-border);
-      }
-
-      .module-id {
-        font-size: 0.8rem;
-        color: var(--color-textSecondary);
-        font-family: monospace;
-        background: #f1f5f9;
-        padding: 2px 6px;
-        border-radius: 4px;
-      }
-
-      .module-actions {
-        display: flex;
-        gap: 0.5rem;
-        opacity: 0;
-        transition: opacity 0.2s;
-      }
-
-      .module-row:hover .module-actions {
-        opacity: 1;
-      }
-
-      .sub-modules {
-        padding-left: 2rem;
-        background: #f8fafc;
-      }
-
-      .empty-sub {
-        padding: 1rem;
-        color: var(--color-textSecondary);
-        font-size: 0.85rem;
-        font-style: italic;
+        margin-top: 1.5rem;
       }
 
       /* Tags Styles */
@@ -375,6 +212,14 @@ import { RouterModule } from '@angular/router';
         border: 1px solid var(--color-border);
         border-radius: 6px;
         font-size: 0.95rem;
+        outline: none;
+        transition: border-color 0.2s;
+        background: var(--color-surface);
+        color: var(--color-text);
+      }
+
+      .add-input:focus {
+        border-color: var(--color-primary);
       }
 
       .tags-grid {
@@ -384,7 +229,7 @@ import { RouterModule } from '@angular/router';
       }
 
       .tag-card {
-        background: #fff;
+        background: var(--color-surface);
         border: 1px solid var(--color-border);
         border-radius: 20px;
         padding: 0.4rem 0.5rem 0.4rem 1rem;
@@ -426,67 +271,8 @@ import { RouterModule } from '@angular/router';
         border: 1px solid var(--color-primary);
         border-radius: 4px;
         font-size: 0.9rem;
-      }
-
-      /* Buttons */
-      .btn-primary,
-      .btn-success {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.6rem 1.2rem;
-        border: none;
-        border-radius: 6px;
-        color: white;
-        cursor: pointer;
-        font-weight: 500;
-        transition: background 0.2s;
-      }
-
-      .btn-primary {
-        background: var(--color-primary);
-      }
-      .btn-primary:hover {
-        background: var(--color-primaryLight);
-      }
-      .btn-primary:disabled {
-        background: #cbd5e1;
-        cursor: not-allowed;
-      }
-
-      .btn-success {
-        background: #10b981;
-      }
-      .btn-success:hover {
-        background: #059669;
-      }
-      .btn-success:disabled {
-        background: #cbd5e1;
-        cursor: not-allowed;
-      }
-
-      .btn-icon {
-        width: 28px;
-        height: 28px;
-        border-radius: 4px;
-        border: 1px solid var(--color-border);
-        background: #fff;
-        color: var(--color-textSecondary);
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s;
-      }
-
-      .btn-icon:hover {
-        border-color: var(--color-primary);
-        color: var(--color-primary);
-      }
-
-      .btn-icon.danger:hover {
-        border-color: #ef4444;
-        color: #ef4444;
+        background: var(--color-surface);
+        color: var(--color-text);
       }
 
       .btn-icon-sm {
@@ -503,27 +289,52 @@ import { RouterModule } from '@angular/router';
       }
 
       .btn-icon-sm:hover {
-        background: #f1f5f9;
+        background: var(--color-surfaceHover);
         color: var(--color-text);
       }
 
       .btn-icon-sm.danger:hover {
         color: #ef4444;
-        background: #fef2f2;
+        background: rgba(239, 68, 68, 0.1);
       }
 
       .btn-icon-sm.success {
         color: #10b981;
       }
+
+      .empty-state {
+        padding: 2rem;
+        text-align: center;
+        color: var(--color-textSecondary);
+      }
     `,
   ],
 })
 export class ConfigManagementComponent implements OnInit {
-  activeTab: 'modules' | 'tags' = 'modules';
+  activeTab: 'modules' | 'tags' | 'versions' = 'modules';
 
   // Modules Data
   modules: any[] = [];
   modulesChanged = false;
+
+  moduleColumns: TableColumn[] = [
+    { key: 'id', label: 'ID', width: 200 },
+    { key: 'name', label: '名称', width: 200 },
+    { key: 'type', label: '类型', width: 150 },
+  ];
+
+  moduleActions: TableAction[] = [
+    {
+      label: '编辑',
+      type: 'primary',
+      handler: (row) => this.editModule(row),
+    },
+    {
+      label: '删除',
+      type: 'danger',
+      handler: (row) => this.deleteModuleItem(row),
+    },
+  ];
 
   // Tags Data
   tags: string[] = [];
@@ -541,58 +352,85 @@ export class ConfigManagementComponent implements OnInit {
   // --- Modules Logic ---
   loadModules() {
     this.configService.getModules().subscribe((data) => {
-      this.modules = data.map((m) => ({ ...m, expanded: true }));
+      this.modules = data;
       this.modulesChanged = false;
     });
   }
 
-  toggleExpand(module: any) {
-    module.expanded = !module.expanded;
+  get flatModules() {
+    const result: any[] = [];
+    this.modules.forEach((parent) => {
+      if (parent.children) {
+        parent.children.forEach((child: any) => {
+          result.push({
+            id: child.id,
+            name: child.name,
+            type: parent.name,
+            parentId: parent.id,
+            original: child,
+            parentOriginal: parent,
+          });
+        });
+      }
+    });
+    return result;
   }
 
-  addTopLevelModule() {
-    const id = prompt('请输入模块ID (英文):');
-    if (!id) return;
-    if (this.modules.some((m) => m.id === id)) {
-      alert('ID已存在');
+  addModule() {
+    // Simple implementation: Ask for Type (Parent), ID, Name
+    const parentId = prompt(
+      '请输入所属模块ID (例如: frontend, backend):\n现有模块: ' +
+        this.modules.map((m) => m.id).join(', '),
+    );
+    if (!parentId) return;
+
+    const parent = this.modules.find((m) => m.id === parentId);
+    if (!parent) {
+      alert('找不到该模块ID');
       return;
     }
 
-    this.modules.push({
-      id,
-      name: '新模块',
-      children: [],
-      expanded: true,
-    });
-    this.markModulesChanged();
-  }
-
-  addSubModule(parent: any) {
-    const id = prompt('请输入子模块ID (英文):');
+    const id = prompt('请输入模块ID (英文):');
     if (!id) return;
     if (parent.children?.some((m: any) => m.id === id)) {
       alert('ID已存在');
       return;
     }
 
+    const name = prompt('请输入模块名称:');
+    if (!name) return;
+
     if (!parent.children) parent.children = [];
-    parent.children.push({
-      id,
-      name: '新子模块',
-    });
-    parent.expanded = true;
-    this.markModulesChanged();
+    parent.children.push({ id, name });
+
+    this.saveModules();
   }
 
-  deleteModule(list: any[], index: number) {
-    if (confirm('确定要删除该模块吗？')) {
-      list.splice(index, 1);
-      this.markModulesChanged();
+  editModule(row: any) {
+    const newName = prompt('请输入新名称:', row.name);
+    if (newName && newName !== row.name) {
+      const parent = this.modules.find((m) => m.id === row.parentId);
+      if (parent) {
+        const child = parent.children.find((c: any) => c.id === row.id);
+        if (child) {
+          child.name = newName;
+          this.saveModules();
+        }
+      }
     }
   }
 
-  markModulesChanged() {
-    this.modulesChanged = true;
+  deleteModuleItem(row: any) {
+    if (confirm(`确定要删除模块 "${row.name}" 吗？`)) {
+      const parent = this.modules.find((m) => m.id === row.parentId);
+      if (parent) {
+        const index = parent.children.findIndex((c: any) => c.id === row.id);
+        if (index > -1) {
+          parent.children.splice(index, 1);
+          this.saveModules();
+        }
+      }
+    }
   }
 
   saveModules() {
@@ -608,7 +446,7 @@ export class ConfigManagementComponent implements OnInit {
 
     this.configService.saveModules(cleanModules).subscribe(() => {
       this.modulesChanged = false;
-      alert('保存成功');
+      this.loadModules(); // Reload to refresh view
     });
   }
 

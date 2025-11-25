@@ -1,175 +1,197 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AgGridAngular, ICellRendererAngularComp } from 'ag-grid-angular';
+import { ColDef, ModuleRegistry, AllCommunityModule, ICellRendererParams } from 'ag-grid-community';
+import { ButtonComponent } from '../button/button.component';
+
+// Register all community modules
+ModuleRegistry.registerModules([AllCommunityModule]);
 
 export interface TableColumn {
-    key: string;
-    label: string;
-    width?: string;
-    sortable?: boolean;
+  key: string;
+  label: string;
+  width?: string | number;
+  sortable?: boolean;
+  filter?: boolean;
 }
 
 export interface TableAction {
-    label: string;
-    icon?: string;
-    type?: 'primary' | 'danger' | 'default';
-    handler: (row: any) => void;
+  label: string;
+  icon?: string;
+  type?: 'primary' | 'danger' | 'default';
+  handler: (row: any) => void;
 }
 
 @Component({
-    selector: 'lib-data-table',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
-    <div class="table-container">
-      <table class="data-table">
-        <thead>
-          <tr>
-            @for (column of columns; track column.key) {
-              <th [style.width]="column.width">
-                {{ column.label }}
-              </th>
-            }
-            @if (actions && actions.length > 0) {
-              <th class="actions-column">操作</th>
-            }
-          </tr>
-        </thead>
-        <tbody>
-          @if (data && data.length > 0) {
-            @for (row of data; track row[rowKey || 'id']) {
-              <tr>
-                @for (column of columns; track column.key) {
-                  <td>{{ row[column.key] }}</td>
-                }
-                @if (actions && actions.length > 0) {
-                  <td class="actions-cell">
-                    @for (action of actions; track action.label) {
-                      <button 
-                        class="action-btn"
-                        [class.btn-primary]="action.type === 'primary'"
-                        [class.btn-danger]="action.type === 'danger'"
-                        (click)="action.handler(row)">
-                        @if (action.icon) {
-                          <span [innerHTML]="action.icon"></span>
-                        }
-                        {{ action.label }}
-                      </button>
-                    }
-                  </td>
-                }
-              </tr>
-            }
-          } @else {
-            <tr>
-              <td [attr.colspan]="columns.length + (actions?.length ? 1 : 0)" class="empty-cell">
-                暂无数据
-              </td>
-            </tr>
+  selector: 'lib-action-cell-renderer',
+  standalone: true,
+  imports: [CommonModule, ButtonComponent],
+  template: `
+    <div class="actions-cell">
+      @for (action of actions; track action.label) {
+        <lib-button [variant]="getVariant(action.type)" size="sm" (click)="onClick($event, action)">
+          @if (action.icon) {
+            <span [innerHTML]="action.icon"></span>
           }
-        </tbody>
-      </table>
+          {{ action.label }}
+        </lib-button>
+      }
     </div>
   `,
-    styles: [`
-    .table-container {
-      overflow-x: auto;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 8px;
-    }
-
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    thead {
-      background: var(--color-surfaceHover);
-    }
-
-    th {
-      padding: 1rem;
-      text-align: left;
-      font-weight: 600;
-      color: var(--color-text);
-      border-bottom: 2px solid var(--color-border);
-      font-size: 0.9rem;
-    }
-
-    td {
-      padding: 1rem;
-      color: var(--color-text);
-      border-bottom: 1px solid var(--color-border);
-    }
-
-    tbody tr:hover {
-      background: var(--color-surfaceHover);
-    }
-
-    tbody tr:last-child td {
-      border-bottom: none;
-    }
-
-    .actions-column {
-      width: 200px;
-      text-align: center;
-    }
-
-    .actions-cell {
-      display: flex;
-      gap: 0.5rem;
-      justify-content: center;
-    }
-
-    .action-btn {
-      padding: 0.4rem 0.8rem;
-      border: 1px solid var(--color-border);
-      border-radius: 4px;
-      background: var(--color-surface);
-      color: var(--color-text);
-      cursor: pointer;
-      transition: all 0.2s;
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-    }
-
-    .action-btn:hover {
-      background: var(--color-surfaceHover);
-    }
-
-    .action-btn.btn-primary {
-      background: var(--color-primary);
-      color: white;
-      border-color: var(--color-primary);
-    }
-
-    .action-btn.btn-primary:hover {
-      background: var(--color-primaryLight);
-    }
-
-    .action-btn.btn-danger {
-      background: #dc3545;
-      color: white;
-      border-color: #dc3545;
-    }
-
-    .action-btn.btn-danger:hover {
-      background: #c82333;
-    }
-
-    .empty-cell {
-      text-align: center;
-      padding: 3rem;
-      color: var(--color-textSecondary);
-      font-style: italic;
-    }
-  `]
+  styles: [
+    `
+      .actions-cell {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        height: 100%;
+      }
+    `,
+  ],
 })
-export class DataTableComponent {
-    @Input() columns: TableColumn[] = [];
-    @Input() data: any[] = [];
-    @Input() actions?: TableAction[];
-    @Input() rowKey?: string;
+export class ActionCellRendererComponent implements ICellRendererAngularComp {
+  params!: ICellRendererParams;
+  actions: TableAction[] = [];
+
+  agInit(params: ICellRendererParams): void {
+    this.params = params;
+    this.actions = (params as any).actions || [];
+  }
+
+  refresh(params: ICellRendererParams): boolean {
+    this.params = params;
+    this.actions = (params as any).actions || [];
+    return true;
+  }
+
+  onClick(event: Event, action: TableAction) {
+    event.stopPropagation();
+    if (action.handler) {
+      action.handler(this.params.data);
+    }
+  }
+
+  getVariant(type?: string): 'primary' | 'danger' | 'outline' {
+    if (type === 'primary') return 'primary';
+    if (type === 'danger') return 'danger';
+    return 'outline';
+  }
+}
+
+@Component({
+  selector: 'lib-data-table',
+  standalone: true,
+  imports: [CommonModule, AgGridAngular],
+  encapsulation: ViewEncapsulation.None,
+  template: `
+    <div class="table-container">
+      <ag-grid-angular
+        style="width: 100%; height: 100%;"
+        [rowData]="data"
+        [columnDefs]="columnDefs"
+        [defaultColDef]="defaultColDef"
+        [pagination]="pagination"
+        [paginationPageSize]="10"
+        [domLayout]="'autoHeight'"
+        class="ag-theme-quartz"
+      >
+      </ag-grid-angular>
+    </div>
+  `,
+  styles: [
+    `
+      .table-container {
+        width: 100%;
+        --ag-background-color: var(--color-surface, #fff);
+        --ag-foreground-color: var(--color-text, #333);
+        --ag-header-background-color: var(--color-background, #f8fafc);
+        --ag-row-hover-color: var(--color-surfaceHover, #f1f5f9);
+        --ag-border-color: var(--color-border, #e2e8f0);
+        --ag-header-foreground-color: var(--color-textSecondary, #64748b);
+        --ag-row-border-color: var(--color-border, #e2e8f0);
+        --ag-input-focus-border-color: var(--color-primary, #3b82f6);
+        --ag-range-selection-border-color: var(--color-primary, #3b82f6);
+        --ag-selected-row-background-color: rgba(59, 130, 246, 0.1);
+      }
+
+      .ag-theme-quartz {
+        font-family: inherit;
+      }
+
+      .ag-theme-quartz .ag-header-cell-label {
+        font-weight: 600;
+      }
+
+      .ag-theme-quartz .ag-cell {
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+      }
+
+      /* Hide pagination border if needed */
+      .ag-theme-quartz .ag-paging-panel {
+        border-top: 1px solid var(--ag-border-color);
+      }
+    `,
+  ],
+})
+export class DataTableComponent implements OnChanges {
+  @Input() columns: TableColumn[] = [];
+  @Input() data: any[] = [];
+  @Input() actions?: TableAction[];
+  @Input() rowKey?: string;
+  @Input() pagination = true;
+
+  columnDefs: ColDef[] = [];
+
+  defaultColDef: ColDef = {
+    sortable: true,
+    filter: true,
+    resizable: true,
+    flex: 1,
+    minWidth: 100,
+  };
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['columns'] || changes['actions']) {
+      this.updateColumnDefs();
+    }
+  }
+
+  private updateColumnDefs() {
+    const cols: ColDef[] = this.columns.map((col) => {
+      let width: number | undefined;
+      if (typeof col.width === 'number') {
+        width = col.width;
+      } else if (typeof col.width === 'string') {
+        width = parseInt(col.width, 10);
+      }
+
+      return {
+        field: col.key,
+        headerName: col.label,
+        width: width,
+        sortable: col.sortable !== false,
+        filter: col.filter !== false,
+      };
+    });
+
+    if (this.actions && this.actions.length > 0) {
+      cols.push({
+        headerName: '操作',
+        field: 'actions',
+        cellRenderer: ActionCellRendererComponent,
+        cellRendererParams: {
+          actions: this.actions,
+        },
+        sortable: false,
+        filter: false,
+        pinned: 'right',
+        width: 200,
+        flex: 0,
+      });
+    }
+
+    this.columnDefs = cols;
+  }
 }

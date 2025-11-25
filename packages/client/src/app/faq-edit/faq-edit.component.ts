@@ -5,12 +5,28 @@ import { FormsModule } from '@angular/forms';
 import { FaqService } from '../faq.service';
 import { FaqItem } from '../models/faq.model';
 import { MODULES, PREDEFINED_TAGS, VERSION_OPTIONS, generateErrorCode } from '../models/config';
+import {
+  ButtonComponent,
+  CardComponent,
+  MermaidComponent,
+  SelectComponent,
+  TagComponent,
+} from '@repo/ui-lib';
 import mermaid from 'mermaid';
 
 @Component({
   selector: 'app-faq-edit',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    ButtonComponent,
+    CardComponent,
+    MermaidComponent,
+    SelectComponent,
+    TagComponent,
+  ],
   template: `
     <div class="page-wrapper">
       <!-- 顶部 Header -->
@@ -29,209 +45,230 @@ import mermaid from 'mermaid';
           />
         </div>
         <div class="header-right">
-          <button class="btn-text" (click)="onCancel()">
+          <lib-button variant="ghost" (click)="onCancel()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
             取消
-          </button>
-          <button class="btn-primary" (click)="onSave()">
+          </lib-button>
+          @if (!showFlowchart) {
+            <lib-button variant="ghost" (click)="toggleFlowchart()" title="显示流程图">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <line x1="15" y1="3" x2="15" y2="21" />
+              </svg>
+              显示流程图
+            </lib-button>
+          }
+          <lib-button variant="primary" (click)="onSave()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
               <polyline points="17 21 17 13 7 13 7 21" />
               <polyline points="7 3 7 8 15 8" />
             </svg>
             {{ isEdit ? '保存修改' : '创建 FAQ' }}
-          </button>
+          </lib-button>
         </div>
       </header>
 
       <div class="main-layout">
         <!-- 左侧边栏：基础信息 -->
         <aside class="left-sidebar">
-          <div class="sidebar-card">
-            <div class="card-title">
+          <lib-card title="基础信息" [hasHeader]="true">
+            <ng-container ngProjectAs="[header-icon]">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                 <line x1="3" y1="9" x2="21" y2="9" />
                 <line x1="9" y1="21" x2="9" y2="9" />
               </svg>
-              基础信息
-            </div>
+            </ng-container>
 
             <div class="form-group">
               <label>所属模块 <span class="required">*</span></label>
-              <select [(ngModel)]="formData.component" class="select-input">
-                <option value="">选择模块</option>
-                @for (opt of moduleOptions; track opt.value) {
-                  <option [value]="opt.value">{{ opt.label }}</option>
-                }
-              </select>
+              <lib-select
+                [(ngModel)]="formData.component"
+                [options]="moduleOptions"
+                placeholder="选择模块"
+              ></lib-select>
             </div>
 
             <div class="form-group">
               <label>适用版本</label>
-              <select [(ngModel)]="formData.version" class="select-input">
-                <option value="">选择版本</option>
-                @for (opt of versionOptions; track opt.value) {
-                  <option [value]="opt.value">{{ opt.label }}</option>
-                }
-              </select>
+              <lib-select
+                [(ngModel)]="formData.version"
+                [options]="versionOptions"
+                placeholder="选择版本"
+              ></lib-select>
             </div>
 
             <div class="form-group">
               <label>相关标签 <span class="required">*</span></label>
+
+              @if (formData.tags.length > 0) {
+                <div class="selected-tags-list">
+                  @for (tag of formData.tags; track tag) {
+                    <lib-tag [selected]="true" (tagClick)="toggleTag(tag)" class="removable-tag">
+                      {{ tag }} <span class="remove-icon">×</span>
+                    </lib-tag>
+                  }
+                </div>
+              }
+
               <div class="tags-list">
                 @for (tag of tagOptions; track tag.value) {
-                  <label class="checkbox-item">
-                    <input
-                      type="checkbox"
-                      [checked]="isTagSelected(tag.value)"
-                      (change)="toggleTag(tag.value)"
-                    />
-                    <span class="checkbox-label">{{ tag.label }}</span>
-                  </label>
+                  <lib-tag
+                    [selectable]="true"
+                    [selected]="isTagSelected(tag.value)"
+                    (selectedChange)="toggleTag(tag.value)"
+                  >
+                    {{ tag.label }}
+                  </lib-tag>
                 }
               </div>
             </div>
-          </div>
+          </lib-card>
         </aside>
 
         <!-- 中间内容区：网格布局 -->
         <main class="center-content">
           <div class="content-grid">
             <!-- 问题描述 -->
-            <div class="content-card beige">
-              <div class="card-header warning">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="8" x2="12" y2="12" />
-                  <line x1="12" y1="16" x2="12.01" y2="16" />
-                </svg>
-                问题描述 <span class="required">*</span>
-              </div>
+            <fieldset class="edit-card warning">
+              <legend class="card-legend">
+                <div class="legend-content">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                  <span>问题描述</span>
+                  <span class="required-mark">*</span>
+                </div>
+              </legend>
               <textarea
                 [(ngModel)]="formData.summary"
                 placeholder="详细描述遇到的问题..."
                 class="text-area"
               ></textarea>
-            </div>
+            </fieldset>
 
             <!-- 现象描述 -->
-            <div class="content-card beige">
-              <div class="card-header warning">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                  <line x1="16" y1="13" x2="8" y2="13" />
-                  <line x1="16" y1="17" x2="8" y2="17" />
-                  <polyline points="10 9 9 9 8 9" />
-                </svg>
-                现象描述 <span class="required">*</span>
-              </div>
+            <fieldset class="edit-card warning">
+              <legend class="card-legend">
+                <div class="legend-content">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <polyline points="10 9 9 9 8 9" />
+                  </svg>
+                  <span>现象描述</span>
+                  <span class="required-mark">*</span>
+                </div>
+              </legend>
               <textarea
                 [(ngModel)]="formData.phenomenon"
                 placeholder="详细描述如何复现该问题..."
                 class="text-area"
               ></textarea>
-            </div>
+            </fieldset>
 
             <!-- 解决方案 -->
-            <div class="content-card green">
-              <div class="card-header success">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                  <polyline points="22 4 12 14.01 9 11.01" />
-                </svg>
-                解决方案 <span class="required">*</span>
-              </div>
+            <fieldset class="edit-card success">
+              <legend class="card-legend">
+                <div class="legend-content">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <polyline points="22 4 12 14.01 9 11.01" />
+                  </svg>
+                  <span>解决方案</span>
+                  <span class="required-mark">*</span>
+                </div>
+              </legend>
               <textarea
                 [(ngModel)]="formData.solution"
                 placeholder="详细说明如何修复该问题..."
                 class="text-area"
               ></textarea>
-            </div>
+            </fieldset>
 
             <!-- 验证方法 -->
-            <div class="content-card blue">
-              <div class="card-header info">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <polyline points="9 11 12 14 22 4" />
-                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-                </svg>
-                验证方法
-              </div>
+            <fieldset class="edit-card info">
+              <legend class="card-legend">
+                <div class="legend-content">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <polyline points="9 11 12 14 22 4" />
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                  </svg>
+                  <span>验证方法</span>
+                </div>
+              </legend>
               <textarea
                 [(ngModel)]="formData.validationMethod"
                 placeholder="如何验证修复是否有效..."
                 class="text-area"
               ></textarea>
-            </div>
+            </fieldset>
           </div>
         </main>
 
         <!-- 右侧边栏：流程图 -->
-        <aside class="right-sidebar">
-          <div class="sidebar-card full-height">
-            <div class="card-header-row">
-              <div class="card-title">
+        @if (showFlowchart) {
+          <aside class="right-sidebar" [class.fullscreen-mode]="isFullscreen">
+            <lib-card title="排查流程图" class="full-height-card">
+              <ng-container ngProjectAs="[header-icon]">
+                <button class="icon-btn toggle-btn" (click)="toggleFlowchart()" title="隐藏流程图">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <polyline points="13 17 18 12 13 7" />
+                    <polyline points="6 17 11 12 6 7" />
+                  </svg>
+                </button>
+              </ng-container>
+              <ng-container ngProjectAs="[header-extra]">
+                <button class="icon-btn" title="全屏" (click)="toggleFullscreen()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <polyline points="15 3 21 3 21 9" />
+                    <polyline points="9 21 3 21 3 15" />
+                    <line x1="21" y1="3" x2="14" y2="10" />
+                    <line x1="3" y1="21" x2="10" y2="14" />
+                  </svg>
+                  全屏
+                </button>
+              </ng-container>
+
+              <div class="editor-container">
+                <div class="code-editor">
+                  <div class="line-numbers">
+                    @for (line of getLineNumbers(); track line) {
+                      <span>{{ line }}</span>
+                    }
+                  </div>
+                  <textarea
+                    [(ngModel)]="formData.troubleshootingFlow"
+                    (ngModelChange)="onFlowChange()"
+                    class="code-textarea"
+                    spellcheck="false"
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="preview-container">
+                <lib-mermaid [code]="formData.troubleshootingFlow || ''"></lib-mermaid>
+              </div>
+
+              <lib-button variant="secondary" [block]="true" (click)="showExamples()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <rect x="3" y="3" width="7" height="7" />
-                  <rect x="14" y="3" width="7" height="7" />
-                  <rect x="14" y="14" width="7" height="7" />
-                  <rect x="3" y="14" width="7" height="7" />
+                  <path
+                    d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"
+                  />
                 </svg>
-                排查流程图
-              </div>
-              <button class="icon-btn" title="全屏">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <polyline points="15 3 21 3 21 9" />
-                  <polyline points="9 21 3 21 3 15" />
-                  <line x1="21" y1="3" x2="14" y2="10" />
-                  <line x1="3" y1="21" x2="10" y2="14" />
-                </svg>
-                全屏
-              </button>
-            </div>
-
-            <div class="editor-container">
-              <div class="code-editor">
-                <div class="line-numbers">
-                  @for (line of getLineNumbers(); track line) {
-                    <span>{{ line }}</span>
-                  }
-                </div>
-                <textarea
-                  [(ngModel)]="formData.troubleshootingFlow"
-                  (ngModelChange)="onFlowChange()"
-                  class="code-textarea"
-                  spellcheck="false"
-                ></textarea>
-              </div>
-            </div>
-
-            <div class="preview-container">
-              <div #mermaidDiv class="mermaid-preview"></div>
-              @if (!formData.troubleshootingFlow) {
-                <div class="empty-preview">
-                  <div class="node-box">开始</div>
-                  <div class="arrow-down">↓</div>
-                  <div class="node-diamond">检查?</div>
-                </div>
-              }
-            </div>
-
-            <button class="btn-dark-block" (click)="showExamples()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path
-                  d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"
-                />
-              </svg>
-              打开流程图构建器
-            </button>
-          </div>
-        </aside>
+                打开流程图构建器
+              </lib-button>
+            </lib-card>
+          </aside>
+        }
       </div>
     </div>
   `,
@@ -239,9 +276,9 @@ import mermaid from 'mermaid';
     `
       :host {
         display: block;
-        background: #f5f7fa;
+        background: var(--color-background);
         min-height: 100vh;
-        color: #333;
+        color: var(--color-text);
       }
 
       .page-wrapper {
@@ -254,13 +291,14 @@ import mermaid from 'mermaid';
       /* Header */
       .top-header {
         height: 64px;
-        background: #fff;
-        border-bottom: 1px solid #e5e7eb;
+        background: var(--color-surface);
+        border-bottom: 1px solid var(--color-border);
         display: flex;
         align-items: center;
         justify-content: space-between;
         padding: 0 1.5rem;
         flex-shrink: 0;
+        backdrop-filter: blur(10px);
       }
 
       .header-left {
@@ -273,7 +311,7 @@ import mermaid from 'mermaid';
       .icon-box {
         width: 32px;
         height: 32px;
-        background: #4f46e5;
+        background: var(--color-primary);
         border-radius: 8px;
         display: flex;
         align-items: center;
@@ -287,52 +325,18 @@ import mermaid from 'mermaid';
         width: 100%;
         max-width: 600px;
         outline: none;
-        color: #1f2937;
+        color: var(--color-text);
+        background: transparent;
       }
 
       .title-input::placeholder {
-        color: #9ca3af;
+        color: var(--color-text-secondary);
       }
 
       .header-right {
         display: flex;
         align-items: center;
         gap: 1rem;
-      }
-
-      .btn-text {
-        background: none;
-        border: none;
-        color: #6b7280;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.9rem;
-        padding: 0.5rem 1rem;
-      }
-
-      .btn-text:hover {
-        color: #374151;
-      }
-
-      .btn-primary {
-        background: #4f46e5;
-        color: white;
-        border: none;
-        padding: 0.5rem 1rem;
-        border-radius: 6px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.9rem;
-        font-weight: 500;
-        transition: background 0.2s;
-      }
-
-      .btn-primary:hover {
-        background: #4338ca;
       }
 
       /* Main Layout */
@@ -346,76 +350,76 @@ import mermaid from 'mermaid';
 
       /* Left Sidebar */
       .left-sidebar {
-        width: 260px;
+        width: 280px;
         flex-shrink: 0;
-        overflow-y: auto;
-      }
-
-      .sidebar-card {
-        background: #fff;
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-      }
-
-      .sidebar-card.full-height {
-        height: 100%;
         display: flex;
         flex-direction: column;
-      }
-
-      .card-title {
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+        overflow: hidden;
       }
 
       .form-group {
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.2rem;
       }
 
       .form-group label {
         display: block;
-        font-size: 0.8rem;
-        color: #6b7280;
-        margin-bottom: 0.5rem;
-        font-weight: 500;
+        font-size: 0.85rem;
+        color: var(--color-text-secondary);
+        margin-bottom: 0.4rem;
+        font-weight: 600;
       }
 
       .required {
-        color: #ef4444;
+        color: var(--color-error);
       }
 
-      .select-input {
-        width: 100%;
-        padding: 0.6rem;
-        border: 1px solid #e5e7eb;
+      .selected-tags-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 0.8rem;
+        padding: 0.5rem;
+        background: var(--color-surface-hover);
         border-radius: 6px;
-        background: #fff;
-        color: #374151;
-        font-size: 0.9rem;
+        border: 1px dashed var(--color-border);
+      }
+
+      .removable-tag {
+        cursor: pointer;
+      }
+
+      .removable-tag:hover {
+        opacity: 0.8;
+      }
+
+      .remove-icon {
+        margin-left: 4px;
+        font-weight: bold;
+        font-size: 1.1em;
+        line-height: 1;
       }
 
       .tags-list {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
+        flex-wrap: wrap;
         gap: 0.5rem;
+        overflow-y: auto;
+        max-height: 300px; /* Fixed height as requested */
+        padding: 4px;
+        border: 1px solid var(--color-border);
+        border-radius: 6px;
       }
 
-      .checkbox-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        cursor: pointer;
+      .tags-list::-webkit-scrollbar {
+        width: 4px;
       }
-
-      .checkbox-label {
-        font-size: 0.9rem;
-        color: #4b5563;
+      .tags-list::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .tags-list::-webkit-scrollbar-thumb {
+        background-color: var(--color-border);
+        border-radius: 4px;
       }
 
       /* Center Content */
@@ -423,92 +427,161 @@ import mermaid from 'mermaid';
         flex: 1;
         overflow-y: auto;
         min-width: 0; /* Prevent flex item from overflowing */
+        padding-right: 0.5rem; /* Add some spacing for scrollbar */
       }
 
       .content-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: 1fr 1fr;
-        gap: 1.5rem;
-        height: 100%;
-        min-height: 600px;
-      }
-
-      .content-card {
-        border-radius: 12px;
-        padding: 1.5rem;
         display: flex;
         flex-direction: column;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        gap: 1rem;
+        padding-bottom: 2rem;
       }
 
-      .content-card.beige {
-        background: #fffbeb;
-        border: 1px solid #fef3c7;
-      }
-      .content-card.green {
-        background: #ecfdf5;
-        border: 1px solid #d1fae5;
-      }
-      .content-card.blue {
-        background: #eff6ff;
-        border: 1px solid #dbeafe;
+      .card-wrapper {
+        display: flex;
+        flex-direction: column;
       }
 
-      .card-header {
+      /* Custom Fieldset Styles */
+      .edit-card {
+        border-radius: 12px;
+        padding: 0.8rem 1.2rem 1rem;
+        margin: 0;
+        min-height: 180px;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.2s ease;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+      }
+
+      .card-legend {
+        padding: 0 0.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+      }
+
+      .legend-content {
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        font-size: 0.9rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
       }
 
-      .card-header.warning {
-        color: #b45309;
+      .required-mark {
+        color: var(--color-error);
+        margin-left: 2px;
       }
-      .card-header.success {
-        color: #047857;
+
+      /* Warning Variant (Yellow) */
+      .edit-card.warning {
+        border: 1px solid var(--color-warning);
+        background-color: color-mix(in srgb, var(--color-warning), transparent 90%);
       }
-      .card-header.info {
-        color: #1d4ed8;
+      .edit-card.warning .card-legend {
+        color: var(--color-warning);
+      }
+      .edit-card.warning .text-area {
+        color: var(--color-text);
+      }
+      .edit-card.warning .text-area::placeholder {
+        color: var(--color-text-secondary);
+        opacity: 0.7;
+      }
+
+      /* Success Variant (Green) */
+      .edit-card.success {
+        border: 1px solid var(--color-success);
+        background-color: color-mix(in srgb, var(--color-success), transparent 90%);
+      }
+      .edit-card.success .card-legend {
+        color: var(--color-success);
+      }
+      .edit-card.success .text-area {
+        color: var(--color-text);
+      }
+      .edit-card.success .text-area::placeholder {
+        color: var(--color-text-secondary);
+        opacity: 0.7;
+      }
+
+      /* Info Variant (Blue) */
+      .edit-card.info {
+        border: 1px solid var(--color-primary);
+        background-color: color-mix(in srgb, var(--color-primary), transparent 90%);
+      }
+      .edit-card.info .card-legend {
+        color: var(--color-primary);
+      }
+      .edit-card.info .text-area {
+        color: var(--color-text);
+      }
+      .edit-card.info .text-area::placeholder {
+        color: var(--color-text-secondary);
+        opacity: 0.7;
       }
 
       .text-area {
         flex: 1;
         width: 100%;
+        min-height: 120px;
         background: transparent;
         border: none;
-        resize: none;
+        resize: vertical;
         outline: none;
-        font-size: 0.95rem;
-        line-height: 1.6;
-        color: #374151;
-      }
-
-      .text-area::placeholder {
-        color: rgba(55, 65, 81, 0.4);
+        font-size: 0.9rem;
+        line-height: 1.5;
+        font-family: inherit;
+        margin-top: 0.25rem;
       }
 
       /* Right Sidebar */
       .right-sidebar {
-        width: 360px;
+        width: 50%;
         flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        transition: width 0.3s ease;
+      }
+
+      .right-sidebar.fullscreen-mode {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 1000;
+        background: var(--color-background);
+        padding: 1.5rem;
+      }
+
+      .full-height-card {
+        height: 100%;
         display: flex;
         flex-direction: column;
       }
 
-      .card-header-row {
+      /* Ensure inner card structure takes full height */
+      .full-height-card ::ng-deep .card {
+        height: 100%;
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
+        flex-direction: column;
+        background: var(--color-surface);
+        border-color: var(--color-border);
+      }
+
+      .full-height-card ::ng-deep .card-body {
+        flex: 1;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
       }
 
       .icon-btn {
         background: none;
         border: none;
-        color: #6b7280;
+        color: var(--color-text-secondary);
         cursor: pointer;
         display: flex;
         align-items: center;
@@ -517,13 +590,14 @@ import mermaid from 'mermaid';
       }
 
       .editor-container {
-        background: #0f172a;
+        background: #0f172a; /* Keep dark for code editor */
         border-radius: 8px;
         padding: 1rem;
         margin-bottom: 1rem;
         flex: 1;
         min-height: 200px;
         overflow: hidden;
+        border: 1px solid var(--color-border);
       }
 
       .code-editor {
@@ -557,8 +631,8 @@ import mermaid from 'mermaid';
       }
 
       .preview-container {
-        background: #fff;
-        border: 1px solid #e5e7eb;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
         border-radius: 8px;
         padding: 1rem;
         margin-bottom: 1rem;
@@ -568,67 +642,6 @@ import mermaid from 'mermaid';
         align-items: center;
         justify-content: center;
         overflow: hidden;
-      }
-
-      .mermaid-preview {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        justify-content: center;
-      }
-
-      .empty-preview {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.5rem;
-        opacity: 0.5;
-      }
-
-      .node-box {
-        border: 1px solid #94a3b8;
-        padding: 4px 12px;
-        border-radius: 4px;
-        font-size: 0.8rem;
-        color: #64748b;
-      }
-
-      .node-diamond {
-        border: 1px solid #f59e0b;
-        padding: 4px 8px;
-        transform: rotate(45deg);
-        font-size: 0.7rem;
-        color: #d97706;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .arrow-down {
-        color: #94a3b8;
-        font-size: 0.8rem;
-      }
-
-      .btn-dark-block {
-        width: 100%;
-        background: #1e293b;
-        color: white;
-        border: none;
-        padding: 0.75rem;
-        border-radius: 6px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        font-size: 0.9rem;
-        transition: background 0.2s;
-      }
-
-      .btn-dark-block:hover {
-        background: #334155;
       }
 
       @media (max-width: 1200px) {
@@ -653,6 +666,8 @@ export class FaqEditComponent implements OnInit, AfterViewInit {
   isEdit = false;
   faqId: string | null = null;
   faqData?: FaqItem;
+  showFlowchart = false;
+  isFullscreen = false;
   @ViewChild('mermaidDiv') mermaidDiv?: ElementRef;
 
   formData: any = {
@@ -759,6 +774,19 @@ export class FaqEditComponent implements OnInit, AfterViewInit {
   D --> E;`;
 
     this.formData.troubleshootingFlow = example;
+    this.onFlowChange();
+  }
+
+  toggleFlowchart() {
+    this.showFlowchart = !this.showFlowchart;
+    // Re-render mermaid when showing
+    if (this.showFlowchart) {
+      this.onFlowChange();
+    }
+  }
+
+  toggleFullscreen() {
+    this.isFullscreen = !this.isFullscreen;
     this.onFlowChange();
   }
 

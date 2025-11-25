@@ -6,12 +6,15 @@
   },
   "peerDependencies": {
     "@angular/common": "^19.0.0",
-    "@angular/core": "^19.0.0"
+    "@angular/core": "^19.0.0",
+    "@angular/forms": "^19.0.0"
   },
   "dependencies": {
-    "@angular/forms": "^19.2.15",
-    "tslib": "^2.3.0",
-    "@repo/utils": "workspace:*"
+    "@repo/utils": "workspace:*",
+    "ag-grid-angular": "^34.3.1",
+    "ag-grid-community": "^34.3.1",
+    "mermaid": "^11.12.1",
+    "tslib": "^2.3.0"
   },
   "devDependencies": {
     "@angular/compiler-cli": "^19.0.0",
