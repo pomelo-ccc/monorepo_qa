@@ -1,0 +1,26 @@
+[
+  {
+    "id": "ver-1",
+    "name": "1.0.x",
+    "description": "初始版本",
+    "createTime": "2025-11-25T03:05:31.191Z"
+  },
+  {
+    "id": "ver-2",
+    "name": "1.1.x",
+    "description": "功能更新",
+    "createTime": "2025-11-25T03:05:31.191Z"
+  },
+  {
+    "id": "ver-3",
+    "name": "1.2.x",
+    "description": "性能优化",
+    "createTime": "2025-11-25T03:05:31.191Z"
+  },
+  {
+    "id": "ver-4",
+    "name": "2.0.x",
+    "description": "重大更新",
+    "createTime": "2025-11-25T03:05:31.191Z"
+  }
+]

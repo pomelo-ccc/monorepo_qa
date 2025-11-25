@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ConfigService, ModuleNode } from '../../services/config.service';
-import { RouterModule } from '@angular/router';
+import { ConfigService } from '../../services/config.service';
+import { Router, RouterModule } from '@angular/router';
 import {
   ButtonComponent,
   CardComponent,
@@ -23,34 +23,61 @@ import {
     DataTableComponent,
   ],
   template: `
-    <div class="config-layout">
-      <header class="page-header">
-        <h1>系统配置管理</h1>
-        <div class="tabs">
-          <button
-            class="tab-btn"
-            [class.active]="activeTab === 'modules'"
-            (click)="activeTab = 'modules'"
-          >
-            模块管理
-          </button>
-          <button
-            class="tab-btn"
-            [class.active]="activeTab === 'tags'"
-            (click)="activeTab = 'tags'"
-          >
-            标签管理
-          </button>
-          <button
-            class="tab-btn"
-            [class.active]="activeTab === 'versions'"
-            (click)="activeTab = 'versions'"
-          >
-            版本管理
-          </button>
-        </div>
-      </header>
+    <div class="config-page">
+      <!-- 固定顶部栏 -->
+      <div class="sticky-header">
+        <button class="back-btn" (click)="goBack()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+          返回
+        </button>
+        <h1 class="page-title">系统配置</h1>
+        <div class="header-spacer"></div>
+      </div>
 
+      <!-- Tab 导航 -->
+      <div class="tab-bar">
+        <button
+          class="tab-item"
+          [class.active]="activeTab === 'modules'"
+          (click)="activeTab = 'modules'"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          模块管理
+        </button>
+        <button
+          class="tab-item"
+          [class.active]="activeTab === 'tags'"
+          (click)="activeTab = 'tags'"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+            <line x1="7" y1="7" x2="7.01" y2="7"></line>
+          </svg>
+          标签管理
+        </button>
+        <button
+          class="tab-item"
+          [class.active]="activeTab === 'versions'"
+          (click)="activeTab = 'versions'"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="6" y1="3" x2="6" y2="15"></line>
+            <circle cx="18" cy="6" r="3"></circle>
+            <circle cx="6" cy="18" r="3"></circle>
+            <path d="M18 9a9 9 0 0 1-9 9"></path>
+          </svg>
+          版本管理
+        </button>
+      </div>
+
+      <!-- 内容区 -->
       <main class="main-content">
         <!-- Modules Management -->
         <div *ngIf="activeTab === 'modules'" class="tab-content">
@@ -147,55 +174,106 @@ import {
   `,
   styles: [
     `
-      .config-layout {
-        min-height: calc(100vh - 64px);
+      .config-page {
+        min-height: 100vh;
         background: var(--color-background);
-        padding: 2rem;
-        max-width: 1400px;
-        margin: 0 auto;
-      }
-
-      .page-header {
-        margin-bottom: 2rem;
-      }
-
-      .page-header h1 {
-        font-size: 1.8rem;
-        margin-bottom: 1.5rem;
-        color: var(--color-text);
-        font-weight: 700;
-      }
-
-      .tabs {
         display: flex;
-        gap: 2rem;
+        flex-direction: column;
+      }
+
+      /* 固定顶部栏 */
+      .sticky-header {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: var(--color-background);
+        border-bottom: 1px solid var(--color-border);
+        padding: 0.75rem 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        backdrop-filter: blur(10px);
+      }
+
+      .back-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        color: var(--color-text);
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .back-btn:hover {
+        background: var(--color-surfaceHover);
+        border-color: var(--color-textSecondary);
+      }
+
+      .page-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--color-text);
+        margin: 0;
+      }
+
+      .header-spacer {
+        flex: 1;
+      }
+
+      /* Tab 导航 */
+      .tab-bar {
+        display: flex;
+        gap: 0.5rem;
+        padding: 1rem 2rem;
+        background: var(--color-surface);
         border-bottom: 1px solid var(--color-border);
       }
 
-      .tab-btn {
-        padding: 0.75rem 0;
-        background: none;
-        border: none;
-        border-bottom: 2px solid transparent;
+      .tab-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.25rem;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 8px;
         color: var(--color-textSecondary);
-        font-size: 1rem;
+        font-size: 0.9rem;
+        font-weight: 500;
         cursor: pointer;
         transition: all 0.2s;
-        font-weight: 500;
       }
 
-      .tab-btn:hover {
-        color: var(--color-primary);
+      .tab-item:hover {
+        background: var(--color-surfaceHover);
+        color: var(--color-text);
       }
 
-      .tab-btn.active {
+      .tab-item.active {
+        background: color-mix(in srgb, var(--color-primary), transparent 90%);
         color: var(--color-primary);
-        border-bottom-color: var(--color-primary);
-        font-weight: 600;
+        border-color: color-mix(in srgb, var(--color-primary), transparent 80%);
+      }
+
+      .main-content {
+        flex: 1;
+        padding: 1.5rem 2rem;
+        max-width: 1200px;
       }
 
       .tab-content {
-        margin-top: 1.5rem;
+        animation: fadeIn 0.2s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
       }
 
       /* Tags Styles */
@@ -342,11 +420,20 @@ export class ConfigManagementComponent implements OnInit {
   editingTag: string | null = null;
   editTagName = '';
 
-  constructor(private configService: ConfigService) {}
+  /* eslint-disable @angular-eslint/prefer-inject */
+  constructor(
+    private configService: ConfigService,
+    private router: Router,
+  ) {}
+  /* eslint-enable @angular-eslint/prefer-inject */
 
   ngOnInit() {
     this.loadModules();
     this.loadTags();
+  }
+
+  goBack() {
+    this.router.navigate(['/']);
   }
 
   // --- Modules Logic ---

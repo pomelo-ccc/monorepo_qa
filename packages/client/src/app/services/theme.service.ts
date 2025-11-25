@@ -162,8 +162,31 @@ export class ThemeService {
 
   private applyTheme(theme: Theme) {
     const root = document.documentElement;
-    Object.entries(theme.colors).forEach(([key, value]) => {
+
+    // 先重置所有拟物化变量为默认值（非玻璃主题使用）
+    const defaultSkeuomorphicVars = {
+      glassHighlight: 'transparent',
+      glassShadow: 'transparent',
+      glassInnerShadow: 'none',
+      glassBorderTop: 'transparent',
+      glassBorderBottom: 'transparent',
+      glassReflection: 'none',
+      glassBlur: '0px',
+      cardShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+      buttonShadow: 'none',
+      inputShadow: 'none',
+    };
+
+    // 重置拟物化变量
+    Object.entries(defaultSkeuomorphicVars).forEach(([key, value]) => {
       root.style.setProperty(`--color-${key}`, value);
+    });
+
+    // 应用主题颜色
+    Object.entries(theme.colors).forEach(([key, value]) => {
+      if (value !== undefined) {
+        root.style.setProperty(`--color-${key}`, value);
+      }
     });
 
     // Special handling for glass theme background

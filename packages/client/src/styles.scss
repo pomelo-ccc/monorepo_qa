@@ -36,7 +36,8 @@ body {
     'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: var(--bg-gradient, var(--color-background));
+  background-color: var(--color-background);
+  background-image: var(--bg-gradient);
   background-attachment: fixed;
   background-size: cover;
   color: var(--color-text);

@@ -85,7 +85,7 @@ import mermaid from 'mermaid';
             </ng-container>
 
             <div class="form-group">
-              <label>所属模块 <span class="required">*</span></label>
+              <div class="form-label">所属模块 <span class="required">*</span></div>
               <lib-select
                 [(ngModel)]="formData.component"
                 [options]="moduleOptions"
@@ -94,7 +94,7 @@ import mermaid from 'mermaid';
             </div>
 
             <div class="form-group">
-              <label>适用版本</label>
+              <div class="form-label">适用版本</div>
               <lib-select
                 [(ngModel)]="formData.version"
                 [options]="versionOptions"
@@ -103,7 +103,7 @@ import mermaid from 'mermaid';
             </div>
 
             <div class="form-group">
-              <label>相关标签 <span class="required">*</span></label>
+              <div class="form-label">相关标签 <span class="required">*</span></div>
 
               @if (formData.tags.length > 0) {
                 <div class="selected-tags-list">
@@ -361,7 +361,7 @@ import mermaid from 'mermaid';
         margin-bottom: 1.2rem;
       }
 
-      .form-group label {
+      .form-group .form-label {
         display: block;
         font-size: 0.85rem;
         color: var(--color-text-secondary);
@@ -692,11 +692,13 @@ export class FaqEditComponent implements OnInit, AfterViewInit {
 
   private renderTimeout: any;
 
+  /* eslint-disable @angular-eslint/prefer-inject */
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private faqService: FaqService,
   ) {
+  /* eslint-enable @angular-eslint/prefer-inject */
     mermaid.initialize({
       startOnLoad: false,
       theme: 'default',
@@ -813,16 +815,24 @@ export class FaqEditComponent implements OnInit, AfterViewInit {
 
     if (this.isEdit && this.faqId) {
       this.faqService.updateFaq(this.faqId, faqData).subscribe(() => {
-        this.router.navigate(['/']);
+        this.router.navigate(['/detail', this.faqId]);
       });
     } else {
-      this.faqService.createFaq(faqData).subscribe(() => {
-        this.router.navigate(['/']);
+      this.faqService.createFaq(faqData).subscribe((newFaq) => {
+        if (newFaq && newFaq.id) {
+          this.router.navigate(['/detail', newFaq.id]);
+        } else {
+          this.router.navigate(['/']);
+        }
       });
     }
   }
 
   onCancel() {
-    this.router.navigate(['/']);
+    if (this.isEdit && this.faqId) {
+      this.router.navigate(['/detail', this.faqId]);
+    } else {
+      this.router.navigate(['/']);
+    }
   }
 }

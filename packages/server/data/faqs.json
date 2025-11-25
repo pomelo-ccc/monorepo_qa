@@ -12,8 +12,8 @@
     "solution": "21212",
     "troubleshootingFlow": "",
     "validationMethod": "33232323",
-    "errorCode": "BAC_FOR_6298",
-    "views": 44,
+    "errorCode": "BAC_FOR_1657",
+    "views": 74,
     "solveTimeMinutes": 0,
     "id": "1763973801936"
   },
@@ -31,9 +31,10 @@
     "troubleshootingFlow": "",
     "validationMethod": "1",
     "errorCode": "PRO_校验_4226",
-    "views": 10,
+    "views": 27,
     "solveTimeMinutes": 0,
-    "id": "1763973755844"
+    "id": "1763973755844",
+    "updateTime": "2025-11-25T03:30:06.708Z"
   },
   {
     "title": "【table】配置了可编辑，但是不生效",
@@ -43,13 +44,13 @@
       "校验",
       "异步"
     ],
-    "summary": "1",
-    "phenomenon": "1",
-    "solution": "1",
+    "summary": "122",
+    "phenomenon": "12222",
+    "solution": "1222",
     "troubleshootingFlow": "",
     "validationMethod": "1",
-    "errorCode": "TAB_校验_7384",
-    "views": 61,
+    "errorCode": "TAB_校验_9163",
+    "views": 71,
     "solveTimeMinutes": 0,
     "id": "1763961167392"
   },
@@ -70,7 +71,7 @@
     "solution": "212",
     "troubleshootingFlow": "graph TD;\n  A[开始] --> B{检查看模型上是否配置了 mode=edit 列上是否配置了 editable 或者 cellEditExpression?};\n  B -->|是| C[操作];\n  B -->|否| D[其他];\n  C --> E[结束];\n  D --> E;",
     "validationMethod": "2323",
-    "views": 78,
+    "views": 89,
     "solveTimeMinutes": 0,
     "id": "1763952468839",
     "author": "张三 (Dev)",
