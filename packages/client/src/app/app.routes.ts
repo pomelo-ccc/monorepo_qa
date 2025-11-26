@@ -36,10 +36,5 @@ export const routes: Routes = [
   { path: 'edit/:id', component: FaqEditComponent, canActivate: [adminGuard] },
   { path: 'admin', component: AdminComponent, canActivate: [adminGuard] },
   { path: 'admin/config', component: ConfigManagementComponent, canActivate: [adminGuard] },
-  {
-    path: 'admin/files',
-    loadComponent: () => import('./admin/file-management/file-management.component').then(m => m.FileManagementComponent),
-    canActivate: [adminGuard]
-  },
   { path: '**', redirectTo: '' },
 ];

@@ -1,29 +1,31 @@
-import { DATA_FILES, readJsonFile, writeJsonFile } from '../utils/file.util';
+import { TagRepository, tagRepository } from '../repositories';
 import { faqService } from './faq.service';
 
 /**
- * 标签服务 - 处理标签的增删改查
+ * 标签服务 - 处理标签业务逻辑
  */
 export class TagService {
+  constructor(private readonly repo: TagRepository = tagRepository) {}
+
   /**
    * 获取所有标签
    */
   async getAll(): Promise<string[]> {
-    return readJsonFile<string[]>(DATA_FILES.tags, []);
+    return this.repo.findAll();
   }
 
   /**
    * 添加标签
    */
   async add(tag: string): Promise<string[]> {
-    const tags = await this.getAll();
-
-    if (tags.includes(tag)) {
+    const exists = await this.repo.exists(tag);
+    if (exists) {
       throw new Error('标签已存在');
     }
 
+    const tags = await this.repo.findAll();
     tags.push(tag);
-    await writeJsonFile(DATA_FILES.tags, tags);
+    await this.repo.save(tags);
 
     return tags;
   }
@@ -32,7 +34,7 @@ export class TagService {
    * 批量添加标签
    */
   async addMany(newTags: string[]): Promise<string[]> {
-    const tags = await this.getAll();
+    const tags = await this.repo.findAll();
     const added: string[] = [];
 
     newTags.forEach((tag) => {
@@ -43,7 +45,7 @@ export class TagService {
     });
 
     if (added.length > 0) {
-      await writeJsonFile(DATA_FILES.tags, tags);
+      await this.repo.save(tags);
     }
 
     return tags;
@@ -53,7 +55,7 @@ export class TagService {
    * 更新标签名称
    */
   async update(oldTag: string, newTag: string): Promise<string[]> {
-    const tags = await this.getAll();
+    const tags = await this.repo.findAll();
     const index = tags.indexOf(oldTag);
 
     if (index === -1) {
@@ -65,7 +67,7 @@ export class TagService {
     }
 
     tags[index] = newTag;
-    await writeJsonFile(DATA_FILES.tags, tags);
+    await this.repo.save(tags);
 
     // 同步更新所有 FAQ 中的标签
     await faqService.updateTagInAllFaqs(oldTag, newTag);
@@ -77,11 +79,9 @@ export class TagService {
    * 删除标签
    */
   async delete(tag: string): Promise<string[]> {
-    const tags = await this.getAll();
+    const tags = await this.repo.findAll();
     const filtered = tags.filter((t) => t !== tag);
-
-    await writeJsonFile(DATA_FILES.tags, filtered);
-
+    await this.repo.save(filtered);
     return filtered;
   }
 
@@ -89,15 +89,14 @@ export class TagService {
    * 检查标签是否存在
    */
   async exists(tag: string): Promise<boolean> {
-    const tags = await this.getAll();
-    return tags.includes(tag);
+    return this.repo.exists(tag);
   }
 
   /**
    * 获取标签使用统计
    */
   async getStats(): Promise<{ tag: string; count: number }[]> {
-    const tags = await this.getAll();
+    const tags = await this.repo.findAll();
     const faqs = await faqService.getAll();
 
     const stats = tags.map((tag) => ({

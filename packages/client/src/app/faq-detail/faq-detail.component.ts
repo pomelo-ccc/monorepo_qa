@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { FaqService } from '../faq.service';
-import { FaqItem } from '../models/faq.model';
-import { AuthService } from '../services/auth.service';
+import { FaqService, AuthService } from '../services';
+import { FaqItem } from '../models';
 import {
   MermaidComponent,
   TreeComponent,
@@ -1041,7 +1040,7 @@ export class FaqDetailComponent implements OnInit {
 
   ngOnInit() {
     // Load all FAQs to build the nav tree
-    this.faqService.getFaqs().subscribe((faqs) => {
+    this.faqService.getAll().subscribe((faqs: FaqItem[]) => {
       this.buildNavTree(faqs);
     });
 
@@ -1077,9 +1076,9 @@ export class FaqDetailComponent implements OnInit {
   }
 
   loadFaq(id: string) {
-    this.faqService.getFaq(id).subscribe((data) => {
+    this.faqService.getById(id).subscribe((data: FaqItem) => {
       this.faq = data;
-      this.faqService.updateFaq(id, { views: data.views + 1 }).subscribe();
+      this.faqService.update(id, { views: data.views + 1 }).subscribe();
     });
   }
 

@@ -1,30 +1,31 @@
 import { FaqItem } from '../models';
-import { DATA_FILES, readJsonFile, writeJsonFile } from '../utils/file.util';
+import { FaqRepository, faqRepository } from '../repositories';
 
 /**
- * FAQ 服务 - 处理问题的增删改查
+ * FAQ 服务 - 处理 FAQ 业务逻辑
  */
 export class FaqService {
+  constructor(private readonly repo: FaqRepository = faqRepository) {}
+
   /**
    * 获取所有 FAQ
    */
   async getAll(): Promise<FaqItem[]> {
-    return readJsonFile<FaqItem[]>(DATA_FILES.faqs, []);
+    return this.repo.findAll();
   }
 
   /**
    * 根据 ID 获取单个 FAQ
    */
   async getById(id: string): Promise<FaqItem | undefined> {
-    const faqs = await this.getAll();
-    return faqs.find((f) => f.id === id);
+    return this.repo.findById(id);
   }
 
   /**
    * 创建新 FAQ
    */
   async create(data: Partial<FaqItem>): Promise<FaqItem> {
-    const faqs = await this.getAll();
+    const faqs = await this.repo.findAll();
 
     const newFaq: FaqItem = {
       id: data.id || `faq-${Date.now()}`,
@@ -47,7 +48,7 @@ export class FaqService {
     } as FaqItem;
 
     faqs.unshift(newFaq);
-    await writeJsonFile(DATA_FILES.faqs, faqs);
+    await this.repo.save(faqs);
 
     return newFaq;
   }
@@ -56,7 +57,7 @@ export class FaqService {
    * 更新 FAQ
    */
   async update(id: string, data: Partial<FaqItem>): Promise<FaqItem | null> {
-    const faqs = await this.getAll();
+    const faqs = await this.repo.findAll();
     const index = faqs.findIndex((f) => f.id === id);
 
     if (index === -1) {
@@ -70,7 +71,7 @@ export class FaqService {
       updateTime: new Date().toISOString(),
     } as FaqItem;
 
-    await writeJsonFile(DATA_FILES.faqs, faqs);
+    await this.repo.save(faqs);
     return faqs[index];
   }
 
@@ -78,14 +79,14 @@ export class FaqService {
    * 删除 FAQ
    */
   async delete(id: string): Promise<boolean> {
-    const faqs = await this.getAll();
+    const faqs = await this.repo.findAll();
     const filtered = faqs.filter((f) => f.id !== id);
 
     if (filtered.length === faqs.length) {
       return false; // 没有找到要删除的项
     }
 
-    await writeJsonFile(DATA_FILES.faqs, filtered);
+    await this.repo.save(filtered);
     return true;
   }
 
@@ -98,7 +99,7 @@ export class FaqService {
     tags?: string[];
     status?: string;
   }): Promise<FaqItem[]> {
-    let faqs = await this.getAll();
+    let faqs = await this.repo.findAll();
 
     if (query.keyword) {
       const kw = query.keyword.toLowerCase();
@@ -129,12 +130,12 @@ export class FaqService {
    * 增加浏览量
    */
   async incrementViews(id: string): Promise<void> {
-    const faqs = await this.getAll();
+    const faqs = await this.repo.findAll();
     const faq = faqs.find((f) => f.id === id);
 
     if (faq) {
       faq.views = (faq.views || 0) + 1;
-      await writeJsonFile(DATA_FILES.faqs, faqs);
+      await this.repo.save(faqs);
     }
   }
 
@@ -142,7 +143,7 @@ export class FaqService {
    * 批量更新标签（当标签重命名时）
    */
   async updateTagInAllFaqs(oldTag: string, newTag: string): Promise<number> {
-    const faqs = await this.getAll();
+    const faqs = await this.repo.findAll();
     let count = 0;
 
     faqs.forEach((faq) => {
@@ -153,7 +154,7 @@ export class FaqService {
     });
 
     if (count > 0) {
-      await writeJsonFile(DATA_FILES.faqs, faqs);
+      await this.repo.save(faqs);
     }
 
     return count;

@@ -1,7 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ConfigService, Version, ModuleNode } from '../../services/config.service';
+import { ConfigService } from '../../services/config.service';
+import { ModuleNode, ModuleChild, Version } from '../../models';
 import { Router, RouterModule } from '@angular/router';
 import {
   ButtonComponent,
@@ -12,7 +13,6 @@ import {
   MessageService,
   DialogComponent,
 } from '@repo/ui-lib';
-import { FileManagementComponent } from '../file-management/file-management.component';
 
 interface FlatModule {
   id: string;
@@ -33,7 +33,6 @@ interface FlatModule {
     ButtonComponent,
     CardComponent,
     DataTableComponent,
-    FileManagementComponent,
     DialogComponent,
   ],
   template: `
@@ -114,24 +113,6 @@ interface FlatModule {
             <path d="M18 9a9 9 0 0 1-9 9"></path>
           </svg>
           版本管理
-        </button>
-        <button
-          class="tab-item"
-          [class.active]="activeTab === 'files'"
-          (click)="activeTab = 'files'"
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
-            <polyline points="13 2 13 9 20 9"></polyline>
-          </svg>
-          文件管理
         </button>
       </div>
 
@@ -285,13 +266,6 @@ interface FlatModule {
                 ></lib-data-table>
               </div>
             </lib-card>
-          </div>
-        }
-
-        <!-- File Management -->
-        @if (activeTab === 'files') {
-          <div class="tab-content">
-            <app-file-management></app-file-management>
           </div>
         }
       </main>
@@ -496,6 +470,7 @@ interface FlatModule {
 
       .main-content {
         flex: 1;
+        min-height: 0;
         padding: 1.5rem 2rem;
         max-width: 1200px;
         width: 100%;
@@ -513,28 +488,19 @@ interface FlatModule {
 
       .tab-content.full-height {
         flex: 1;
+        min-height: 0;
         overflow: hidden;
-      }
-
-      /* Make card take full height and flex its content */
-      ::ng-deep .full-height-card {
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-      }
-
-      ::ng-deep .full-height-card .card-body {
-        flex: 1;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        padding: 0; /* Remove padding to let table fill */
       }
 
       .table-wrapper {
-        flex: 1;
-        overflow: hidden;
-        padding: 1rem; /* Add padding back inside wrapper */
+        height: 100%;
+        padding: 1rem;
+        box-sizing: border-box;
+      }
+
+      /* 确保 full-height-card 内的 card-body 不设置 padding */
+      :host ::ng-deep .full-height-card .card-body {
+        padding: 0;
       }
 
       @keyframes fadeIn {
@@ -815,7 +781,7 @@ export class ConfigManagementComponent implements OnInit {
     const result: FlatModule[] = [];
     this.modules.forEach((parent) => {
       if (parent.children) {
-        parent.children.forEach((child) => {
+        parent.children.forEach((child: ModuleChild) => {
           result.push({
             id: child.id,
             name: child.name,

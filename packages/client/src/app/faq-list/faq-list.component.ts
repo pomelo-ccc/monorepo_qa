@@ -1,10 +1,9 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { FaqService } from '../faq.service';
-import { FaqItem } from '../models/faq.model';
-import { ThemeService } from '../services/theme.service';
+import { FaqService, ConfigService, ThemeService } from '../services';
+import { FaqItem, FlatModule } from '../models';
 import { ButtonComponent } from '@repo/ui-lib';
 
 @Component({
@@ -19,21 +18,21 @@ import { ButtonComponent } from '@repo/ui-lib';
           <h3 class="sidebar-title">模块分类</h3>
           <div class="filter-list">
             <lib-button
-              [variant]="selectedComponent() === '' ? 'primary' : 'ghost'"
+              [variant]="selectedModule() === '' ? 'primary' : 'ghost'"
               [block]="true"
-              (click)="filterByComponent('')"
+              (click)="filterByModule('')"
               class="filter-btn"
             >
               全部模块
             </lib-button>
-            @for (comp of components(); track comp) {
+            @for (mod of usedModules(); track mod.id) {
               <lib-button
-                [variant]="selectedComponent() === comp ? 'primary' : 'ghost'"
+                [variant]="selectedModule() === mod.id ? 'primary' : 'ghost'"
                 [block]="true"
-                (click)="filterByComponent(comp)"
+                (click)="filterByModule(mod.id)"
                 class="filter-btn"
               >
-                {{ comp | titlecase }} {{ getComponentLabel(comp) }}
+                {{ getModuleName(mod.id) }}
               </lib-button>
             }
           </div>
@@ -66,14 +65,13 @@ import { ButtonComponent } from '@repo/ui-lib';
               <input
                 type="text"
                 [(ngModel)]="keywordSearch"
-                (input)="onSearch()"
                 (focus)="searchFocused = true"
                 (blur)="searchFocused = false"
                 placeholder="搜索问题、错误码或解决方案..."
                 class="search-input"
               />
               @if (keywordSearch) {
-                <button class="clear-btn" (click)="keywordSearch = ''; onSearch()">
+                <button class="clear-btn" (click)="keywordSearch = ''">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="18" y1="6" x2="6" y2="18" />
                     <line x1="6" y1="6" x2="18" y2="18" />
@@ -570,15 +568,22 @@ import { ButtonComponent } from '@repo/ui-lib';
   ],
 })
 export class FaqListComponent implements OnInit {
+  private faqService = inject(FaqService);
+  private configService = inject(ConfigService);
+  public themeService = inject(ThemeService);
+
   faqs = signal<FaqItem[]>([]);
-  selectedComponent = signal<string>('');
-  errorCodeSearch = '';
+  modules = signal<FlatModule[]>([]);
+  selectedModule = signal<string>('');
   keywordSearch = '';
   searchFocused = false;
 
-  components = computed(() => {
-    const comps = new Set(this.faqs().map((f) => f.component));
-    return Array.from(comps).sort();
+  /**
+   * 从 FAQ 数据中提取已使用的模块
+   */
+  usedModules = computed(() => {
+    const moduleIds = new Set(this.faqs().map((f) => f.component));
+    return this.modules().filter((m) => moduleIds.has(m.id));
   });
 
   popularTags = computed(() => {
@@ -598,17 +603,8 @@ export class FaqListComponent implements OnInit {
     let result = this.faqs();
 
     // 模块筛选
-    if (this.selectedComponent()) {
-      result = result.filter((f) => f.component === this.selectedComponent());
-    }
-
-    // ERROR CODE 搜索
-    if (this.errorCodeSearch.trim()) {
-      const search = this.errorCodeSearch.toLowerCase();
-      result = result.filter(
-        (f) =>
-          f.errorCode?.toLowerCase().includes(search) || f.title.toLowerCase().includes(search),
-      );
+    if (this.selectedModule()) {
+      result = result.filter((f) => f.component === this.selectedModule());
     }
 
     // 关键词搜索
@@ -620,6 +616,7 @@ export class FaqListComponent implements OnInit {
           f.summary.toLowerCase().includes(search) ||
           f.phenomenon.toLowerCase().includes(search) ||
           f.solution.toLowerCase().includes(search) ||
+          f.errorCode?.toLowerCase().includes(search) ||
           f.tags.some((tag) => tag.toLowerCase().includes(search)),
       );
     }
@@ -627,43 +624,30 @@ export class FaqListComponent implements OnInit {
     return result;
   });
 
-  /* eslint-disable @angular-eslint/prefer-inject */
-  constructor(
-    private faqService: FaqService,
-    public themeService: ThemeService,
-  ) {}
-  /* eslint-enable @angular-eslint/prefer-inject */
-
   ngOnInit() {
-    this.loadFaqs();
+    this.loadData();
   }
 
-  loadFaqs() {
-    this.faqService.getFaqs().subscribe((data) => {
+  private loadData() {
+    this.faqService.getAll().subscribe((data) => {
       this.faqs.set(data);
+    });
+    this.configService.getFlatModules().subscribe((data) => {
+      this.modules.set(data);
     });
   }
 
-  filterByComponent(component: string) {
-    this.selectedComponent.set(component);
+  filterByModule(moduleId: string) {
+    this.selectedModule.set(moduleId);
   }
 
   searchByTag(tag: string) {
     this.keywordSearch = tag;
-    this.onSearch();
   }
 
-  onSearch() {
-    // Trigger computed signal update
-  }
-
-  getComponentLabel(comp: string): string {
-    const labels: Record<string, string> = {
-      form: '表单',
-      table: '表格',
-      project: '工程化',
-      backend: '后端交互',
-    };
-    return labels[comp.toLowerCase()] || '';
+  getModuleName(moduleId: string): string {
+    const module = this.modules().find((m) => m.id === moduleId);
+    if (!module) return moduleId;
+    return module.parentName ? `${module.parentName} - ${module.name}` : module.name;
   }
 }

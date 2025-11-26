@@ -1,10 +1,9 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { FaqService } from '../faq.service';
-import { FaqItem } from '../models/faq.model';
-import { MODULES, PREDEFINED_TAGS, VERSION_OPTIONS, generateErrorCode } from '../models/config';
+import { FaqService, ConfigService } from '../services';
+import { FaqItem } from '../models';
 import {
   ButtonComponent,
   CardComponent,
@@ -663,6 +662,11 @@ import mermaid from 'mermaid';
   ],
 })
 export class FaqEditComponent implements OnInit, AfterViewInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private faqService = inject(FaqService);
+  private configService = inject(ConfigService);
+
   isEdit = false;
   faqId: string | null = null;
   faqData?: FaqItem;
@@ -670,7 +674,7 @@ export class FaqEditComponent implements OnInit, AfterViewInit {
   isFullscreen = false;
   @ViewChild('mermaidDiv') mermaidDiv?: ElementRef;
 
-  formData: any = {
+  formData: Partial<FaqItem> & { tags: string[] } = {
     title: '',
     component: '',
     version: '',
@@ -682,23 +686,13 @@ export class FaqEditComponent implements OnInit, AfterViewInit {
     validationMethod: '',
   };
 
-  moduleOptions = [
-    ...MODULES.frontend.children.map((c) => ({ label: `前端 - ${c.name}`, value: c.id })),
-    { label: '后端', value: MODULES.backend.id },
-  ];
+  moduleOptions: { label: string; value: string }[] = [];
+  tagOptions: { label: string; value: string }[] = [];
+  versionOptions: { label: string; value: string }[] = [];
 
-  tagOptions = PREDEFINED_TAGS.map((tag) => ({ label: tag, value: tag }));
-  versionOptions = VERSION_OPTIONS.map((v) => ({ label: v, value: v }));
+  private renderTimeout: ReturnType<typeof setTimeout> | null = null;
 
-  private renderTimeout: any;
-
-  /* eslint-disable @angular-eslint/prefer-inject */
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private faqService: FaqService,
-  ) {
-  /* eslint-enable @angular-eslint/prefer-inject */
+  constructor() {
     mermaid.initialize({
       startOnLoad: false,
       theme: 'default',
@@ -707,16 +701,30 @@ export class FaqEditComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
+    // 加载配置数据
+    this.loadConfigData();
+
     this.faqId = this.route.snapshot.paramMap.get('id');
     if (this.faqId) {
       this.isEdit = true;
-      this.faqService.getFaq(this.faqId).subscribe((data) => {
+      this.faqService.getById(this.faqId).subscribe((data) => {
         this.faqData = data;
-        this.formData = { ...data };
-        // Trigger render after data load
+        this.formData = { ...data, tags: data.tags || [] };
         setTimeout(() => this.renderMermaid(), 100);
       });
     }
+  }
+
+  private loadConfigData() {
+    this.configService.getModuleOptions().subscribe((options) => {
+      this.moduleOptions = options;
+    });
+    this.configService.getTagOptions().subscribe((options) => {
+      this.tagOptions = options;
+    });
+    this.configService.getVersionOptions().subscribe((options) => {
+      this.versionOptions = options;
+    });
   }
 
   ngAfterViewInit() {
@@ -805,7 +813,7 @@ export class FaqEditComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    const errorCode = generateErrorCode(this.formData.component, this.formData.tags);
+    const errorCode = this.generateErrorCode(this.formData.component || '', this.formData.tags);
     const faqData: Partial<FaqItem> = {
       ...this.formData,
       errorCode,
@@ -814,11 +822,11 @@ export class FaqEditComponent implements OnInit, AfterViewInit {
     };
 
     if (this.isEdit && this.faqId) {
-      this.faqService.updateFaq(this.faqId, faqData).subscribe(() => {
+      this.faqService.update(this.faqId, faqData).subscribe(() => {
         this.router.navigate(['/detail', this.faqId]);
       });
     } else {
-      this.faqService.createFaq(faqData).subscribe((newFaq) => {
+      this.faqService.create(faqData).subscribe((newFaq) => {
         if (newFaq && newFaq.id) {
           this.router.navigate(['/detail', newFaq.id]);
         } else {
@@ -826,6 +834,13 @@ export class FaqEditComponent implements OnInit, AfterViewInit {
         }
       });
     }
+  }
+
+  private generateErrorCode(module: string, tags: string[]): string {
+    const modulePrefix = module.toUpperCase().substring(0, 3);
+    const tagPrefix = tags.length > 0 ? tags[0].substring(0, 3).toUpperCase() : 'GEN';
+    const timestamp = Date.now().toString().slice(-4);
+    return `${modulePrefix}_${tagPrefix}_${timestamp}`;
   }
 
   onCancel() {

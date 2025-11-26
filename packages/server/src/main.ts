@@ -4,8 +4,6 @@ import routes from './routes';
 import { ensureDataDir } from './utils/file.util';
 import { versionService } from './services';
 
-import * as path from 'path';
-
 const app = express();
 const PORT = 3000;
 

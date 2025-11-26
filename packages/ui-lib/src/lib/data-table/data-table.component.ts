@@ -100,7 +100,8 @@ export class ActionCellRendererComponent implements ICellRendererAngularComp {
         [columnDefs]="columnDefs"
         [defaultColDef]="defaultColDef"
         [pagination]="pagination"
-        [paginationPageSize]="10"
+        [paginationPageSize]="pagination ? 10 : undefined"
+        [suppressPaginationPanel]="!pagination"
         [domLayout]="autoHeight ? 'autoHeight' : 'normal'"
         [theme]="theme"
       >
@@ -109,8 +110,15 @@ export class ActionCellRendererComponent implements ICellRendererAngularComp {
   `,
   styles: [
     `
+      :host {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
       .table-container {
         width: 100%;
+        height: 100%;
         border-radius: 12px;
         overflow: hidden;
         box-shadow:

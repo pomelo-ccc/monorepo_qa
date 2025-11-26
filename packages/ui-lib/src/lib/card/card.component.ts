@@ -41,6 +41,24 @@ export type CardVariant = 'default' | 'warning' | 'success' | 'info';
         display: block;
       }
 
+      :host-context(.full-height-card) {
+        height: 100%;
+      }
+
+      :host-context(.full-height-card) .card {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+
+      :host-context(.full-height-card) .card-body {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
       .card {
         background: var(--color-surface, #fff);
         border-radius: 16px;
@@ -110,6 +128,7 @@ export type CardVariant = 'default' | 'warning' | 'success' | 'info';
       .card-body {
         padding: 1.5rem;
         color: var(--color-text);
+        position: relative;
       }
 
       .card-body.no-padding {
