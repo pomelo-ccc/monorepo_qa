@@ -1,0 +1,110 @@
+<div class="faq-container">
+  <!-- 左侧边栏 -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <h3 class="sidebar-title">模块分类</h3>
+      <div class="filter-list">
+        <lib-button [variant]="selectedModule() === '' ? 'primary' : 'ghost'" [block]="true" (click)="filterByModule('')" class="filter-btn">
+          全部模块
+        </lib-button>
+        @for (mod of usedModules(); track mod.id) {
+          <lib-button [variant]="selectedModule() === mod.id ? 'primary' : 'ghost'" [block]="true" (click)="filterByModule(mod.id)" class="filter-btn">
+            {{ getModuleName(mod.id) }}
+          </lib-button>
+        }
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <h3 class="sidebar-title">热门搜索</h3>
+      <div class="tag-cloud">
+        @for (tag of popularTags(); track tag) {
+          <lib-button variant="outline" size="sm" (click)="searchByTag(tag)">
+            {{ tag }}
+          </lib-button>
+        }
+      </div>
+    </div>
+  </aside>
+
+  <!-- 主内容区 -->
+  <main class="main-content">
+    <!-- 搜索区域 -->
+    <div class="search-section">
+      <div class="search-container">
+        <div class="search-input-wrapper" [class.focused]="searchFocused">
+          <div class="search-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+            </svg>
+          </div>
+          <input type="text" [(ngModel)]="keywordSearch" (focus)="searchFocused = true" (blur)="searchFocused = false" placeholder="搜索问题、错误码或解决方案..." class="search-input" />
+          @if (keywordSearch) {
+            <button class="clear-btn" (click)="keywordSearch = ''">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- FAQ 卡片列表 -->
+    @if (filteredFaqs().length > 0) {
+      <div class="faq-grid">
+        @for (faq of filteredFaqs(); track faq.id) {
+          <div class="faq-card" [routerLink]="['/detail', faq.id]">
+            <div class="card-content">
+              <h3 class="card-title">{{ faq.title }}</h3>
+              <div class="card-meta-row">
+                <div class="badges-wrapper">
+                  <span class="capsule capsule-primary">{{ faq.component }}</span>
+                  <span class="capsule capsule-outline">{{ faq.version }}</span>
+                </div>
+                @if (faq.errorCode) {
+                  <span class="capsule capsule-warning">{{ faq.errorCode }}</span>
+                }
+              </div>
+              <p class="card-summary">{{ faq.summary }}</p>
+            </div>
+            <div class="card-footer">
+              <div class="tags-wrapper">
+                @for (tag of faq.tags.slice(0, 3); track tag) {
+                  <span class="mini-tag">#{{ tag }}</span>
+                }
+              </div>
+              <div class="stats-wrapper">
+                <span class="stat-item" title="查看次数">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  {{ faq.views }}
+                </span>
+                <span class="stat-item" title="解决时长">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                  {{ faq.solveTimeMinutes }}m
+                </span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <svg class="empty-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
+        </svg>
+        <h3>未找到相关问题</h3>
+        <p>尝试切换模块或修改搜索条件</p>
+      </div>
+    }
+  </main>
+</div>
