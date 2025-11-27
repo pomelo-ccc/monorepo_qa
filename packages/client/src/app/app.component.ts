@@ -3,13 +3,12 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule, RouterOutlet, NavigationEnd } from '@angular/router';
 import { ThemeService } from './services/theme.service';
 import { AuthService } from './services/auth.service';
-import { ButtonComponent } from '@repo/ui-lib';
 import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterModule, ButtonComponent],
+  imports: [CommonModule, RouterOutlet, RouterModule],
   template: `
     <div class="app">
       @if (showHeader) {

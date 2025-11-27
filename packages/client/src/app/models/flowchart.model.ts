@@ -1,5 +1,5 @@
 /** 节点类型 */
-export type FlowNodeType = 'start' | 'process' | 'decision' | 'end';
+export type FlowNodeType = 'start' | 'process' | 'decision' | 'end' | 'image';
 
 /** 连接点位置 */
 export type ConnectorPosition = 'top' | 'right' | 'bottom' | 'left';
@@ -15,6 +15,7 @@ export interface FlowNode {
   height: number;
   fillColor: string;
   strokeColor: string;
+  imageUrl?: string; // 图片节点的图片 URL
 }
 
 /** 连接点 */
@@ -57,6 +58,7 @@ export const NODE_DEFAULTS: Record<FlowNodeType, { width: number; height: number
   process: { width: 140, height: 60, fillColor: '#3b82f6', strokeColor: '#2563eb' },
   decision: { width: 140, height: 80, fillColor: '#f59e0b', strokeColor: '#d97706' },
   end: { width: 120, height: 50, fillColor: '#ef4444', strokeColor: '#dc2626' },
+  image: { width: 160, height: 120, fillColor: '#64748b', strokeColor: '#475569' },
 };
 
 /** 预设颜色 */

@@ -7,18 +7,39 @@
     "tags": [
       "Auth"
     ],
-    "errorCode": "TAB_AUT_0431",
+    "errorCode": "TAB_AUT_1508",
     "summary": "1212",
-    "phenomenon": "1. 1212\n2. 121",
+    "phenomenon": "1. ",
     "solution": "3333",
-    "troubleshootingFlow": "",
+    "troubleshootingFlow": "{\"nodes\":[{\"id\":\"1\",\"type\":\"start\",\"text\":\"属性不生效问题\",\"x\":400,\"y\":60,\"width\":120,\"height\":50,\"fillColor\":\"#dcfce7\",\"strokeColor\":\"#22c55e\"},{\"id\":\"2\",\"type\":\"process\",\"text\":\"打开网络页签，查看接口返回数据\",\"x\":400,\"y\":182,\"width\":120,\"height\":50,\"fillColor\":\"#dbeafe\",\"strokeColor\":\"#3b82f6\"},{\"id\":\"3\",\"type\":\"decision\",\"text\":\"有对应属性?\",\"x\":400,\"y\":300,\"width\":120,\"height\":50,\"fillColor\":\"#fef3c7\",\"strokeColor\":\"#f59e0b\"},{\"id\":\"4\",\"type\":\"end\",\"text\":\"需要配置模型\",\"x\":150,\"y\":300,\"width\":120,\"height\":50,\"fillColor\":\"#fee2e2\",\"strokeColor\":\"#ef4444\"},{\"id\":\"5\",\"type\":\"process\",\"text\":\"Source页签 → main文件 → 搜索函数 → 打断点\",\"x\":400,\"y\":440,\"width\":120,\"height\":50,\"fillColor\":\"#dbeafe\",\"strokeColor\":\"#3b82f6\"},{\"id\":\"6\",\"type\":\"decision\",\"text\":\"入参对的上?\",\"x\":400,\"y\":570,\"width\":120,\"height\":50,\"fillColor\":\"#fef3c7\",\"strokeColor\":\"#f59e0b\"},{\"id\":\"7\",\"type\":\"end\",\"text\":\"父容器问题\",\"x\":150,\"y\":570,\"width\":120,\"height\":50,\"fillColor\":\"#fee2e2\",\"strokeColor\":\"#ef4444\"},{\"id\":\"8\",\"type\":\"process\",\"text\":\"继续搜索xxx → 查看表达式执行结果\",\"x\":400,\"y\":700,\"width\":120,\"height\":50,\"fillColor\":\"#dbeafe\",\"strokeColor\":\"#3b82f6\"},{\"id\":\"9\",\"type\":\"end\",\"text\":\"根据表达式与行数据计算\",\"x\":400,\"y\":820,\"width\":120,\"height\":50,\"fillColor\":\"#fee2e2\",\"strokeColor\":\"#ef4444\"}],\"connections\":[{\"id\":\"c1\",\"from\":{\"nodeId\":\"1\",\"position\":\"bottom\"},\"to\":{\"nodeId\":\"2\",\"position\":\"top\"}},{\"id\":\"c2\",\"from\":{\"nodeId\":\"2\",\"position\":\"bottom\"},\"to\":{\"nodeId\":\"3\",\"position\":\"top\"}},{\"id\":\"c3\",\"from\":{\"nodeId\":\"3\",\"position\":\"bottom\"},\"to\":{\"nodeId\":\"4\",\"position\":\"top\"},\"text\":{\"x\":275,\"y\":300,\"value\":\"没有\"}},{\"id\":\"c4\",\"from\":{\"nodeId\":\"3\",\"position\":\"bottom\"},\"to\":{\"nodeId\":\"5\",\"position\":\"top\"},\"text\":{\"x\":400,\"y\":365,\"value\":\"有\"}},{\"id\":\"c5\",\"from\":{\"nodeId\":\"5\",\"position\":\"bottom\"},\"to\":{\"nodeId\":\"6\",\"position\":\"top\"}},{\"id\":\"c6\",\"from\":{\"nodeId\":\"6\",\"position\":\"bottom\"},\"to\":{\"nodeId\":\"7\",\"position\":\"top\"},\"text\":{\"x\":275,\"y\":570,\"value\":\"对不上\"}},{\"id\":\"c7\",\"from\":{\"nodeId\":\"6\",\"position\":\"bottom\"},\"to\":{\"nodeId\":\"8\",\"position\":\"top\"},\"text\":{\"x\":400,\"y\":635,\"value\":\"对的上\"}},{\"id\":\"c8\",\"from\":{\"nodeId\":\"8\",\"position\":\"bottom\"},\"to\":{\"nodeId\":\"9\",\"position\":\"top\"}}]}",
     "validationMethod": "",
-    "views": 12,
+    "views": 63,
     "solveTimeMinutes": 0,
     "createTime": "2025-11-27T03:39:50.440Z",
-    "updateTime": "2025-11-27T03:41:18.759Z",
+    "updateTime": "2025-11-27T08:23:04.029Z",
     "author": "admin",
-    "status": "pending"
+    "status": "pending",
+    "attachments": [
+      {
+        "id": "att-1",
+        "name": "错误截图.png",
+        "type": "image",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "id": "att-2",
+        "name": "操作演示.mp4",
+        "type": "video",
+        "url": "https://www.w3schools.com/html/mov_bbb.mp4"
+      },
+      {
+        "id": "att-3",
+        "name": "解决方案.md",
+        "type": "markdown",
+        "url": "",
+        "content": "# 解决方案\\n\\n## 步骤1\\n检查配置文件\\n\\n## 步骤2\\n重启服务"
+      }
+    ]
   },
   {
     "title": "3123213",
@@ -34,10 +55,10 @@
     "troubleshootingFlow": "",
     "validationMethod": "33232323",
     "errorCode": "BAC_FOR_1657",
-    "views": 91,
+    "views": 97,
     "solveTimeMinutes": 0,
     "id": "1763973801936",
-    "updateTime": "2025-11-27T03:40:14.248Z"
+    "updateTime": "2025-11-27T08:02:35.686Z"
   },
   {
     "title": "111",
@@ -53,10 +74,10 @@
     "troubleshootingFlow": "",
     "validationMethod": "1",
     "errorCode": "PRO_校验_4226",
-    "views": 38,
+    "views": 40,
     "solveTimeMinutes": 0,
     "id": "1763973755844",
-    "updateTime": "2025-11-27T03:40:09.491Z"
+    "updateTime": "2025-11-27T06:52:43.335Z"
   },
   {
     "title": "【table】配置了可编辑，但是不生效",
@@ -69,13 +90,13 @@
     "summary": "122",
     "phenomenon": "12222",
     "solution": "1222",
-    "troubleshootingFlow": "",
+    "troubleshootingFlow": "{\"nodes\":[{\"id\":\"ed06dd92-217f-4ef8-9a92-5e9481f670c8\",\"type\":\"start\",\"text\":\"开始\",\"x\":214.09247274469033,\"y\":184.00281721235874,\"width\":120,\"height\":50,\"fillColor\":\"#10b981\",\"strokeColor\":\"#059669\"},{\"id\":\"ecf71381-5b54-44c1-80e2-6b55889c5f34\",\"type\":\"process\",\"text\":\"流程步骤\",\"x\":399.6301840733829,\"y\":191.81718749475942,\"width\":120,\"height\":50,\"fillColor\":\"#3b82f6\",\"strokeColor\":\"#2563eb\"}],\"connections\":[{\"id\":\"67943dc3-b7ff-4265-9333-078c8bb74f56\",\"from\":{\"nodeId\":\"ed06dd92-217f-4ef8-9a92-5e9481f670c8\",\"position\":\"bottom\"},\"to\":{\"nodeId\":\"ecf71381-5b54-44c1-80e2-6b55889c5f34\",\"position\":\"top\"}}]}",
     "validationMethod": "1",
-    "errorCode": "TAB_校验_9163",
-    "views": 90,
+    "errorCode": "TAB_校验_0812",
+    "views": 114,
     "solveTimeMinutes": 0,
     "id": "1763961167392",
-    "updateTime": "2025-11-27T03:41:42.536Z"
+    "updateTime": "2025-11-27T07:18:58.269Z"
   },
   {
     "title": "ddd",
@@ -90,7 +111,7 @@
     "solution": "2123213",
     "troubleshootingFlow": "graph TD;\n  A[开始] --> B{检查看模型上是否配置了 mode=edit 列上是否配置了 editable 或者 cellEditExpression?};\n  B -->|是| C[操作];\n  B -->|否| D[其他];\n  C --> E[结束];\n  D --> E;",
     "validationMethod": "2323321321",
-    "views": 98,
+    "views": 102,
     "solveTimeMinutes": 0,
     "id": "1763952468839",
     "author": "张三 (Dev)",
@@ -100,6 +121,6 @@
       "KD",
       "Li"
     ],
-    "updateTime": "2025-11-27T03:15:27.639Z"
+    "updateTime": "2025-11-27T08:02:37.868Z"
   }
 ]

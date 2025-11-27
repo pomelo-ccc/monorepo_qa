@@ -1,0 +1,338 @@
+<div class="view-container">
+  <!-- 左侧导航栏 -->
+  <aside class="nav-sidebar">
+    <div class="sidebar-header">
+      <h3 class="section-title">问题导航</h3>
+    </div>
+    <div class="nav-tree-wrapper">
+      <lib-tree
+        [nodes]="treeNodes"
+        [activeId]="faq?.id || null"
+        (nodeClick)="onNodeClick($event)"
+      ></lib-tree>
+    </div>
+  </aside>
+
+  <!-- 主内容区域 -->
+  <div class="main-scroll-area">
+    @if (faq) {
+      <!-- 固定顶部栏 -->
+      <div class="sticky-header">
+        <button class="back-btn" (click)="goBack()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+          返回
+        </button>
+        
+        <div class="header-actions">
+          <!-- 分享按钮 -->
+          <div class="share-dropdown">
+            <button class="action-btn outline" (click)="toggleShareMenu()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                <polyline points="16 6 12 2 8 6" />
+                <line x1="12" y1="2" x2="12" y2="15" />
+              </svg>
+              分享
+            </button>
+            
+            @if (shareMenuOpen) {
+              <div class="share-menu">
+                <button class="share-item" (click)="copyLink()">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                  复制链接
+                </button>
+                <button class="share-item" (click)="shareWechat()">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                  分享到微信
+                </button>
+              </div>
+            }
+          </div>
+
+          @if (authService.isAdmin()) {
+            <button class="action-btn primary" [routerLink]="['/edit', faq.id]">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+              编辑
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="article-container">
+        <!-- 文章头部 -->
+        <header class="article-header">
+          <h1 class="article-title">{{ faq.title }}</h1>
+          <div class="article-meta">
+            <div class="meta-left">
+              <span class="version-tag">v{{ faq.version }}</span>
+              <span class="status-dot" [class.resolved]="faq.status === 'resolved'"></span>
+              <span class="meta-text">{{ faq.status === 'resolved' ? '已解决' : '处理中' }}</span>
+              <span class="divider-dot">·</span>
+              <span class="meta-text">{{ faq.createTime || '最近更新' }}</span>
+            </div>
+          </div>
+        </header>
+
+        <!-- 微信分享弹窗 -->
+        @if (showWechatModal) {
+          <div class="modal-overlay" (click)="closeWechatModal()">
+            <div class="wechat-modal" (click)="$event.stopPropagation()">
+              <div class="modal-header">
+                <h3>微信扫一扫分享</h3>
+                <button class="close-btn" (click)="closeWechatModal()">×</button>
+              </div>
+              <div class="qrcode-placeholder">
+                <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <rect x="7" y="7" width="3" height="3"></rect>
+                  <rect x="14" y="7" width="3" height="3"></rect>
+                  <rect x="7" y="14" width="3" height="3"></rect>
+                  <rect x="14" y="14" width="3" height="3"></rect>
+                </svg>
+                <span>二维码生成中...</span>
+              </div>
+            </div>
+          </div>
+        }
+
+        <div class="content-with-toc">
+          <!-- 核心内容流 -->
+          <article class="article-body">
+            <!-- 1. 问题概述卡片 -->
+            <div class="overview-card" id="section-phenomenon">
+              <div class="overview-header">
+                <div class="overview-icon warning">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                  </svg>
+                </div>
+                <h2 class="overview-title">问题概述</h2>
+              </div>
+              <p class="overview-summary">{{ faq.summary }}</p>
+              @if (faq.phenomenon) {
+                <div class="steps-section">
+                  <h4 class="steps-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="8" y1="6" x2="21" y2="6"></line>
+                      <line x1="8" y1="12" x2="21" y2="12"></line>
+                      <line x1="8" y1="18" x2="21" y2="18"></line>
+                      <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                      <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                      <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                    </svg>
+                    复现步骤
+                  </h4>
+                  <div class="steps-content">
+                    @for (step of phenomenonSteps; track $index) {
+                      <div class="step-item">
+                        <span class="step-number">{{ $index + 1 }}</span>
+                        <span class="step-text">{{ step }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- 2. 附件展示 -->
+            @if (faq.attachments && faq.attachments.length > 0) {
+              <div class="attachments-section" id="section-attachments">
+                <h2 class="section-heading">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                  </svg>
+                  相关附件
+                  <span class="attachment-count">{{ faq.attachments.length }}</span>
+                </h2>
+                <div class="attachments-grid">
+                  @for (attachment of faq.attachments; track attachment.id) {
+                    <div class="attachment-card">
+                      <div class="attachment-preview-area" (click)="openAttachmentPreview(attachment)" (keydown.enter)="openAttachmentPreview(attachment)" tabindex="0" role="button">
+                        @if (attachment.type === 'image') {
+                          <img [src]="attachment.url" [alt]="attachment.name" class="attachment-image" />
+                        } @else if (attachment.type === 'video') {
+                          <div class="file-thumbnail video">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                          </div>
+                        } @else if (attachment.type === 'markdown') {
+                          <div class="file-thumbnail markdown">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                              <polyline points="14 2 14 8 20 8"></polyline>
+                              <line x1="16" y1="13" x2="8" y2="13"></line>
+                              <line x1="16" y1="17" x2="8" y2="17"></line>
+                              <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                            <span class="file-ext">.md</span>
+                          </div>
+                        }
+                      </div>
+                      <div class="attachment-info">
+                        <span class="attachment-name">{{ attachment.name }}</span>
+                        <button class="download-btn" (click)="downloadAttachment(attachment); $event.stopPropagation()" title="下载">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- 3. 排查流程 -->
+            @if (flowchartData && flowchartData.nodes.length > 0) {
+              <div class="flow-section" id="section-flow">
+                <h2 class="section-heading">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                  </svg>
+                  排查逻辑
+                </h2>
+                <div class="flowchart-viewer">
+                  <app-flowchart-builder [data]="flowchartData" [readonly]="true" />
+                </div>
+              </div>
+            }
+
+            <!-- 4. 解决方案 -->
+            <div class="solution-section" id="section-solution">
+              <h2 class="section-heading success">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                解决方案
+              </h2>
+              <div class="solution-content">
+                @for (line of solutionLines; track $index) {
+                  <div class="solution-line">
+                    @if (isCodeLine(line)) {
+                      <code class="inline-code">{{ line }}</code>
+                    } @else {
+                      <span>{{ line }}</span>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- 底部信息 -->
+            <div class="article-footer">
+              <div class="tags-row">
+                @for (tag of faq.tags; track tag) {
+                  <span class="footer-tag"># {{ tag }}</span>
+                }
+              </div>
+              <div class="contributors-row">
+                <span class="label">贡献者:</span>
+                <div class="avatars">
+                  @if (faq.contributors && faq.contributors.length) {
+                    @for (contributor of faq.contributors; track contributor) {
+                      <span class="text-avatar" [title]="contributor">{{ contributor.charAt(0).toUpperCase() }}</span>
+                    }
+                  } @else {
+                    <span class="text-avatar">?</span>
+                  }
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- 右侧悬浮目录 -->
+          <aside class="toc-sidebar">
+            <div class="toc-container">
+              <h4 class="toc-title">目录</h4>
+              <ul class="toc-list">
+                <li>
+                  <a (click)="scrollToSection('section-phenomenon')" [class.active]="activeSection === 'section-phenomenon'">问题现象</a>
+                </li>
+                @if (faq.attachments && faq.attachments.length > 0) {
+                  <li>
+                    <a (click)="scrollToSection('section-attachments')" [class.active]="activeSection === 'section-attachments'">相关附件</a>
+                  </li>
+                }
+                @if (faq.troubleshootingFlow) {
+                  <li>
+                    <a (click)="scrollToSection('section-flow')" [class.active]="activeSection === 'section-flow'">排查逻辑</a>
+                  </li>
+                }
+                <li>
+                  <a (click)="scrollToSection('section-solution')" [class.active]="activeSection === 'section-solution'">解决方案</a>
+                </li>
+              </ul>
+            </div>
+          </aside>
+        </div>
+      </div>
+    } @else {
+      <div class="loading-state">
+        <div class="spinner"></div>
+      </div>
+    }
+  </div>
+
+  <!-- 附件预览 Modal -->
+  @if (previewAttachment) {
+    <div class="preview-modal" [class.markdown-mode]="previewAttachment.type === 'markdown'" (click)="closeAttachmentPreview()" (keydown.escape)="closeAttachmentPreview()" tabindex="0" role="dialog">
+      <div class="preview-modal-content" [class.wide]="previewAttachment.type === 'markdown'" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" role="document">
+        <div class="preview-header">
+          <span class="preview-name">{{ previewAttachment.name }}</span>
+          <div class="preview-actions">
+            <button class="preview-download" (click)="downloadAttachment(previewAttachment)" title="下载">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+            </button>
+            <button class="preview-close-btn" (click)="closeAttachmentPreview()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="preview-body">
+          @if (previewAttachment.type === 'image') {
+            <img [src]="previewAttachment.url" [alt]="previewAttachment.name" class="preview-image" />
+          } @else if (previewAttachment.type === 'video') {
+            <video [src]="previewAttachment.url" controls autoplay class="preview-video">
+              您的浏览器不支持视频播放
+            </video>
+          } @else if (previewAttachment.type === 'markdown') {
+            <div class="markdown-preview">
+              <pre class="markdown-content">{{ previewAttachment.content || '加载中...' }}</pre>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

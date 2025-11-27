@@ -1,0 +1,321 @@
+<div class="flowchart-builder" [class.readonly-mode]="readonly()">
+  <!-- 工具栏 -->
+  @if (!readonly()) {
+  <div class="toolbar">
+    <div class="toolbar-section">
+      <span class="toolbar-label">节点</span>
+      <button class="tool-btn" (click)="addNode('start')" title="开始节点">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <ellipse cx="12" cy="12" rx="10" ry="6" />
+        </svg>
+        开始
+      </button>
+      <button class="tool-btn" (click)="addNode('process')" title="流程节点">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="6" width="18" height="12" rx="2" />
+        </svg>
+        流程
+      </button>
+      <button class="tool-btn" (click)="addNode('decision')" title="判断节点">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2 L22 12 L12 22 L2 12 Z" />
+        </svg>
+        判断
+      </button>
+      <button class="tool-btn" (click)="addNode('end')" title="结束节点">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <ellipse cx="12" cy="12" rx="10" ry="6" />
+          <ellipse cx="12" cy="12" rx="7" ry="4" />
+        </svg>
+        结束
+      </button>
+      <button class="tool-btn" (click)="addNode('image')" title="图片节点">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+          <circle cx="8.5" cy="8.5" r="1.5" />
+          <polyline points="21 15 16 10 5 21" />
+        </svg>
+        图片
+      </button>
+    </div>
+
+    <div class="toolbar-divider"></div>
+
+    <div class="toolbar-section">
+      <button class="tool-btn" (click)="deleteSelected()" title="删除选中">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6" />
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+        </svg>
+      </button>
+      <button class="tool-btn" (click)="undo()" title="撤销">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 7v6h6" />
+          <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
+        </svg>
+      </button>
+      <button class="tool-btn" (click)="redo()" title="重做">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 7v6h-6" />
+          <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="toolbar-divider"></div>
+
+    <div class="toolbar-section">
+      <span class="toolbar-label">视图</span>
+      <button class="tool-btn" (click)="zoomIn()" title="放大">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          <line x1="11" y1="8" x2="11" y2="14" />
+          <line x1="8" y1="11" x2="14" y2="11" />
+        </svg>
+      </button>
+      <button class="tool-btn" (click)="zoomOut()" title="缩小">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          <line x1="8" y1="11" x2="14" y2="11" />
+        </svg>
+      </button>
+      <button class="tool-btn" (click)="resetView()" title="重置视图">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+          <path d="M3 3v5h5" />
+        </svg>
+      </button>
+      <span class="zoom-label">{{ zoomPercent() }}%</span>
+    </div>
+
+    <div class="toolbar-divider"></div>
+
+    <div class="toolbar-section">
+      <button class="tool-btn" [class.active]="viewMode() === 'visual'" (click)="setViewMode('visual')">
+        可视化
+      </button>
+      <button class="tool-btn" [class.active]="viewMode() === 'code'" (click)="setViewMode('code')">
+        代码
+      </button>
+    </div>
+
+    <div class="toolbar-spacer"></div>
+
+    <div class="toolbar-section">
+      <button class="tool-btn primary" (click)="exportData()">
+        导出
+      </button>
+    </div>
+  </div>
+  } @else {
+  <div class="toolbar readonly-toolbar">
+    <div class="toolbar-section">
+      <button class="tool-btn" (click)="zoomIn()" title="放大">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          <line x1="11" y1="8" x2="11" y2="14" />
+          <line x1="8" y1="11" x2="14" y2="11" />
+        </svg>
+      </button>
+      <button class="tool-btn" (click)="zoomOut()" title="缩小">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          <line x1="8" y1="11" x2="14" y2="11" />
+        </svg>
+      </button>
+      <button class="tool-btn" (click)="resetView()" title="重置视图">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+          <path d="M3 3v5h5" />
+        </svg>
+      </button>
+      <span class="zoom-label">{{ zoomPercent() }}%</span>
+    </div>
+  </div>
+  }
+
+  <!-- 主要内容区 -->
+  <div class="main-content">
+    <div class="canvas-container" [class.hidden]="viewMode() === 'code'" #canvasContainer></div>
+
+    <!-- 节点描述 tooltip -->
+    @if (tooltipVisible()) {
+      <div class="node-tooltip" [style.left.px]="tooltipPosition().x" [style.top.px]="tooltipPosition().y">
+        {{ tooltipContent() }}
+      </div>
+    }
+
+    <!-- 节点属性面板 -->
+    @if (selectedNodeData() && !readonly() && viewMode() === 'visual') {
+      <div class="property-panel">
+        <div class="panel-header">
+          <h4>节点属性</h4>
+          <button class="close-btn" (click)="closePropertyPanel()">×</button>
+        </div>
+        <div class="panel-body">
+          <div class="form-group">
+            <span class="form-label">类型</span>
+            <span class="type-badge">{{ getNodeTypeLabel(selectedNodeData()?.flowType) }}</span>
+          </div>
+          <div class="form-group">
+            <label for="nodeText" class="form-label">文字</label>
+            <input id="nodeText" type="text" [(ngModel)]="editingText" (blur)="updateNodeText()" (keyup.enter)="updateNodeText()" />
+          </div>
+          <div class="form-group">
+            <label for="nodeDesc" class="form-label">描述</label>
+            <textarea id="nodeDesc" rows="3" [(ngModel)]="editingDescription" (blur)="updateNodeDescription()" placeholder="详细描述（悬浮节点时显示）"></textarea>
+          </div>
+          <div class="form-group">
+            <div class="color-tabs">
+              <button class="color-tab" [class.active]="colorMode() === 'fill'" (click)="setColorMode('fill')">填充</button>
+              <button class="color-tab" [class.active]="colorMode() === 'stroke'" (click)="setColorMode('stroke')">边框</button>
+              <button class="color-tab" [class.active]="colorMode() === 'text'" (click)="setColorMode('text')">文字</button>
+            </div>
+            <div class="color-picker">
+              @for (color of presetColors; track color) {
+                <button
+                  class="color-btn"
+                  [style.background]="color"
+                  [class.active]="getCurrentColor() === color"
+                  (click)="updateNodeColorByMode(color)"
+                  [attr.aria-label]="'选择颜色 ' + color"
+                >&#8203;</button>
+              }
+              <label class="color-btn custom-color-btn" [style.background]="customColor" title="自定义颜色">
+                <input type="color" [value]="customColor" (input)="onCustomColorChange($event)" hidden />
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="16" />
+                  <line x1="8" y1="12" x2="16" y2="12" />
+                </svg>
+              </label>
+            </div>
+          </div>
+          <div class="form-group">
+            <span class="form-label">附件</span>
+            <div class="attachments-list">
+              @for (att of nodeAttachments; track att.id; let i = $index) {
+                <div class="attachment-item-row">
+                  <div class="attachment-thumb" (click)="previewNodeAttachment(att)" (keydown.enter)="previewNodeAttachment(att)" tabindex="0" role="button">
+                    @if (att.type === 'image') {
+                      <img [src]="att.url" [alt]="att.name" />
+                    } @else {
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5 3 19 12 5 21 5 3" />
+                      </svg>
+                    }
+                  </div>
+                  <input type="text" class="attachment-name-input" [(ngModel)]="att.name" (blur)="updateNodeAttachments()" placeholder="附件名称" />
+                  <button class="attachment-remove-btn" (click)="removeNodeAttachment(i)" title="删除">×</button>
+                </div>
+              }
+              <label class="upload-btn">
+                <input type="file" accept="image/*,video/*" (change)="onNodeAttachmentSelect($event)" multiple hidden />
+                + 添加附件
+              </label>
+            </div>
+          </div>
+          <div class="form-group">
+            <button class="delete-btn" (click)="deleteSelected()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+              删除节点
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (viewMode() === 'code') {
+      <div class="code-editor-container">
+        <div class="code-header">
+          <div class="code-tabs">
+            <button class="code-tab active">JSON 数据</button>
+          </div>
+          <div class="code-actions">
+            <button class="action-btn" (click)="showImportDialog()">导入</button>
+            <button class="action-btn" (click)="showAiHelpDialog()">AI 帮助</button>
+          </div>
+        </div>
+        <div class="code-editor">
+          <div class="line-numbers">
+            @for (line of codeLineNumbers(); track line) {
+              <span>{{ line }}</span>
+            }
+          </div>
+          <textarea
+            class="code-textarea"
+            [value]="codeContent()"
+            (input)="onCodeChange($any($event.target).value)"
+            spellcheck="false"
+          ></textarea>
+        </div>
+        @if (codeError()) {
+          <div class="code-error">{{ codeError() }}</div>
+        }
+      </div>
+    }
+
+    <!-- 导入对话框 -->
+    @if (showImport()) {
+      <div class="modal-overlay" role="dialog" tabindex="-1" (click)="closeModals()" (keyup.escape)="closeModals()">
+        <div class="modal-content" role="document" (click)="$event.stopPropagation()" (keyup.escape)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>导入流程图</h3>
+            <button class="close-btn" (click)="closeModals()">×</button>
+          </div>
+          <div class="modal-body">
+            <p class="modal-desc">粘贴 JSON 格式的流程图数据：</p>
+            <textarea class="import-textarea" [(ngModel)]="importCode" rows="12"></textarea>
+            @if (importError()) {
+              <div class="import-error">{{ importError() }}</div>
+            }
+          </div>
+          <div class="modal-footer">
+            <button class="btn-secondary" (click)="closeModals()">取消</button>
+            <button class="btn-primary" (click)="doImport()">导入</button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- AI 帮助对话框 -->
+    @if (showAiHelp()) {
+      <div class="modal-overlay" role="dialog" tabindex="-1" (click)="closeModals()" (keyup.escape)="closeModals()">
+        <div class="modal-content modal-lg" role="document" (click)="$event.stopPropagation()" (keyup.escape)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>AI 生成帮助</h3>
+            <button class="close-btn" (click)="closeModals()">×</button>
+          </div>
+          <div class="modal-body">
+            <p class="modal-desc">复制以下提示词给 AI：</p>
+            <div class="prompt-box">
+              <pre class="prompt-content">{{ aiPrompt }}</pre>
+              <button class="copy-btn" (click)="copyPrompt()" [class.copied]="promptCopied()">
+                {{ promptCopied() ? '已复制' : '复制' }}
+              </button>
+            </div>
+            <div class="example-section">
+              <h4>示例输出：</h4>
+              <div class="prompt-box">
+                <pre class="example-code">{{ exampleCode }}</pre>
+                <button class="copy-btn" (click)="copyExample()" [class.copied]="exampleCopied()">
+                  {{ exampleCopied() ? '已复制' : '复制' }}
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-primary" (click)="closeModals()">我知道了</button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>
