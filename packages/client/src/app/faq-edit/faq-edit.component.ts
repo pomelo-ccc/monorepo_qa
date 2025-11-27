@@ -1,17 +1,17 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { FaqService, ConfigService } from '../services';
-import { FaqItem } from '../models';
+import { FaqItem, FlowchartData } from '../models';
 import {
   ButtonComponent,
   CardComponent,
-  MermaidComponent,
   SelectComponent,
   TagComponent,
+  MessageService,
 } from '@repo/ui-lib';
-import mermaid from 'mermaid';
+import { FlowchartBuilderComponent } from '../flowchart-builder/flowchart-builder.component';
 
 @Component({
   selector: 'app-faq-edit',
@@ -22,9 +22,9 @@ import mermaid from 'mermaid';
     RouterModule,
     ButtonComponent,
     CardComponent,
-    MermaidComponent,
     SelectComponent,
     TagComponent,
+    FlowchartBuilderComponent,
   ],
   template: `
     <div class="page-wrapper">
@@ -152,7 +152,7 @@ import mermaid from 'mermaid';
               ></textarea>
             </fieldset>
 
-            <!-- 现象描述 -->
+            <!-- 复刻步骤 -->
             <fieldset class="edit-card warning">
               <legend class="card-legend">
                 <div class="legend-content">
@@ -163,15 +163,100 @@ import mermaid from 'mermaid';
                     <line x1="16" y1="17" x2="8" y2="17" />
                     <polyline points="10 9 9 9 8 9" />
                   </svg>
-                  <span>现象描述</span>
+                  <span>复刻步骤</span>
                   <span class="required-mark">*</span>
                 </div>
               </legend>
               <textarea
+                #stepsTextarea
                 [(ngModel)]="formData.phenomenon"
-                placeholder="详细描述如何复现该问题..."
-                class="text-area"
+                (keydown)="onStepsKeydown($event)"
+                placeholder="1. "
+                class="text-area steps-textarea"
               ></textarea>
+            </fieldset>
+
+            <!-- 附件上传 -->
+            <fieldset class="edit-card info">
+              <legend class="card-legend">
+                <div class="legend-content">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <polyline points="21 15 16 10 5 21" />
+                  </svg>
+                  <span>附件（图片/视频）</span>
+                </div>
+              </legend>
+              <div class="attachments-area">
+                <div class="attachments-grid">
+                  @for (attachment of attachments; track attachment.id; let i = $index) {
+                    <div class="attachment-item">
+                      <div class="attachment-preview" (click)="openPreview(attachment)" (keydown.enter)="openPreview(attachment)" tabindex="0" role="button">
+                        @if (attachment.type === 'image') {
+                          <img [src]="attachment.url" [alt]="attachment.name" />
+                          <div class="preview-overlay">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <circle cx="11" cy="11" r="8" />
+                              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                              <line x1="11" y1="8" x2="11" y2="14" />
+                              <line x1="8" y1="11" x2="14" y2="11" />
+                            </svg>
+                          </div>
+                        } @else if (attachment.type === 'video') {
+                          <div class="video-placeholder">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <polygon points="5 3 19 12 5 21 5 3" />
+                            </svg>
+                          </div>
+                          <div class="preview-overlay">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <polygon points="5 3 19 12 5 21 5 3" />
+                            </svg>
+                          </div>
+                        } @else if (attachment.type === 'markdown') {
+                          <div class="markdown-placeholder">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                              <polyline points="14 2 14 8 20 8"></polyline>
+                              <line x1="16" y1="13" x2="8" y2="13"></line>
+                              <line x1="16" y1="17" x2="8" y2="17"></line>
+                            </svg>
+                            <span class="file-ext">.md</span>
+                          </div>
+                          <div class="preview-overlay">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <circle cx="11" cy="11" r="8" />
+                              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                            </svg>
+                          </div>
+                        }
+                      </div>
+                      <span class="attachment-name">{{ attachment.name }}</span>
+                      <button class="remove-attachment" (click)="removeAttachment(i); $event.stopPropagation()" title="删除">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <line x1="18" y1="6" x2="6" y2="18" />
+                          <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                      </button>
+                    </div>
+                  }
+                  <label class="add-attachment">
+                    <input
+                      type="file"
+                      accept="image/*,video/*,.md,.markdown,text/markdown"
+                      multiple
+                      (change)="onFileSelect($event)"
+                      hidden
+                    />
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <line x1="12" y1="5" x2="12" y2="19" />
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    <span>添加附件</span>
+                  </label>
+                </div>
+              </div>
             </fieldset>
 
             <!-- 解决方案 -->
@@ -193,39 +278,60 @@ import mermaid from 'mermaid';
               ></textarea>
             </fieldset>
 
-            <!-- 验证方法 -->
-            <fieldset class="edit-card info">
-              <legend class="card-legend">
-                <div class="legend-content">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <polyline points="9 11 12 14 22 4" />
-                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-                  </svg>
-                  <span>验证方法</span>
-                </div>
-              </legend>
-              <textarea
-                [(ngModel)]="formData.validationMethod"
-                placeholder="如何验证修复是否有效..."
-                class="text-area"
-              ></textarea>
-            </fieldset>
           </div>
         </main>
 
-        <!-- 右侧边栏：流程图 -->
+        <!-- 附件预览 Modal -->
+        @if (previewAttachment) {
+          <div class="preview-modal" [class.markdown-mode]="previewAttachment.type === 'markdown'" (click)="closePreview()" (keydown.escape)="closePreview()" tabindex="0" role="dialog">
+            <div class="preview-modal-content" [class.wide]="previewAttachment.type === 'markdown'" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" role="document">
+              <button class="preview-close" (click)="closePreview()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+              <div class="preview-body">
+                @if (previewAttachment.type === 'image') {
+                  <img [src]="previewAttachment.url" [alt]="previewAttachment.name" class="preview-image" />
+                } @else if (previewAttachment.type === 'video') {
+                  <video [src]="previewAttachment.url" controls autoplay class="preview-video">
+                    您的浏览器不支持视频播放
+                  </video>
+                } @else if (previewAttachment.type === 'markdown') {
+                  <div class="markdown-preview">
+                    <pre class="markdown-content">{{ previewAttachment.content || '内容加载中...' }}</pre>
+                  </div>
+                }
+              </div>
+              <div class="preview-footer">
+                <span class="preview-name">{{ previewAttachment.name }}</span>
+                @if (attachments.length > 1) {
+                  <div class="preview-nav">
+                    <button class="nav-btn" (click)="prevPreview()" [disabled]="currentPreviewIndex === 0">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6" />
+                      </svg>
+                    </button>
+                    <span class="preview-counter">{{ currentPreviewIndex + 1 }} / {{ attachments.length }}</span>
+                    <button class="nav-btn" (click)="nextPreview()" [disabled]="currentPreviewIndex === attachments.length - 1">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- 右侧边栏：流程图构建器 -->
         @if (showFlowchart) {
           <aside class="right-sidebar" [class.fullscreen-mode]="isFullscreen">
-            <lib-card title="排查流程图" class="full-height-card">
-              <ng-container ngProjectAs="[header-icon]">
-                <button class="icon-btn toggle-btn" (click)="toggleFlowchart()" title="隐藏流程图">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <polyline points="13 17 18 12 13 7" />
-                    <polyline points="6 17 11 12 6 7" />
-                  </svg>
-                </button>
-              </ng-container>
-              <ng-container ngProjectAs="[header-extra]">
+            <div class="flowchart-header">
+              <span class="flowchart-title">排查流程图</span>
+              <div class="flowchart-actions">
                 <button class="icon-btn" title="全屏" (click)="toggleFullscreen()">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <polyline points="15 3 21 3 21 9" />
@@ -233,39 +339,21 @@ import mermaid from 'mermaid';
                     <line x1="21" y1="3" x2="14" y2="10" />
                     <line x1="3" y1="21" x2="10" y2="14" />
                   </svg>
-                  全屏
                 </button>
-              </ng-container>
-
-              <div class="editor-container">
-                <div class="code-editor">
-                  <div class="line-numbers">
-                    @for (line of getLineNumbers(); track line) {
-                      <span>{{ line }}</span>
-                    }
-                  </div>
-                  <textarea
-                    [(ngModel)]="formData.troubleshootingFlow"
-                    (ngModelChange)="onFlowChange()"
-                    class="code-textarea"
-                    spellcheck="false"
-                  ></textarea>
-                </div>
+                <button class="icon-btn" (click)="toggleFlowchart()" title="隐藏">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <polyline points="13 17 18 12 13 7" />
+                    <polyline points="6 17 11 12 6 7" />
+                  </svg>
+                </button>
               </div>
-
-              <div class="preview-container">
-                <lib-mermaid [code]="formData.troubleshootingFlow || ''"></lib-mermaid>
-              </div>
-
-              <lib-button variant="secondary" [block]="true" (click)="showExamples()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path
-                    d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"
-                  />
-                </svg>
-                打开流程图构建器
-              </lib-button>
-            </lib-card>
+            </div>
+            <div class="flowchart-container">
+              <app-flowchart-builder
+                [data]="flowchartData"
+                (dataChange)="onFlowchartChange($event)"
+              />
+            </div>
           </aside>
         }
       </div>
@@ -535,6 +623,140 @@ import mermaid from 'mermaid';
         margin-top: 0.25rem;
       }
 
+      .steps-textarea {
+        font-family: 'SF Mono', Monaco, Consolas, monospace;
+        line-height: 2;
+        padding: 1rem;
+        background: linear-gradient(
+          to bottom,
+          transparent 0,
+          transparent calc(2em - 1px),
+          var(--color-border) calc(2em - 1px),
+          var(--color-border) 2em
+        );
+        background-size: 100% 2em;
+        background-attachment: local;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        color: var(--color-text);
+      }
+
+      .steps-textarea::placeholder {
+        color: var(--color-text-secondary);
+        opacity: 0.6;
+      }
+
+      /* 附件区域 */
+      .attachments-area {
+        padding: 0.5rem 0;
+      }
+
+      .attachments-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 0.75rem;
+      }
+
+      .attachment-item {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.5rem;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        transition: all 0.15s ease;
+      }
+
+      .attachment-item:hover {
+        border-color: var(--color-primary);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .attachment-preview {
+        width: 80px;
+        height: 60px;
+        border-radius: 4px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--color-background);
+      }
+
+      .attachment-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .video-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      .attachment-name {
+        font-size: 0.75rem;
+        color: var(--color-text-secondary);
+        text-align: center;
+        max-width: 90px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .remove-attachment {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        width: 20px;
+        height: 20px;
+        border: none;
+        border-radius: 50%;
+        background: rgba(239, 68, 68, 0.9);
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.15s ease;
+      }
+
+      .attachment-item:hover .remove-attachment {
+        opacity: 1;
+      }
+
+      .add-attachment {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.25rem;
+        padding: 1rem;
+        min-height: 100px;
+        background: var(--color-surface);
+        border: 2px dashed var(--color-border);
+        border-radius: 8px;
+        cursor: pointer;
+        color: var(--color-text-secondary);
+        font-size: 0.75rem;
+        transition: all 0.15s ease;
+      }
+
+      .add-attachment:hover {
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+        background: color-mix(in srgb, var(--color-primary), transparent 95%);
+      }
+
       /* Right Sidebar */
       .right-sidebar {
         width: 50%;
@@ -552,7 +774,33 @@ import mermaid from 'mermaid';
         height: 100vh;
         z-index: 1000;
         background: var(--color-background);
-        padding: 1.5rem;
+        padding: 0;
+      }
+
+      .flowchart-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1rem;
+        background: var(--color-surface);
+        border-bottom: 1px solid var(--color-border);
+        flex-shrink: 0;
+      }
+
+      .flowchart-title {
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+
+      .flowchart-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .flowchart-container {
+        flex: 1;
+        overflow: hidden;
       }
 
       .full-height-card {
@@ -643,6 +891,190 @@ import mermaid from 'mermaid';
         overflow: hidden;
       }
 
+      /* 预览覆盖层 */
+      .attachment-preview {
+        cursor: pointer;
+        position: relative;
+      }
+
+      .preview-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+
+      .attachment-preview:hover .preview-overlay {
+        opacity: 1;
+      }
+
+      /* 预览 Modal */
+      .preview-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+      }
+
+      .preview-modal-content {
+        position: relative;
+        max-width: 90vw;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .preview-close {
+        position: absolute;
+        top: -40px;
+        right: 0;
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 8px;
+        transition: color 0.2s ease;
+      }
+
+      .preview-close:hover {
+        color: var(--color-primary);
+      }
+
+      .preview-body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        max-width: 100%;
+        max-height: calc(90vh - 80px);
+      }
+
+      .preview-image {
+        max-width: 100%;
+        max-height: calc(90vh - 80px);
+        object-fit: contain;
+        border-radius: 4px;
+      }
+
+      .preview-video {
+        max-width: 100%;
+        max-height: calc(90vh - 80px);
+        border-radius: 4px;
+      }
+
+      .preview-footer {
+        margin-top: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        color: white;
+      }
+
+      .preview-name {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .preview-nav {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .nav-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .nav-btn:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .nav-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+      }
+
+      .preview-counter {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.6);
+        min-width: 60px;
+        text-align: center;
+      }
+
+      /* Markdown 占位符样式 */
+      .markdown-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        background: linear-gradient(135deg, #1a365d, #2c5282);
+        color: white;
+      }
+
+      .markdown-placeholder .file-ext {
+        font-size: 0.75rem;
+        font-weight: 600;
+        opacity: 0.8;
+      }
+
+      /* Markdown 预览 Modal 样式 */
+      .preview-modal.markdown-mode .preview-body {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .preview-modal-content.wide {
+        max-width: 900px;
+        width: 90vw;
+      }
+
+      .markdown-preview {
+        background: #1e1e1e;
+        border-radius: 12px;
+        padding: 1.5rem;
+        max-height: 70vh;
+        overflow-y: auto;
+        width: 100%;
+      }
+
+      .markdown-content {
+        margin: 0;
+        color: #d4d4d4;
+        font-family: 'SF Mono', Monaco, Consolas, monospace;
+        font-size: 0.9rem;
+        line-height: 1.7;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
       @media (max-width: 1200px) {
         .main-layout {
           flex-direction: column;
@@ -661,18 +1093,31 @@ import mermaid from 'mermaid';
     `,
   ],
 })
-export class FaqEditComponent implements OnInit, AfterViewInit {
+export class FaqEditComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private faqService = inject(FaqService);
   private configService = inject(ConfigService);
+  private messageService = inject(MessageService);
 
   isEdit = false;
   faqId: string | null = null;
   faqData?: FaqItem;
-  showFlowchart = false;
+  showFlowchart = true;
   isFullscreen = false;
-  @ViewChild('mermaidDiv') mermaidDiv?: ElementRef;
+
+  // 流程图数据
+  flowchartData: FlowchartData = { nodes: [], connections: [] };
+
+  // 附件数据
+  attachments: { id: string; name: string; type: 'image' | 'video' | 'markdown'; url: string; file?: File; content?: string }[] = [];
+  private imageCount = 0;
+  private videoCount = 0;
+  private markdownCount = 0;
+
+  // 预览状态
+  previewAttachment: { id: string; name: string; type: 'image' | 'video' | 'markdown'; url: string; content?: string } | null = null;
+  currentPreviewIndex = 0;
 
   formData: Partial<FaqItem> & { tags: string[] } = {
     title: '',
@@ -680,25 +1125,14 @@ export class FaqEditComponent implements OnInit, AfterViewInit {
     version: '',
     tags: [],
     summary: '',
-    phenomenon: '',
+    phenomenon: '1. ',
     solution: '',
     troubleshootingFlow: '',
-    validationMethod: '',
   };
 
   moduleOptions: { label: string; value: string }[] = [];
   tagOptions: { label: string; value: string }[] = [];
   versionOptions: { label: string; value: string }[] = [];
-
-  private renderTimeout: ReturnType<typeof setTimeout> | null = null;
-
-  constructor() {
-    mermaid.initialize({
-      startOnLoad: false,
-      theme: 'default',
-      securityLevel: 'loose',
-    });
-  }
 
   ngOnInit() {
     // 加载配置数据
@@ -710,9 +1144,24 @@ export class FaqEditComponent implements OnInit, AfterViewInit {
       this.faqService.getById(this.faqId).subscribe((data) => {
         this.faqData = data;
         this.formData = { ...data, tags: data.tags || [] };
-        setTimeout(() => this.renderMermaid(), 100);
+        // 尝试解析已保存的流程图数据
+        if (data.troubleshootingFlow) {
+          try {
+            this.flowchartData = JSON.parse(data.troubleshootingFlow);
+          } catch {
+            // 如果解析失败，保持空流程图
+            this.flowchartData = { nodes: [], connections: [] };
+          }
+        }
       });
     }
+  }
+
+  // 流程图数据变化时更新
+  onFlowchartChange(data: FlowchartData) {
+    this.flowchartData = data;
+    // 将流程图数据序列化存储
+    this.formData.troubleshootingFlow = JSON.stringify(data);
   }
 
   private loadConfigData() {
@@ -725,10 +1174,6 @@ export class FaqEditComponent implements OnInit, AfterViewInit {
     this.configService.getVersionOptions().subscribe((options) => {
       this.versionOptions = options;
     });
-  }
-
-  ngAfterViewInit() {
-    this.renderMermaid();
   }
 
   isTagSelected(tag: string): boolean {
@@ -744,60 +1189,150 @@ export class FaqEditComponent implements OnInit, AfterViewInit {
     }
   }
 
-  getLineNumbers(): number[] {
-    const lines = (this.formData.troubleshootingFlow || '').split('\n').length;
-    return Array.from({ length: Math.max(lines, 6) }, (_, i) => i + 1);
-  }
-
-  onFlowChange() {
-    if (this.renderTimeout) {
-      clearTimeout(this.renderTimeout);
+  // 复刻步骤自动编号
+  onStepsKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      const textarea = event.target as HTMLTextAreaElement;
+      const value = textarea.value;
+      const cursorPos = textarea.selectionStart;
+      
+      // 找到当前行的编号
+      const beforeCursor = value.substring(0, cursorPos);
+      const lines = beforeCursor.split('\n');
+      const currentLine = lines[lines.length - 1];
+      const match = currentLine.match(/^(\d+)\.\s*/);
+      
+      let nextNumber = 1;
+      if (match) {
+        nextNumber = parseInt(match[1], 10) + 1;
+      } else {
+        // 如果当前行没有编号，查找最后一个编号
+        for (let i = lines.length - 1; i >= 0; i--) {
+          const lineMatch = lines[i].match(/^(\d+)\.\s*/);
+          if (lineMatch) {
+            nextNumber = parseInt(lineMatch[1], 10) + 1;
+            break;
+          }
+        }
+      }
+      
+      // 插入新行和编号
+      const newLine = `\n${nextNumber}. `;
+      const afterCursor = value.substring(cursorPos);
+      this.formData.phenomenon = beforeCursor + newLine + afterCursor;
+      
+      // 设置光标位置
+      setTimeout(() => {
+        const newPos = cursorPos + newLine.length;
+        textarea.selectionStart = newPos;
+        textarea.selectionEnd = newPos;
+      });
     }
-    this.renderTimeout = setTimeout(() => {
-      this.renderMermaid();
-    }, 500);
   }
 
-  async renderMermaid() {
-    if (!this.mermaidDiv || !this.formData.troubleshootingFlow) return;
+  // 文件选择处理
+  onFileSelect(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files) return;
 
-    try {
-      const element = this.mermaidDiv.nativeElement;
-      element.innerHTML = ''; // Clear previous
-      const { svg } = await mermaid.render(
-        'mermaid-svg-' + Date.now(),
-        this.formData.troubleshootingFlow,
-      );
-      element.innerHTML = svg;
-    } catch (e) {
-      console.error('Mermaid render error:', e);
-      // Optionally show error in UI
+    Array.from(input.files).forEach((file) => {
+      const isImage = file.type.startsWith('image/');
+      const isVideo = file.type.startsWith('video/');
+      const isMarkdown = file.name.endsWith('.md') || file.name.endsWith('.markdown') || file.type === 'text/markdown';
+      
+      if (!isImage && !isVideo && !isMarkdown) return;
+
+      const type: 'image' | 'video' | 'markdown' = isImage ? 'image' : isVideo ? 'video' : 'markdown';
+      let count: number;
+      let name: string;
+      
+      if (isImage) {
+        count = ++this.imageCount;
+        name = `图 ${count}`;
+      } else if (isVideo) {
+        count = ++this.videoCount;
+        name = `视频 ${count}`;
+      } else {
+        count = ++this.markdownCount;
+        name = file.name; // 保留原始文件名
+      }
+      
+      const url = URL.createObjectURL(file);
+      const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      if (isMarkdown) {
+        // 读取 markdown 文件内容
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const content = e.target?.result as string;
+          this.attachments.push({
+            id,
+            name,
+            type,
+            url,
+            file,
+            content,
+          });
+        };
+        reader.readAsText(file);
+      } else {
+        this.attachments.push({
+          id,
+          name,
+          type,
+          url,
+          file,
+        });
+      }
+    });
+
+    // 重置 input
+    input.value = '';
+  }
+
+  // 删除附件
+  removeAttachment(index: number) {
+    const attachment = this.attachments[index];
+    if (attachment.url.startsWith('blob:')) {
+      URL.revokeObjectURL(attachment.url);
+    }
+    this.attachments.splice(index, 1);
+  }
+
+  // 打开预览
+  openPreview(attachment: { id: string; name: string; type: 'image' | 'video' | 'markdown'; url: string; content?: string }) {
+    this.previewAttachment = attachment;
+    this.currentPreviewIndex = this.attachments.findIndex((a) => a.id === attachment.id);
+  }
+
+  // 关闭预览
+  closePreview() {
+    this.previewAttachment = null;
+  }
+
+  // 上一张
+  prevPreview() {
+    if (this.currentPreviewIndex > 0) {
+      this.currentPreviewIndex--;
+      this.previewAttachment = this.attachments[this.currentPreviewIndex];
     }
   }
 
-  showExamples() {
-    const example = `graph TD;
-  A[开始] --> B{检查?};
-  B -->|是| C[操作];
-  B -->|否| D[其他];
-  C --> E[结束];
-  D --> E;`;
-
-    this.formData.troubleshootingFlow = example;
-    this.onFlowChange();
+  // 下一张
+  nextPreview() {
+    if (this.currentPreviewIndex < this.attachments.length - 1) {
+      this.currentPreviewIndex++;
+      this.previewAttachment = this.attachments[this.currentPreviewIndex];
+    }
   }
 
   toggleFlowchart() {
     this.showFlowchart = !this.showFlowchart;
-    // Re-render mermaid when showing
-    if (this.showFlowchart) {
-      this.onFlowChange();
-    }
   }
 
   toggleFullscreen() {
     this.isFullscreen = !this.isFullscreen;
-    this.onFlowChange();
   }
 
   onSave() {
@@ -809,7 +1344,7 @@ export class FaqEditComponent implements OnInit, AfterViewInit {
       !this.formData.phenomenon ||
       !this.formData.solution
     ) {
-      alert('请填写所有必填字段');
+      this.messageService.warning('请填写所有必填字段');
       return;
     }
 

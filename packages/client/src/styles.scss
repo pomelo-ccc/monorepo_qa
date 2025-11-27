@@ -66,3 +66,35 @@ body {
   background: var(--color-primary);
   color: white;
 }
+
+/* AG Grid 拖拽 Ghost 样式 */
+.ag-dnd-ghost {
+  min-width: 300px !important;
+  max-width: 600px !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 40px !important;
+  padding: 8px 12px !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  background: var(--color-surface) !important;
+  border: 1px solid var(--color-primary) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  font-size: 14px !important;
+  color: var(--color-text) !important;
+  z-index: 9999 !important;
+}
+
+.ag-dnd-ghost-label {
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  max-width: none !important;
+  width: auto !important;
+}
+
+.ag-dnd-ghost-icon {
+  margin-right: 8px !important;
+  flex-shrink: 0 !important;
+}

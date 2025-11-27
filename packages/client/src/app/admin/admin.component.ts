@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
 import {
   DataTableComponent,
   TableColumn,
@@ -8,8 +9,11 @@ import {
   ButtonComponent,
   CardComponent,
   MessageService,
+  DialogService,
 } from '@repo/ui-lib';
 import { ConfigService } from '../services/config.service';
+import { FaqService } from '../services/faq.service';
+import { FaqItem } from '../models';
 
 interface ConfigItem {
   id: string;
@@ -29,7 +33,7 @@ interface FormData {
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, DataTableComponent, ButtonComponent, CardComponent],
+  imports: [CommonModule, FormsModule, RouterModule, DataTableComponent, ButtonComponent, CardComponent],
   template: `
     <div class="admin-container">
       <h1>系统配置管理</h1>
@@ -37,12 +41,34 @@ interface FormData {
       <div class="tabs">
         <button
           class="tab-btn"
+          [class.active]="activeTab === 'faqs'"
+          (click)="activeTab = 'faqs'; loadFaqs()"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          问题管理
+        </button>
+        <button
+          class="tab-btn"
           [class.active]="activeTab === 'modules'"
           (click)="activeTab = 'modules'"
         >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
+          </svg>
           模块管理
         </button>
         <button class="tab-btn" [class.active]="activeTab === 'tags'" (click)="activeTab = 'tags'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+            <line x1="7" y1="7" x2="7.01" y2="7" />
+          </svg>
           标签管理
         </button>
         <button
@@ -50,11 +76,34 @@ interface FormData {
           [class.active]="activeTab === 'versions'"
           (click)="activeTab = 'versions'"
         >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="6" y1="3" x2="6" y2="15" />
+            <circle cx="18" cy="6" r="3" />
+            <circle cx="6" cy="18" r="3" />
+            <path d="M18 9a9 9 0 0 1-9 9" />
+          </svg>
           版本管理
         </button>
       </div>
 
       <div class="tab-content">
+        @if (activeTab === 'faqs') {
+          <div class="section">
+            <div class="section-header">
+              <h2>问题列表</h2>
+              <lib-button variant="primary" (click)="createFaq()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                新建问题
+              </lib-button>
+            </div>
+            <lib-data-table [columns]="faqColumns" [data]="faqData" [actions]="faqActions">
+            </lib-data-table>
+          </div>
+        }
+
         @if (activeTab === 'modules') {
           <div class="section">
             <div class="section-header">
@@ -252,10 +301,14 @@ interface FormData {
       }
 
       .tab-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
         padding: 0.75rem 1.5rem;
         background: transparent;
         border: none;
         border-bottom: 2px solid transparent;
+        border-radius: 8px 8px 0 0;
         color: var(--color-textSecondary);
         cursor: pointer;
         transition: all 0.2s;
@@ -265,6 +318,11 @@ interface FormData {
 
       .tab-btn:hover {
         color: var(--color-text);
+        background: var(--color-surface-hover);
+      }
+
+      .tab-btn svg {
+        flex-shrink: 0;
       }
 
       .tab-btn.active {
@@ -349,8 +407,11 @@ interface FormData {
 export class AdminComponent implements OnInit {
   private configService = inject(ConfigService);
   private messageService = inject(MessageService);
+  private dialogService = inject(DialogService);
+  private faqService = inject(FaqService);
+  private router = inject(Router);
 
-  activeTab: 'modules' | 'tags' | 'versions' = 'modules';
+  activeTab: 'faqs' | 'modules' | 'tags' | 'versions' = 'faqs';
   showDialog = false;
   dialogType: 'module' | 'tag' | 'version' = 'module';
   editingItem: ConfigItem | null = null;
@@ -411,8 +472,61 @@ export class AdminComponent implements OnInit {
     },
   ];
 
+  // FAQ data
+  faqData: FaqItem[] = [];
+  faqColumns: TableColumn[] = [
+    { key: 'title', label: '标题' },
+    { key: 'component', label: '模块', width: '120px' },
+    { key: 'status', label: '状态', width: '100px' },
+    { key: 'views', label: '浏览', width: '80px' },
+  ];
+  faqActions: TableAction[] = [
+    {
+      label: '编辑',
+      type: 'primary',
+      handler: (row) => this.editFaq(row),
+    },
+    {
+      label: '删除',
+      type: 'danger',
+      handler: (row) => this.deleteFaq(row),
+    },
+  ];
+
   ngOnInit() {
     this.loadData();
+    this.loadFaqs();
+  }
+
+  loadFaqs() {
+    this.faqService.getAll().subscribe((faqs) => {
+      this.faqData = faqs;
+    });
+  }
+
+  createFaq() {
+    this.router.navigate(['/create']);
+  }
+
+  editFaq(faq: FaqItem) {
+    this.router.navigate(['/edit', faq.id]);
+  }
+
+  async deleteFaq(faq: FaqItem) {
+    const confirmed = await this.dialogService.confirm({
+      title: '确认删除',
+      message: `确定要删除问题 "${faq.title}" 吗？`,
+      type: 'danger',
+      confirmText: '删除',
+    });
+    if (!confirmed) return;
+    this.faqService.delete(faq.id).subscribe({
+      next: () => {
+        this.messageService.success('删除成功');
+        this.loadFaqs();
+      },
+      error: (err) => this.messageService.error('删除失败: ' + err.message),
+    });
   }
 
   loadData() {
@@ -471,8 +585,14 @@ export class AdminComponent implements OnInit {
     this.showDialog = true;
   }
 
-  deleteItem(type: 'module' | 'tag' | 'version', item: ConfigItem) {
-    if (!confirm(`确定要删除 "${item.name}" 吗？`)) return;
+  async deleteItem(type: 'module' | 'tag' | 'version', item: ConfigItem) {
+    const confirmed = await this.dialogService.confirm({
+      title: '确认删除',
+      message: `确定要删除 "${item.name}" 吗？`,
+      type: 'danger',
+      confirmText: '删除',
+    });
+    if (!confirmed) return;
 
     if (type === 'module') {
       if (item.parentId) {

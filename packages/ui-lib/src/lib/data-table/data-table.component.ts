@@ -126,6 +126,39 @@ export class ActionCellRendererComponent implements ICellRendererAngularComp {
           0 1px 2px -1px rgba(0, 0, 0, 0.1);
         background: var(--color-surface);
       }
+
+      /* AG Grid 拖拽 Ghost 元素样式覆盖 */
+      :host ::ng-deep .ag-dnd-ghost {
+        min-width: 300px !important;
+        max-width: 600px !important;
+        width: auto !important;
+        height: auto !important;
+        padding: 10px 16px !important;
+        white-space: nowrap !important;
+        overflow: visible !important;
+        background: var(--color-surface) !important;
+        border: 2px solid var(--color-primary) !important;
+        border-radius: 8px !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+        font-size: 14px !important;
+        color: var(--color-text) !important;
+        opacity: 0.95 !important;
+      }
+
+      :host ::ng-deep .ag-dnd-ghost-label {
+        white-space: nowrap !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        max-width: none !important;
+        width: auto !important;
+        display: inline-block !important;
+      }
+
+      :host ::ng-deep .ag-dnd-ghost-icon {
+        margin-right: 8px !important;
+        flex-shrink: 0 !important;
+        display: inline-block !important;
+      }
     `,
   ],
 })

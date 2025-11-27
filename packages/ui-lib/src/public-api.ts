@@ -15,3 +15,4 @@ export * from './lib/select/select.component';
 export * from './lib/checkbox/checkbox.component';
 export * from './lib/message/message.component';
 export * from './lib/dialog/dialog.component';
+export * from './lib/dialog/dialog.service';

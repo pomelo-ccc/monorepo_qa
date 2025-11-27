@@ -2,12 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FaqService, AuthService } from '../services';
-import { FaqItem } from '../models';
+import { FaqItem, FlowchartData, FaqAttachment } from '../models';
 import {
-  MermaidComponent,
   TreeComponent,
   TreeNode,
+  MessageService,
 } from '@repo/ui-lib';
+import { FlowchartBuilderComponent } from '../flowchart-builder/flowchart-builder.component';
 
 @Component({
   selector: 'app-faq-detail',
@@ -15,8 +16,8 @@ import {
   imports: [
     CommonModule,
     RouterModule,
-    MermaidComponent,
     TreeComponent,
+    FlowchartBuilderComponent,
   ],
   template: `
     <div class="view-container">
@@ -134,70 +135,136 @@ import {
               <!-- 核心内容流 -->
               <article class="article-body">
                 
-                <!-- 1. 现象描述 (醒目提示) -->
-                <div class="problem-alert" id="section-phenomenon">
-                  <div class="alert-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <line x1="12" y1="8" x2="12" y2="12"></line>
-                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                    </svg>
+                <!-- 1. 问题概述卡片 -->
+                <div class="overview-card" id="section-phenomenon">
+                  <div class="overview-header">
+                    <div class="overview-icon warning">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                      </svg>
+                    </div>
+                    <h2 class="overview-title">问题概述</h2>
                   </div>
-                  <div class="alert-content">
-                    <h3 class="alert-title">问题现象</h3>
-                    <p class="alert-desc">{{ faq.summary }}</p>
-                    @if (faq.phenomenon) {
-                      <div class="phenomenon-details">
-                        <pre>{{ faq.phenomenon }}</pre>
+                  <p class="overview-summary">{{ faq.summary }}</p>
+                  @if (faq.phenomenon) {
+                    <div class="steps-section">
+                      <h4 class="steps-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <line x1="8" y1="6" x2="21" y2="6"></line>
+                          <line x1="8" y1="12" x2="21" y2="12"></line>
+                          <line x1="8" y1="18" x2="21" y2="18"></line>
+                          <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                          <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                          <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                        </svg>
+                        复现步骤
+                      </h4>
+                      <div class="steps-content">
+                        @for (step of phenomenonSteps; track $index) {
+                          <div class="step-item">
+                            <span class="step-number">{{ $index + 1 }}</span>
+                            <span class="step-text">{{ step }}</span>
+                          </div>
+                        }
                       </div>
-                    }
-                  </div>
+                    </div>
+                  }
                 </div>
 
-                <!-- 2. 排查流程 (如果有，作为核心步骤展示) -->
-                @if (faq.troubleshootingFlow) {
-                  <div class="flow-section" id="section-flow">
-                    <h2 class="section-title">
-                      <span class="title-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <rect x="3" y="3" width="7" height="7"></rect>
-                          <rect x="14" y="3" width="7" height="7"></rect>
-                          <rect x="14" y="14" width="7" height="7"></rect>
-                          <rect x="3" y="14" width="7" height="7"></rect>
-                        </svg>
-                      </span>
-                      排查逻辑
+                <!-- 2. 附件展示 -->
+                @if (faq.attachments && faq.attachments.length > 0) {
+                  <div class="attachments-section" id="section-attachments">
+                    <h2 class="section-heading">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                      </svg>
+                      相关附件
+                      <span class="attachment-count">{{ faq.attachments.length }}</span>
                     </h2>
-                    <div class="mermaid-viewer">
-                      <lib-mermaid [code]="faq.troubleshootingFlow"></lib-mermaid>
+                    <div class="attachments-grid">
+                      @for (attachment of faq.attachments; track attachment.id) {
+                        <div class="attachment-card">
+                          <div class="attachment-preview-area" (click)="openAttachmentPreview(attachment)" (keydown.enter)="openAttachmentPreview(attachment)" tabindex="0" role="button">
+                            @if (attachment.type === 'image') {
+                              <img [src]="attachment.url" [alt]="attachment.name" class="attachment-image" />
+                            } @else if (attachment.type === 'video') {
+                              <div class="file-thumbnail video">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                              </div>
+                            } @else if (attachment.type === 'markdown') {
+                              <div class="file-thumbnail markdown">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                  <polyline points="14 2 14 8 20 8"></polyline>
+                                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                                  <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                                <span class="file-ext">.md</span>
+                              </div>
+                            }
+                          </div>
+                          <div class="attachment-info">
+                            <span class="attachment-name">{{ attachment.name }}</span>
+                            <button class="download-btn" (click)="downloadAttachment(attachment); $event.stopPropagation()" title="下载">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      }
                     </div>
                   </div>
                 }
 
-                <!-- 3. 解决方案 -->
-                <div class="solution-section" id="section-solution">
-                  <h2 class="section-title">
-                    <span class="title-icon success">
+                
+                <!-- 3. 排查流程 -->
+                @if (flowchartData && flowchartData.nodes.length > 0) {
+                  <div class="flow-section" id="section-flow">
+                    <h2 class="section-heading">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
                       </svg>
-                    </span>
+                      排查逻辑
+                    </h2>
+                    <div class="flowchart-viewer">
+                      <app-flowchart-builder [data]="flowchartData" [readonly]="true" />
+                    </div>
+                  </div>
+                }
+
+                <!-- 4. 解决方案 -->
+                <div class="solution-section" id="section-solution">
+                  <h2 class="section-heading success">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
                     解决方案
                   </h2>
                   
-                  <div class="solution-card">
-                    <div class="code-window">
-                      <div class="window-header">
-                        <div class="window-controls">
-                          <span class="control red"></span>
-                          <span class="control yellow"></span>
-                          <span class="control green"></span>
-                        </div>
-                        <span class="window-title">Solution</span>
+                  <div class="solution-content">
+                    @for (line of solutionLines; track $index) {
+                      <div class="solution-line">
+                        @if (isCodeLine(line)) {
+                          <code class="inline-code">{{ line }}</code>
+                        } @else {
+                          <span>{{ line }}</span>
+                        }
                       </div>
-                      <pre class="window-body"><code>{{ faq.solution }}</code></pre>
-                    </div>
+                    }
                   </div>
                 </div>
 
@@ -233,6 +300,11 @@ import {
                     <li>
                       <a (click)="scrollToSection('section-phenomenon')" [class.active]="activeSection === 'section-phenomenon'">问题现象</a>
                     </li>
+                    @if (faq.attachments && faq.attachments.length > 0) {
+                      <li>
+                        <a (click)="scrollToSection('section-attachments')" [class.active]="activeSection === 'section-attachments'">相关附件</a>
+                      </li>
+                    }
                     @if (faq.troubleshootingFlow) {
                       <li>
                         <a (click)="scrollToSection('section-flow')" [class.active]="activeSection === 'section-flow'">排查逻辑</a>
@@ -252,6 +324,45 @@ import {
           </div>
         }
       </div>
+
+      <!-- 附件预览 Modal -->
+      @if (previewAttachment) {
+        <div class="preview-modal" [class.markdown-mode]="previewAttachment.type === 'markdown'" (click)="closeAttachmentPreview()" (keydown.escape)="closeAttachmentPreview()" tabindex="0" role="dialog">
+          <div class="preview-modal-content" [class.wide]="previewAttachment.type === 'markdown'" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" role="document">
+            <div class="preview-header">
+              <span class="preview-name">{{ previewAttachment.name }}</span>
+              <div class="preview-actions">
+                <button class="preview-download" (click)="downloadAttachment(previewAttachment)" title="下载">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                </button>
+                <button class="preview-close-btn" (click)="closeAttachmentPreview()">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="preview-body">
+              @if (previewAttachment.type === 'image') {
+                <img [src]="previewAttachment.url" [alt]="previewAttachment.name" class="preview-image" />
+              } @else if (previewAttachment.type === 'video') {
+                <video [src]="previewAttachment.url" controls autoplay class="preview-video">
+                  您的浏览器不支持视频播放
+                </video>
+              } @else if (previewAttachment.type === 'markdown') {
+                <div class="markdown-preview">
+                  <pre class="markdown-content">{{ previewAttachment.content || '加载中...' }}</pre>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
     </div>
   `,
   styles: [
@@ -732,10 +843,12 @@ import {
         padding: 2rem;
       }
 
-      .mermaid-viewer {
-        display: flex;
-        justify-content: center;
-        padding: 1rem 0;
+      .flowchart-viewer {
+        min-height: 400px;
+        background: var(--color-surface);
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid var(--color-border);
         overflow-x: auto;
       }
 
@@ -1009,15 +1122,488 @@ import {
         font-size: 0.9rem;
         border: 1px solid var(--color-border);
       }
+
+      /* 新增样式：问题概述卡片 */
+      .overview-card {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 16px;
+        padding: 1.5rem;
+      }
+
+      .overview-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .overview-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .overview-icon.warning {
+        background: color-mix(in srgb, var(--color-warning), transparent 85%);
+        color: var(--color-warning);
+      }
+
+      .overview-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--color-text);
+        margin: 0;
+      }
+
+      .overview-summary {
+        font-size: 1.05rem;
+        line-height: 1.7;
+        color: var(--color-text);
+        margin: 0 0 1.5rem 0;
+        padding-left: 0.5rem;
+        border-left: 3px solid var(--color-warning);
+      }
+
+      .steps-section {
+        background: var(--color-background);
+        border-radius: 12px;
+        padding: 1.25rem;
+      }
+
+      .steps-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--color-textSecondary);
+        margin: 0 0 1rem 0;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .steps-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .step-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      .step-number {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--color-primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+        flex-shrink: 0;
+      }
+
+      .step-text {
+        flex: 1;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: var(--color-text);
+        padding-top: 3px;
+      }
+
+      /* 新增样式：通用 section 标题 */
+      .section-heading {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--color-text);
+        margin: 0 0 1.25rem 0;
+      }
+
+      .section-heading svg {
+        color: var(--color-textSecondary);
+      }
+
+      .section-heading.success svg {
+        color: var(--color-success);
+      }
+
+      /* 附件区域样式 */
+      .attachments-section {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 16px;
+        padding: 1.5rem;
+      }
+
+      .attachment-count {
+        font-size: 0.85rem;
+        background: var(--color-surfaceHover);
+        padding: 2px 10px;
+        border-radius: 20px;
+        color: var(--color-textSecondary);
+        font-weight: 500;
+      }
+
+      .attachments-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 1rem;
+      }
+
+      .attachment-card {
+        background: var(--color-background);
+        border: 1px solid var(--color-border);
+        border-radius: 12px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .attachment-card:hover {
+        border-color: var(--color-primary);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .attachment-image {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+      }
+
+      .video-thumbnail {
+        width: 100%;
+        height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #1e1e1e, #2d2d2d);
+        color: white;
+      }
+
+      .attachment-name {
+        display: block;
+        padding: 0.75rem;
+        font-size: 0.85rem;
+        color: var(--color-text);
+        text-align: center;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      /* 解决方案样式优化 */
+      .solution-section {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 16px;
+        padding: 1.5rem;
+      }
+
+      .solution-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .solution-line {
+        font-size: 0.95rem;
+        line-height: 1.7;
+        color: var(--color-text);
+        padding: 0.5rem 0;
+        border-bottom: 1px solid color-mix(in srgb, var(--color-border), transparent 50%);
+      }
+
+      .solution-line:last-child {
+        border-bottom: none;
+      }
+
+      .inline-code {
+        font-family: 'SF Mono', Monaco, Consolas, monospace;
+        background: var(--color-background);
+        padding: 0.25rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        color: var(--color-primary);
+        display: inline-block;
+      }
+
+      /* 预览 Modal 样式 */
+      .preview-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+      }
+
+      .preview-modal-content {
+        position: relative;
+        max-width: 90vw;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .preview-close {
+        position: absolute;
+        top: -40px;
+        right: 0;
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 8px;
+        transition: color 0.2s ease;
+      }
+
+      .preview-close:hover {
+        color: var(--color-primary);
+      }
+
+      .preview-body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        max-width: 100%;
+        max-height: calc(90vh - 80px);
+      }
+
+      .preview-image {
+        max-width: 100%;
+        max-height: calc(90vh - 80px);
+        object-fit: contain;
+        border-radius: 8px;
+      }
+
+      .preview-video {
+        max-width: 100%;
+        max-height: calc(90vh - 80px);
+        border-radius: 8px;
+      }
+
+      /* 附件预览区域 */
+      .attachment-preview-area {
+        cursor: pointer;
+        transition: transform 0.2s ease;
+      }
+
+      .attachment-preview-area:hover {
+        transform: scale(1.02);
+      }
+
+      .file-thumbnail {
+        width: 100%;
+        height: 120px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .file-thumbnail.video {
+        background: linear-gradient(135deg, #1e1e1e, #2d2d2d);
+        color: white;
+      }
+
+      .file-thumbnail.markdown {
+        background: linear-gradient(135deg, #1a365d, #2c5282);
+        color: white;
+      }
+
+      .file-ext {
+        font-size: 0.75rem;
+        font-weight: 600;
+        opacity: 0.8;
+      }
+
+      .attachment-info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 0.75rem;
+        background: var(--color-surface);
+        border-top: 1px solid var(--color-border);
+      }
+
+      .download-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        border: none;
+        background: var(--color-surfaceHover);
+        color: var(--color-textSecondary);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+      }
+
+      .download-btn:hover {
+        background: var(--color-primary);
+        color: white;
+      }
+
+      /* 预览 Modal 头部 */
+      .preview-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.5rem;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 12px 12px 0 0;
+        min-width: 300px;
+      }
+
+      .preview-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .preview-download,
+      .preview-close-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: none;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+      }
+
+      .preview-download:hover {
+        background: var(--color-primary);
+      }
+
+      .preview-close-btn:hover {
+        background: rgba(239, 68, 68, 0.8);
+      }
+
+      .preview-modal-content.wide {
+        max-width: 900px;
+        width: 90vw;
+      }
+
+      /* Markdown 预览 */
+      .markdown-preview {
+        background: #1e1e1e;
+        border-radius: 0 0 12px 12px;
+        padding: 1.5rem;
+        max-height: 70vh;
+        overflow-y: auto;
+      }
+
+      .markdown-content {
+        margin: 0;
+        color: #d4d4d4;
+        font-family: 'SF Mono', Monaco, Consolas, monospace;
+        font-size: 0.9rem;
+        line-height: 1.7;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .preview-modal.markdown-mode .preview-body {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .preview-name {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+      }
+
+      /* 布局优化：占满屏幕 */
+      .article-body {
+        flex: 1;
+        min-width: 0;
+        max-width: 100%;
+      }
+
+      .content-with-toc {
+        display: flex;
+        gap: 2rem;
+        align-items: flex-start;
+      }
+
+      .article-container {
+        flex: 1;
+        padding: 1.5rem 2rem 2rem;
+      }
+
+      @media (max-width: 1024px) {
+        .toc-sidebar {
+          display: none;
+        }
+        .article-body {
+          max-width: 100%;
+        }
+      }
     `,
   ],
 })
 export class FaqDetailComponent implements OnInit {
   faq?: FaqItem;
+  flowchartData: FlowchartData | null = null;
   treeNodes: TreeNode[] = [];
   shareMenuOpen = false;
   showWechatModal = false;
   activeSection = 'section-phenomenon';
+  previewAttachment: FaqAttachment | null = null;
+
+  // 解析后的现象步骤
+  get phenomenonSteps(): string[] {
+    if (!this.faq?.phenomenon) return [];
+    return this.faq.phenomenon
+      .split('\n')
+      .map(line => line.replace(/^\d+\.\s*/, '').trim())
+      .filter(line => line.length > 0);
+  }
+
+  // 解析后的解决方案行
+  get solutionLines(): string[] {
+    if (!this.faq?.solution) return [];
+    return this.faq.solution.split('\n').filter(line => line.trim().length > 0);
+  }
+
+  // 判断是否是代码行
+  isCodeLine(line: string): boolean {
+    return line.trim().startsWith('`') || 
+           line.includes('=') || 
+           line.includes('()') || 
+           line.includes('->') ||
+           line.includes('npm ') ||
+           line.includes('pnpm ') ||
+           line.includes('yarn ');
+  }
 
   /* eslint-disable @angular-eslint/prefer-inject */
   constructor(
@@ -1025,6 +1611,7 @@ export class FaqDetailComponent implements OnInit {
     private router: Router,
     private faqService: FaqService,
     public authService: AuthService,
+    private messageService: MessageService,
   ) {
   /* eslint-enable @angular-eslint/prefer-inject */
     // Close share menu when clicking outside
@@ -1079,6 +1666,17 @@ export class FaqDetailComponent implements OnInit {
     this.faqService.getById(id).subscribe((data: FaqItem) => {
       this.faq = data;
       this.faqService.update(id, { views: data.views + 1 }).subscribe();
+      
+      // 解析流程图数据
+      if (data.troubleshootingFlow) {
+        try {
+          this.flowchartData = JSON.parse(data.troubleshootingFlow);
+        } catch {
+          this.flowchartData = null;
+        }
+      } else {
+        this.flowchartData = null;
+      }
     });
   }
 
@@ -1127,7 +1725,7 @@ export class FaqDetailComponent implements OnInit {
   copyLink() {
     const url = window.location.href;
     navigator.clipboard.writeText(url).then(() => {
-      alert('链接已复制到剪贴板');
+      this.messageService.success('链接已复制到剪贴板');
       this.shareMenuOpen = false;
     });
   }
@@ -1147,5 +1745,37 @@ export class FaqDetailComponent implements OnInit {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  }
+
+  openAttachmentPreview(attachment: FaqAttachment) {
+    this.previewAttachment = attachment;
+  }
+
+  closeAttachmentPreview() {
+    this.previewAttachment = null;
+  }
+
+  downloadAttachment(attachment: FaqAttachment) {
+    const link = document.createElement('a');
+    
+    if (attachment.type === 'markdown' && attachment.content) {
+      // 对于 markdown，创建 blob 下载
+      const blob = new Blob([attachment.content], { type: 'text/markdown' });
+      link.href = URL.createObjectURL(blob);
+    } else {
+      link.href = attachment.url;
+    }
+    
+    link.download = attachment.name;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    if (attachment.type === 'markdown' && attachment.content) {
+      URL.revokeObjectURL(link.href);
+    }
+    
+    this.messageService.success('开始下载: ' + attachment.name);
   }
 }

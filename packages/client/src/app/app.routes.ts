@@ -12,6 +12,7 @@ import { FaqDetailComponent } from './faq-detail/faq-detail.component';
 import { LoginComponent } from './login/login.component';
 import { AdminComponent } from './admin/admin.component';
 import { ConfigManagementComponent } from './admin/config-management/config-management.component';
+import { FlowchartBuilderPageComponent } from './flowchart-builder/flowchart-builder-page.component';
 import { AuthService } from './services/auth.service';
 
 // Admin guard function
@@ -34,6 +35,7 @@ export const routes: Routes = [
   { path: 'detail/:id', component: FaqDetailComponent },
   { path: 'create', component: FaqEditComponent, canActivate: [adminGuard] },
   { path: 'edit/:id', component: FaqEditComponent, canActivate: [adminGuard] },
+  { path: 'flowchart-builder', component: FlowchartBuilderPageComponent, canActivate: [adminGuard] },
   { path: 'admin', component: AdminComponent, canActivate: [adminGuard] },
   { path: 'admin/config', component: ConfigManagementComponent, canActivate: [adminGuard] },
   { path: '**', redirectTo: '' },

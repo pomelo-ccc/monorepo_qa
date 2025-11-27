@@ -1,5 +1,26 @@
 [
   {
+    "id": "faq-1764214790440",
+    "title": "121",
+    "component": "table",
+    "version": "hot5029",
+    "tags": [
+      "Auth"
+    ],
+    "errorCode": "TAB_AUT_0431",
+    "summary": "1212",
+    "phenomenon": "1. 1212\n2. 121",
+    "solution": "3333",
+    "troubleshootingFlow": "",
+    "validationMethod": "",
+    "views": 12,
+    "solveTimeMinutes": 0,
+    "createTime": "2025-11-27T03:39:50.440Z",
+    "updateTime": "2025-11-27T03:41:18.759Z",
+    "author": "admin",
+    "status": "pending"
+  },
+  {
     "title": "3123213",
     "component": "backend",
     "version": "1.1.x",
@@ -13,10 +34,10 @@
     "troubleshootingFlow": "",
     "validationMethod": "33232323",
     "errorCode": "BAC_FOR_1657",
-    "views": 80,
+    "views": 91,
     "solveTimeMinutes": 0,
     "id": "1763973801936",
-    "updateTime": "2025-11-26T01:10:25.998Z"
+    "updateTime": "2025-11-27T03:40:14.248Z"
   },
   {
     "title": "111",
@@ -32,10 +53,10 @@
     "troubleshootingFlow": "",
     "validationMethod": "1",
     "errorCode": "PRO_校验_4226",
-    "views": 32,
+    "views": 38,
     "solveTimeMinutes": 0,
     "id": "1763973755844",
-    "updateTime": "2025-11-25T09:48:05.015Z"
+    "updateTime": "2025-11-27T03:40:09.491Z"
   },
   {
     "title": "【table】配置了可编辑，但是不生效",
@@ -51,10 +72,10 @@
     "troubleshootingFlow": "",
     "validationMethod": "1",
     "errorCode": "TAB_校验_9163",
-    "views": 80,
+    "views": 90,
     "solveTimeMinutes": 0,
     "id": "1763961167392",
-    "updateTime": "2025-11-25T09:48:48.368Z"
+    "updateTime": "2025-11-27T03:41:42.536Z"
   },
   {
     "title": "ddd",
@@ -69,7 +90,7 @@
     "solution": "2123213",
     "troubleshootingFlow": "graph TD;\n  A[开始] --> B{检查看模型上是否配置了 mode=edit 列上是否配置了 editable 或者 cellEditExpression?};\n  B -->|是| C[操作];\n  B -->|否| D[其他];\n  C --> E[结束];\n  D --> E;",
     "validationMethod": "2323321321",
-    "views": 97,
+    "views": 98,
     "solveTimeMinutes": 0,
     "id": "1763952468839",
     "author": "张三 (Dev)",
@@ -79,6 +100,6 @@
       "KD",
       "Li"
     ],
-    "updateTime": "2025-11-25T09:49:13.947Z"
+    "updateTime": "2025-11-27T03:15:27.639Z"
   }
 ]
