@@ -198,50 +198,39 @@
   margin-left: 2px;
 }
 
-/* Warning Variant (Yellow) */
-.edit-card.warning {
-  border: 1px solid var(--color-warning);
-  background-color: color-mix(in srgb, var(--color-warning), transparent 90%);
-}
-.edit-card.warning .card-legend {
-  color: var(--color-warning);
-}
-.edit-card.warning .text-area {
-  color: var(--color-text);
-}
-.edit-card.warning .text-area::placeholder {
-  color: var(--color-text-secondary);
-  opacity: 0.7;
+/* Legend Icon */
+.legend-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+
+  &.steps {
+    background: var(--color-textSecondary);
+  }
+
+  &.attachment {
+    background: var(--color-textSecondary);
+  }
 }
 
-/* Success Variant (Green) */
-.edit-card.success {
-  border: 1px solid var(--color-success);
-  background-color: color-mix(in srgb, var(--color-success), transparent 90%);
+/* Danger Variant (Red) */
+.edit-card.danger {
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  background-color: rgba(239, 68, 68, 0.05);
 }
-.edit-card.success .card-legend {
-  color: var(--color-success);
-}
-.edit-card.success .text-area {
+.edit-card.danger .card-legend {
   color: var(--color-text);
 }
-.edit-card.success .text-area::placeholder {
-  color: var(--color-text-secondary);
-  opacity: 0.7;
-}
-
-/* Info Variant (Blue) */
-.edit-card.info {
-  border: 1px solid var(--color-primary);
-  background-color: color-mix(in srgb, var(--color-primary), transparent 90%);
-}
-.edit-card.info .card-legend {
-  color: var(--color-primary);
-}
-.edit-card.info .text-area {
+.edit-card.danger .text-area {
   color: var(--color-text);
 }
-.edit-card.info .text-area::placeholder {
+.edit-card.danger .text-area::placeholder {
   color: var(--color-text-secondary);
   opacity: 0.7;
 }
