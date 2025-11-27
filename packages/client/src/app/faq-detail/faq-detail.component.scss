@@ -767,39 +767,72 @@
 .overview-header {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   margin-bottom: 1rem;
 }
 
-.overview-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+.overview-icon-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #f59e0b;
   flex-shrink: 0;
 }
 
-.overview-icon.warning {
-  background: color-mix(in srgb, var(--color-warning), transparent 85%);
-  color: var(--color-warning);
-}
-
 .overview-title {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--color-text);
   margin: 0;
 }
 
+.overview-content {
+  padding-left: 2.5rem;
+}
+
 .overview-summary {
-  font-size: 1.05rem;
+  font-size: 1rem;
   line-height: 1.7;
   color: var(--color-text);
-  margin: 0 0 1.5rem 0;
-  padding-left: 0.5rem;
-  border-left: 3px solid var(--color-warning);
+  margin: 0;
+}
+
+/* 可折叠复现步骤 */
+.steps-collapse {
+  margin-top: 1rem;
+  border-top: 1px solid var(--color-border);
+  padding-top: 0.75rem;
+}
+
+.collapse-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  border: none;
+  color: var(--color-textSecondary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+
+  &:hover {
+    background: var(--color-surfaceHover);
+    color: var(--color-text);
+  }
+
+  span { flex: 1; text-align: left; }
+}
+
+.collapse-arrow {
+  transition: transform 0.2s;
+
+  &.expanded { transform: rotate(180deg); }
 }
 
 .steps-section {
@@ -1208,6 +1241,118 @@
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.9);
   font-weight: 500;
+}
+
+/* 新附件卡片样式 */
+.attachments-grid-new {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.attachment-card-new {
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.attachment-thumb {
+  width: 100%;
+  height: 120px;
+  cursor: pointer;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover img { transform: scale(1.05); }
+}
+
+.thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  &.video {
+    background: linear-gradient(135deg, #1e293b, #334155);
+    color: white;
+  }
+
+  &.markdown {
+    background: var(--color-surfaceHover);
+    color: var(--color-textSecondary);
+  }
+}
+
+.file-type {
+  font-size: 0.75rem;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.attachment-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+}
+
+.file-name {
+  font-size: 0.85rem;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  margin-right: 0.5rem;
+}
+
+.download-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--color-textSecondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+
+  &:hover {
+    background: var(--color-surfaceHover);
+    color: var(--color-primary);
+  }
+}
+
+/* 流程图容器 */
+.flowchart-viewer-wrapper {
+  min-height: 400px;
+  width: 100%;
+  background: var(--color-background);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
 }
 
 /* 布局优化：占满屏幕 */

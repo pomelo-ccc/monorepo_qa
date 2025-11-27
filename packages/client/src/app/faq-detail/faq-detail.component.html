@@ -114,19 +114,19 @@
             <!-- 1. 问题概述卡片 -->
             <div class="overview-card" id="section-phenomenon">
               <div class="overview-header">
-                <div class="overview-icon warning">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <div class="overview-icon-circle">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="12"></line>
-                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
                   </svg>
                 </div>
                 <h2 class="overview-title">问题概述</h2>
               </div>
-              <p class="overview-summary">{{ faq.summary }}</p>
+              <div class="overview-content">
+                <p class="overview-summary">{{ faq.summary }}</p>
+              </div>
               @if (faq.phenomenon) {
-                <div class="steps-section">
-                  <h4 class="steps-title">
+                <div class="steps-collapse">
+                  <button class="collapse-trigger" (click)="stepsExpanded = !stepsExpanded">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <line x1="8" y1="6" x2="21" y2="6"></line>
                       <line x1="8" y1="12" x2="21" y2="12"></line>
@@ -135,16 +135,21 @@
                       <line x1="3" y1="12" x2="3.01" y2="12"></line>
                       <line x1="3" y1="18" x2="3.01" y2="18"></line>
                     </svg>
-                    复现步骤
-                  </h4>
-                  <div class="steps-content">
-                    @for (step of phenomenonSteps; track $index) {
-                      <div class="step-item">
-                        <span class="step-number">{{ $index + 1 }}</span>
-                        <span class="step-text">{{ step }}</span>
-                      </div>
-                    }
-                  </div>
+                    <span>复现步骤</span>
+                    <svg class="collapse-arrow" [class.expanded]="stepsExpanded" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  @if (stepsExpanded) {
+                    <div class="steps-content">
+                      @for (step of phenomenonSteps; track $index) {
+                        <div class="step-item">
+                          <span class="step-number">{{ $index + 1 }}</span>
+                          <span class="step-text">{{ step }}</span>
+                        </div>
+                      }
+                    </div>
+                  }
                 </div>
               }
             </div>
@@ -161,35 +166,32 @@
                   相关附件
                   <span class="attachment-count">{{ faq.attachments.length }}</span>
                 </h2>
-                <div class="attachments-grid">
+                <div class="attachments-grid-new">
                   @for (attachment of faq.attachments; track attachment.id) {
-                    <div class="attachment-card">
-                      <div class="attachment-preview-area" (click)="openAttachmentPreview(attachment)" (keydown.enter)="openAttachmentPreview(attachment)" tabindex="0" role="button">
+                    <div class="attachment-card-new">
+                      <div class="attachment-thumb" (click)="openAttachmentPreview(attachment)" (keydown.enter)="openAttachmentPreview(attachment)" tabindex="0" role="button">
                         @if (attachment.type === 'image') {
-                          <img [src]="attachment.url" [alt]="attachment.name" class="attachment-image" />
+                          <img [src]="attachment.url" [alt]="attachment.name" />
                         } @else if (attachment.type === 'video') {
-                          <div class="file-thumbnail video">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <div class="thumb-placeholder video">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                               <polygon points="5 3 19 12 5 21 5 3"></polygon>
                             </svg>
                           </div>
                         } @else if (attachment.type === 'markdown') {
-                          <div class="file-thumbnail markdown">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <div class="thumb-placeholder markdown">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                               <polyline points="14 2 14 8 20 8"></polyline>
-                              <line x1="16" y1="13" x2="8" y2="13"></line>
-                              <line x1="16" y1="17" x2="8" y2="17"></line>
-                              <polyline points="10 9 9 9 8 9"></polyline>
                             </svg>
-                            <span class="file-ext">.md</span>
+                            <span class="file-type">.md</span>
                           </div>
                         }
                       </div>
-                      <div class="attachment-info">
-                        <span class="attachment-name">{{ attachment.name }}</span>
-                        <button class="download-btn" (click)="downloadAttachment(attachment); $event.stopPropagation()" title="下载">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <div class="attachment-meta">
+                        <span class="file-name">{{ attachment.name }}</span>
+                        <button class="download-icon" (click)="downloadAttachment(attachment); $event.stopPropagation()" title="下载">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                             <polyline points="7 10 12 15 17 10"></polyline>
                             <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -214,7 +216,7 @@
                   </svg>
                   排查逻辑
                 </h2>
-                <div class="flowchart-viewer">
+                <div class="flowchart-viewer-wrapper">
                   <app-flowchart-builder [data]="flowchartData" [readonly]="true" />
                 </div>
               </div>

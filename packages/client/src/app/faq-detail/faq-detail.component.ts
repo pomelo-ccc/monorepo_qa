@@ -21,6 +21,7 @@ export class FaqDetailComponent implements OnInit {
   showWechatModal = false;
   activeSection = 'section-phenomenon';
   previewAttachment: FaqAttachment | null = null;
+  stepsExpanded = false;
 
   get phenomenonSteps(): string[] {
     if (!this.faq?.phenomenon) return [];
