@@ -1,0 +1,171 @@
+@if (!readonly()) {
+<div class="toolbar">
+  <div class="toolbar-section">
+    <span class="toolbar-label">节点</span>
+    <button class="tool-btn" (click)="onAddNode('start')" title="开始节点">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <ellipse cx="12" cy="12" rx="10" ry="6" />
+      </svg>
+      开始
+    </button>
+    <button class="tool-btn" (click)="onAddNode('process')" title="流程节点">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="6" width="18" height="12" rx="2" />
+      </svg>
+      流程
+    </button>
+    <button class="tool-btn" (click)="onAddNode('decision')" title="判断节点">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="12 2 22 12 12 22 2 12" />
+      </svg>
+      判断
+    </button>
+    <button class="tool-btn" (click)="onAddNode('end')" title="结束节点">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10" />
+        <circle cx="12" cy="12" r="4" fill="currentColor" />
+      </svg>
+      结束
+    </button>
+    <button class="tool-btn" (click)="onAddNode('image')" title="图片节点">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <circle cx="8.5" cy="8.5" r="1.5" />
+        <polyline points="21 15 16 10 5 21" />
+      </svg>
+      图片
+    </button>
+  </div>
+
+  <div class="toolbar-divider"></div>
+
+  <div class="toolbar-section">
+    <button class="tool-btn" (click)="onDeleteSelected()" title="删除选中">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="3 6 5 6 21 6" />
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+      </svg>
+    </button>
+    <button class="tool-btn" (click)="onUndo()" title="撤销">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 7v6h6" />
+        <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
+      </svg>
+    </button>
+    <button class="tool-btn" (click)="onRedo()" title="重做">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 7v6h-6" />
+        <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13" />
+      </svg>
+    </button>
+  </div>
+
+  <div class="toolbar-divider"></div>
+
+  <div class="toolbar-section">
+    <span class="toolbar-label">视图</span>
+    <button class="tool-btn" (click)="onZoomIn()" title="放大">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        <line x1="11" y1="8" x2="11" y2="14" />
+        <line x1="8" y1="11" x2="14" y2="11" />
+      </svg>
+    </button>
+    <button class="tool-btn" (click)="onZoomOut()" title="缩小">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        <line x1="8" y1="11" x2="14" y2="11" />
+      </svg>
+    </button>
+    <button class="tool-btn" (click)="onResetView()" title="重置视图">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+        <path d="M3 3v5h5" />
+      </svg>
+    </button>
+    <span class="zoom-label">{{ zoomPercent() }}%</span>
+  </div>
+
+  <div class="toolbar-divider"></div>
+
+  <div class="toolbar-section">
+    <button class="tool-btn" [class.active]="viewMode() === 'visual'" (click)="setViewMode('visual')">
+      可视化
+    </button>
+    <button class="tool-btn" [class.active]="viewMode() === 'code'" (click)="setViewMode('code')">
+      代码
+    </button>
+  </div>
+
+  <div class="toolbar-spacer"></div>
+
+  <div class="toolbar-section">
+    <button class="tool-btn" (click)="onToggleFullscreen()" [title]="isFullscreen() ? '退出全屏' : '全屏'">
+      @if (isFullscreen()) {
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="4 14 10 14 10 20" />
+          <polyline points="20 10 14 10 14 4" />
+          <line x1="14" y1="10" x2="21" y2="3" />
+          <line x1="3" y1="21" x2="10" y2="14" />
+        </svg>
+      } @else {
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 3 21 3 21 9" />
+          <polyline points="9 21 3 21 3 15" />
+          <line x1="21" y1="3" x2="14" y2="10" />
+          <line x1="3" y1="21" x2="10" y2="14" />
+        </svg>
+      }
+    </button>
+    <button class="tool-btn primary" (click)="onExportData()">
+      导出
+    </button>
+  </div>
+</div>
+} @else {
+<div class="toolbar readonly-toolbar">
+  <div class="toolbar-section">
+    <button class="tool-btn" (click)="onZoomIn()" title="放大">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        <line x1="11" y1="8" x2="11" y2="14" />
+        <line x1="8" y1="11" x2="14" y2="11" />
+      </svg>
+    </button>
+    <button class="tool-btn" (click)="onZoomOut()" title="缩小">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        <line x1="8" y1="11" x2="14" y2="11" />
+      </svg>
+    </button>
+    <button class="tool-btn" (click)="onResetView()" title="重置视图">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+        <path d="M3 3v5h5" />
+      </svg>
+    </button>
+    <span class="zoom-label">{{ zoomPercent() }}%</span>
+    <button class="tool-btn" (click)="onToggleFullscreen()" [title]="isFullscreen() ? '退出全屏' : '全屏'">
+      @if (isFullscreen()) {
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="4 14 10 14 10 20" />
+          <polyline points="20 10 14 10 14 4" />
+          <line x1="14" y1="10" x2="21" y2="3" />
+          <line x1="3" y1="21" x2="10" y2="14" />
+        </svg>
+      } @else {
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 3 21 3 21 9" />
+          <polyline points="9 21 3 21 3 15" />
+          <line x1="21" y1="3" x2="14" y2="10" />
+          <line x1="3" y1="21" x2="10" y2="14" />
+        </svg>
+      }
+    </button>
+  </div>
+</div>
+}

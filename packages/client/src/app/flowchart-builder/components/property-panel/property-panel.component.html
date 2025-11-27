@@ -1,0 +1,79 @@
+<div class="property-panel">
+  <div class="panel-header">
+    <h4>节点属性</h4>
+    <button class="close-btn" (click)="onClose()">×</button>
+  </div>
+  <div class="panel-body">
+    <div class="form-group">
+      <span class="form-label">类型</span>
+      <span class="type-badge">{{ getNodeTypeLabel(nodeData()?.flowType) }}</span>
+    </div>
+    <div class="form-group">
+      <label for="nodeText" class="form-label">文字</label>
+      <input id="nodeText" type="text" [(ngModel)]="editingText" (blur)="onTextBlur()" (keyup.enter)="onTextBlur()" />
+    </div>
+    <div class="form-group">
+      <label for="nodeDesc" class="form-label">描述</label>
+      <textarea id="nodeDesc" rows="3" [(ngModel)]="editingDescription" (blur)="onDescriptionBlur()" placeholder="详细描述（悬浮节点时显示）"></textarea>
+    </div>
+    <div class="form-group">
+      <div class="color-tabs">
+        <button class="color-tab" [class.active]="colorMode() === 'fill'" (click)="setColorMode('fill')">填充</button>
+        <button class="color-tab" [class.active]="colorMode() === 'stroke'" (click)="setColorMode('stroke')">边框</button>
+        <button class="color-tab" [class.active]="colorMode() === 'text'" (click)="setColorMode('text')">文字</button>
+      </div>
+      <div class="color-picker">
+        @for (color of presetColors; track color) {
+          <button
+            class="color-btn"
+            [style.background]="color"
+            [class.active]="getCurrentColor() === color"
+            (click)="updateColor(color)"
+            [attr.aria-label]="'选择颜色 ' + color"
+          >&#8203;</button>
+        }
+        <label class="color-btn custom-color-btn" [style.background]="customColor" title="自定义颜色">
+          <input type="color" [value]="customColor" (input)="onCustomColorChange($event)" hidden />
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="16" />
+            <line x1="8" y1="12" x2="16" y2="12" />
+          </svg>
+        </label>
+      </div>
+    </div>
+    <div class="form-group">
+      <span class="form-label">附件</span>
+      <div class="attachments-list">
+        @for (att of nodeAttachments; track att.id; let i = $index) {
+          <div class="attachment-item-row">
+            <div class="attachment-thumb" tabindex="0" role="button">
+              @if (att.type === 'image') {
+                <img [src]="att.url" [alt]="att.name" />
+              } @else {
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+              }
+            </div>
+            <input type="text" class="attachment-name-input" [(ngModel)]="att.name" (blur)="updateAttachmentName()" placeholder="附件名称" />
+            <button class="attachment-remove-btn" (click)="removeAttachment(i)" title="删除">×</button>
+          </div>
+        }
+        <label class="upload-btn">
+          <input type="file" accept="image/*,video/*" (change)="onAttachmentSelect($event)" multiple hidden />
+          + 添加附件
+        </label>
+      </div>
+    </div>
+    <div class="form-group">
+      <button class="delete-btn" (click)="onDelete()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6" />
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+        </svg>
+        删除节点
+      </button>
+    </div>
+  </div>
+</div>
