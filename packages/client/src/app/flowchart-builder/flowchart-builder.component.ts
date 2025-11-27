@@ -17,6 +17,8 @@ import { FormsModule } from '@angular/forms';
 import LogicFlow from '@logicflow/core';
 import { Menu } from '@logicflow/extension';
 import { FlowNode, FlowConnection, FlowNodeType, FlowchartData, PRESET_COLORS } from '../models';
+import { FlowchartToolbarComponent } from './components/flowchart-toolbar/flowchart-toolbar.component';
+import { PropertyPanelComponent, NodeAttachment } from './components/property-panel/property-panel.component';
 
 // 自定义节点类型映射 - 浅色背景 + 彩色左边框风格
 const NODE_STYLES: Record<FlowNodeType, { fill: string; stroke: string }> = {
@@ -48,7 +50,7 @@ interface GraphData {
 @Component({
   selector: 'app-flowchart-builder',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, FlowchartToolbarComponent, PropertyPanelComponent],
   templateUrl: './flowchart-builder.component.html',
   styleUrls: ['./flowchart-builder.component.scss'],
 })
@@ -186,167 +188,118 @@ export class FlowchartBuilderComponent implements AfterViewInit, OnDestroy {
 
   private initLogicFlow() {
     const container = this.canvasContainer.nativeElement;
-    // 设置明确的宽高
     const width = container.clientWidth || 800;
     const height = container.clientHeight || 400;
 
-    // 注册插件
     LogicFlow.use(Menu);
+    this.lf = new LogicFlow(this.createLogicFlowConfig(container, width, height));
+    this.setupTheme();
+    this.lf.setDefaultEdgeType('polyline');
+    this.setupContextMenu();
+    this.lf.render({});
+    this.setupEventListeners();
+  }
 
-    this.lf = new LogicFlow({
+  private createLogicFlowConfig(container: HTMLElement, width: number, height: number) {
+    return {
       container,
       width,
       height,
-      grid: {
-        size: 20,
-        visible: true,
-        type: 'dot',
-        config: {
-          color: '#e0e0e0',
-        },
-      },
-      background: {
-        backgroundColor: '#f8fafc',
-      },
-      keyboard: {
-        enabled: !this.readonly(),
-      },
+      grid: { size: 20, visible: true, type: 'dot' as const, config: { color: '#e0e0e0' } },
+      background: { backgroundColor: '#f8fafc' },
+      keyboard: { enabled: !this.readonly() },
       edgeTextDraggable: true,
       nodeTextDraggable: false,
-      textEdit: false, // 禁用双击编辑文字
+      textEdit: false,
       isSilentMode: this.readonly(),
       stopZoomGraph: false,
       stopScrollGraph: false,
       stopMoveGraph: false,
-      multipleSelectKey: '', // 禁用多选
-    });
+      multipleSelectKey: '',
+    };
+  }
 
-    // 使用主题设置节点样式 - 浅色背景 + 深色文字
+  private setupTheme() {
     this.lf.setTheme({
-      rect: {
-        fill: NODE_STYLES.process.fill,
-        stroke: NODE_STYLES.process.stroke,
-        strokeWidth: 2,
-        radius: 6,
-        width: 180,
-        height: 50,
-      },
-      ellipse: {
-        fill: NODE_STYLES.start.fill,
-        stroke: NODE_STYLES.start.stroke,
-        strokeWidth: 2,
-        rx: 70,
-        ry: 30,
-      },
-      diamond: {
-        fill: NODE_STYLES.decision.fill,
-        stroke: NODE_STYLES.decision.stroke,
-        strokeWidth: 2,
-        rx: 80,
-        ry: 45,
-      },
-      nodeText: {
-        color: '#1e293b', // 深色文字
-        fontSize: 13,
-        overflowMode: 'autoWrap',
-        lineHeight: 1.4,
-      },
-      polyline: {
-        stroke: '#94a3b8',
-        strokeWidth: 1.5,
-      },
-      edgeText: {
-        textWidth: 80,
-        fontSize: 12,
-        color: '#475569',
-        background: {
-          fill: '#f8fafc',
-          stroke: '#e2e8f0',
-          radius: 4,
-        },
-      },
-      arrow: {
-        offset: 4,
-        verticalLength: 2,
-      },
+      rect: { fill: NODE_STYLES.process.fill, stroke: NODE_STYLES.process.stroke, strokeWidth: 2, radius: 6, width: 180, height: 50 },
+      ellipse: { fill: NODE_STYLES.start.fill, stroke: NODE_STYLES.start.stroke, strokeWidth: 2, rx: 70, ry: 30 },
+      diamond: { fill: NODE_STYLES.decision.fill, stroke: NODE_STYLES.decision.stroke, strokeWidth: 2, rx: 80, ry: 45 },
+      nodeText: { color: '#1e293b', fontSize: 13, overflowMode: 'autoWrap', lineHeight: 1.4 },
+      polyline: { stroke: '#94a3b8', strokeWidth: 1.5 },
+      edgeText: { textWidth: 80, fontSize: 12, color: '#475569', background: { fill: '#f8fafc', stroke: '#e2e8f0', radius: 4 } },
+      arrow: { offset: 4, verticalLength: 2 },
     });
+  }
 
-    this.lf.setDefaultEdgeType('polyline');
+  private setupContextMenu() {
+    if (this.readonly()) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const menu = (this.lf.extension as any).menu;
+    if (!menu?.setMenuConfig) return;
+    
+    menu.setMenuConfig({
+      nodeMenu: [{ text: '删除', callback: (node: { id: string }) => this.handleDeleteNode(node.id) }],
+      edgeMenu: [{ text: '删除', callback: (edge: { id: string }) => this.handleDeleteEdge(edge.id) }],
+    });
+  }
 
-    // 配置节点右键菜单
-    if (!this.readonly()) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const menu = (this.lf.extension as any).menu;
-      if (menu?.setMenuConfig) {
-        menu.setMenuConfig({
-          nodeMenu: [
-            {
-              text: '删除',
-              callback: (node: { id: string }) => {
-                this.lf.deleteNode(node.id);
-                this.selectedNodeId.set(null);
-                this.selectedNodeData.set(null);
-                this.emitDataChange();
-              },
-            },
-          ],
-          edgeMenu: [
-            {
-              text: '删除',
-              callback: (edge: { id: string }) => {
-                this.lf.deleteEdge(edge.id);
-                this.emitDataChange();
-              },
-            },
-          ],
-        });
-      }
-    }
+  private handleDeleteNode(nodeId: string) {
+    this.lf.deleteNode(nodeId);
+    this.selectedNodeId.set(null);
+    this.selectedNodeData.set(null);
+    this.emitDataChange();
+  }
 
-    this.lf.render({});
+  private handleDeleteEdge(edgeId: string) {
+    this.lf.deleteEdge(edgeId);
+    this.emitDataChange();
+  }
 
-    // 事件监听
+  private setupEventListeners() {
     this.lf.on('node:click', ({ data }: { data: { id: string; text?: { value: string }; properties?: Record<string, unknown> } }) => {
-      this.selectedNodeId.set(data.id);
-      const flowType = (data.properties?.['flowType'] as FlowNodeType) || 'process';
-      const text = typeof data.text === 'object' ? data.text?.value || '' : '';
-      const imageUrl = (data.properties?.['imageUrl'] as string) || '';
-      const style = data.properties?.['style'] as { fill?: string; stroke?: string } | undefined;
-      const textColor = (data.properties?.['textColor'] as string) || '#1e293b';
-      const description = (data.properties?.['description'] as string) || '';
-      const attachments = (data.properties?.['attachments'] as { id: string; name: string; type: 'image' | 'video'; url: string }[]) || [];
-      this.selectedNodeData.set({ id: data.id, text, flowType, imageUrl });
-      this.editingText = text;
-      this.editingDescription = description;
-      this.editingFillColor = style?.fill || NODE_STYLES[flowType].fill;
-      this.editingStrokeColor = style?.stroke || NODE_STYLES[flowType].stroke;
-      this.editingTextColor = textColor;
-      this.editingImageUrl = imageUrl;
-      this.nodeAttachments = [...attachments];
+      this.handleNodeClick(data);
     });
-
-    this.lf.on('blank:click', () => {
-      this.selectedNodeId.set(null);
-      this.selectedNodeData.set(null);
-    });
-
-    this.lf.on('history:change', () => {
-      this.emitDataChange();
-    });
-
-    // 节点悬浮显示描述
+    this.lf.on('blank:click', () => this.clearSelection());
+    this.lf.on('history:change', () => this.emitDataChange());
     this.lf.on('node:mouseenter', ({ data, e }: { data: { properties?: Record<string, unknown> }; e: MouseEvent }) => {
-      const description = data.properties?.['description'] as string;
-      if (description) {
-        this.tooltipContent.set(description);
-        this.tooltipPosition.set({ x: e.clientX + 10, y: e.clientY + 10 });
-        this.tooltipVisible.set(true);
-      }
+      this.showNodeTooltip(data, e);
     });
+    this.lf.on('node:mouseleave', () => this.tooltipVisible.set(false));
+  }
 
-    this.lf.on('node:mouseleave', () => {
-      this.tooltipVisible.set(false);
+  private handleNodeClick(data: { id: string; text?: { value: string }; properties?: Record<string, unknown> }) {
+    this.selectedNodeId.set(data.id);
+    const props = data.properties || {};
+    const flowType = (props['flowType'] as FlowNodeType) || 'process';
+    const style = props['style'] as { fill?: string; stroke?: string } | undefined;
+    
+    this.selectedNodeData.set({
+      id: data.id,
+      text: typeof data.text === 'object' ? data.text?.value || '' : '',
+      flowType,
+      imageUrl: (props['imageUrl'] as string) || '',
     });
+    this.editingText = typeof data.text === 'object' ? data.text?.value || '' : '';
+    this.editingDescription = (props['description'] as string) || '';
+    this.editingFillColor = style?.fill || NODE_STYLES[flowType].fill;
+    this.editingStrokeColor = style?.stroke || NODE_STYLES[flowType].stroke;
+    this.editingTextColor = (props['textColor'] as string) || '#1e293b';
+    this.editingImageUrl = (props['imageUrl'] as string) || '';
+    this.nodeAttachments = [...((props['attachments'] as NodeAttachment[]) || [])];
+  }
+
+  private showNodeTooltip(data: { properties?: Record<string, unknown> }, e: MouseEvent) {
+    const description = data.properties?.['description'] as string;
+    if (description) {
+      this.tooltipContent.set(description);
+      this.tooltipPosition.set({ x: e.clientX + 10, y: e.clientY + 10 });
+      this.tooltipVisible.set(true);
+    }
+  }
+
+  private clearSelection() {
+    this.selectedNodeId.set(null);
+    this.selectedNodeData.set(null);
   }
 
   private getNodeType(flowType: FlowNodeType): string {
@@ -464,10 +417,6 @@ export class FlowchartBuilderComponent implements AfterViewInit, OnDestroy {
         }
       }, delay);
     });
-  }
-
-  clearSelection() {
-    this.selectedNodeId.set(null);
   }
 
   setViewMode(mode: 'visual' | 'code') {
