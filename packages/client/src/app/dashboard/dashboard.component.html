@@ -1,0 +1,179 @@
+<div class="dashboard-container">
+  <header class="dashboard-header">
+    <h1>数据仪表盘</h1>
+    <p class="subtitle">FAQ 系统运行状态概览</p>
+  </header>
+
+  <!-- 核心指标卡片 -->
+  <div class="stats-grid">
+    <lib-card class="stat-card">
+      <div class="stat-content">
+        <div class="stat-icon total">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats().total }}</span>
+          <span class="stat-label">总问题数</span>
+        </div>
+      </div>
+    </lib-card>
+
+    <lib-card class="stat-card">
+      <div class="stat-content">
+        <div class="stat-icon resolved">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats().resolveRate }}%</span>
+          <span class="stat-label">解决率</span>
+        </div>
+      </div>
+    </lib-card>
+
+    <lib-card class="stat-card">
+      <div class="stat-content">
+        <div class="stat-icon views">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats().totalViews }}</span>
+          <span class="stat-label">总浏览量</span>
+        </div>
+      </div>
+    </lib-card>
+
+    <lib-card class="stat-card">
+      <div class="stat-content">
+        <div class="stat-icon time">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats().avgSolveTime }}m</span>
+          <span class="stat-label">平均解决时长</span>
+        </div>
+      </div>
+    </lib-card>
+  </div>
+
+  <!-- 图表区域 -->
+  <div class="charts-grid">
+    <!-- 按模块分布 -->
+    <lib-card [title]="'按模块分布'" [hasHeader]="true" class="chart-card">
+      <div class="bar-chart">
+        @for (item of moduleStats(); track item.label) {
+          <div class="bar-item">
+            <div class="bar-label">{{ item.label }}</div>
+            <div class="bar-wrapper">
+              <div class="bar" [style.width.%]="getBarWidth(item.value, getMaxValue(moduleStats()))" [style.background]="item.color"></div>
+              <span class="bar-value">{{ item.value }}</span>
+            </div>
+          </div>
+        }
+        @if (moduleStats().length === 0) {
+          <div class="empty-chart">暂无数据</div>
+        }
+      </div>
+    </lib-card>
+
+    <!-- 状态分布 -->
+    <lib-card [title]="'状态分布'" [hasHeader]="true" class="chart-card">
+      <div class="status-chart">
+        <div class="donut-chart">
+          <svg viewBox="0 0 100 100" class="donut">
+            @if (stats().total > 0) {
+              <circle class="donut-ring" cx="50" cy="50" r="40" fill="transparent" stroke="#e5e7eb" stroke-width="12"/>
+              <circle class="donut-segment resolved-segment" cx="50" cy="50" r="40" fill="transparent" stroke="#22c55e" stroke-width="12"
+                [attr.stroke-dasharray]="(stats().resolved / stats().total * 251.2) + ' 251.2'"
+                stroke-dashoffset="0" transform="rotate(-90 50 50)"/>
+              <circle class="donut-segment pending-segment" cx="50" cy="50" r="40" fill="transparent" stroke="#f59e0b" stroke-width="12"
+                [attr.stroke-dasharray]="(stats().pending / stats().total * 251.2) + ' 251.2'"
+                [attr.stroke-dashoffset]="-((stats().resolved / stats().total * 251.2))" transform="rotate(-90 50 50)"/>
+            }
+          </svg>
+          <div class="donut-center">
+            <span class="donut-value">{{ stats().total }}</span>
+            <span class="donut-label">总计</span>
+          </div>
+        </div>
+        <div class="status-legend">
+          @for (item of statusStats(); track item.label) {
+            <div class="legend-item">
+              <span class="legend-color" [style.background]="item.color"></span>
+              <span class="legend-label">{{ item.label }}</span>
+              <span class="legend-value">{{ item.value }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </lib-card>
+
+    <!-- 热门标签 -->
+    <lib-card [title]="'热门标签'" [hasHeader]="true" class="chart-card">
+      <div class="tags-cloud">
+        @for (tag of topTags(); track tag[0]) {
+          <span class="tag-item" [style.font-size.rem]="0.8 + (tag[1] / topTags()[0][1]) * 0.4">
+            #{{ tag[0] }}
+            <span class="tag-count">{{ tag[1] }}</span>
+          </span>
+        }
+        @if (topTags().length === 0) {
+          <div class="empty-chart">暂无数据</div>
+        }
+      </div>
+    </lib-card>
+  </div>
+
+  <!-- 列表区域 -->
+  <div class="lists-grid">
+    <!-- 热门问题 -->
+    <lib-card [title]="'热门问题 TOP5'" [hasHeader]="true" class="list-card">
+      <div class="faq-list">
+        @for (faq of topFaqs(); track faq.id; let i = $index) {
+          <a class="faq-item" [routerLink]="['/detail', faq.id]">
+            <span class="rank" [class.top3]="i < 3">{{ i + 1 }}</span>
+            <span class="title">{{ faq.title }}</span>
+            <span class="views">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              {{ faq.views }}
+            </span>
+          </a>
+        }
+        @if (topFaqs().length === 0) {
+          <div class="empty-list">暂无数据</div>
+        }
+      </div>
+    </lib-card>
+
+    <!-- 最近更新 -->
+    <lib-card [title]="'最近更新'" [hasHeader]="true" class="list-card">
+      <div class="faq-list">
+        @for (faq of recentFaqs(); track faq.id) {
+          <a class="faq-item" [routerLink]="['/detail', faq.id]">
+            <span class="status-dot" [class.resolved]="faq.status === 'resolved'" [class.pending]="faq.status === 'pending'"></span>
+            <span class="title">{{ faq.title }}</span>
+            <span class="time">{{ faq.createTime || '未知' }}</span>
+          </a>
+        }
+        @if (recentFaqs().length === 0) {
+          <div class="empty-list">暂无数据</div>
+        }
+      </div>
+    </lib-card>
+  </div>
+</div>

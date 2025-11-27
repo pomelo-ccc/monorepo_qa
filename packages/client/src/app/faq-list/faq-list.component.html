@@ -1,6 +1,26 @@
 <div class="faq-container">
   <!-- 左侧边栏 -->
   <aside class="sidebar">
+    <!-- 统计卡片 -->
+    <div class="stats-cards">
+      <div class="stat-card">
+        <div class="stat-value">{{ stats().total }}</div>
+        <div class="stat-label">总问题数</div>
+      </div>
+      <div class="stat-card resolved">
+        <div class="stat-value">{{ stats().resolved }}</div>
+        <div class="stat-label">已解决</div>
+      </div>
+      <div class="stat-card pending">
+        <div class="stat-value">{{ stats().pending }}</div>
+        <div class="stat-label">处理中</div>
+      </div>
+      <div class="stat-card views">
+        <div class="stat-value">{{ stats().totalViews }}</div>
+        <div class="stat-label">总浏览</div>
+      </div>
+    </div>
+
     <div class="sidebar-section">
       <h3 class="sidebar-title">模块分类</h3>
       <div class="filter-list">
@@ -39,7 +59,7 @@
               <path d="m21 21-4.35-4.35" />
             </svg>
           </div>
-          <input type="text" [(ngModel)]="keywordSearch" (focus)="searchFocused = true" (blur)="searchFocused = false" placeholder="搜索问题、错误码或解决方案..." class="search-input" />
+          <input type="text" [(ngModel)]="keywordSearch" (focus)="onSearchFocus()" (blur)="onSearchBlur()" (keyup.enter)="onSearchSubmit()" placeholder="搜索问题、错误码或解决方案..." class="search-input" />
           @if (keywordSearch) {
             <button class="clear-btn" (click)="keywordSearch = ''">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -48,8 +68,71 @@
               </svg>
             </button>
           }
+          <button class="filter-toggle-btn" [class.active]="showAdvancedSearch" (click)="toggleAdvancedSearch()" title="高级筛选">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+            </svg>
+          </button>
+
+          <!-- 搜索历史下拉 -->
+          @if (showSearchHistory && searchHistory().length > 0) {
+            <div class="search-history-dropdown">
+              <div class="history-header">
+                <span>搜索历史</span>
+                <button class="clear-history-btn" (click)="clearHistory()">清空</button>
+              </div>
+              @for (item of searchHistory(); track item) {
+                <button class="history-item" (click)="selectHistory(item)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                  {{ item }}
+                </button>
+              }
+            </div>
+          }
         </div>
+
+        <!-- 高级筛选面板 -->
+        @if (showAdvancedSearch) {
+          <div class="advanced-search-panel">
+            <div class="filter-row">
+              <div class="filter-item">
+                <span class="filter-item-label">版本</span>
+                <lib-select [options]="versionOptions()" [(ngModel)]="advancedVersion" (selectionChange)="filterByVersion($event)" placeholder="选择版本"></lib-select>
+              </div>
+              <div class="filter-item">
+                <span class="filter-item-label">状态</span>
+                <lib-select [options]="statusOptions" [(ngModel)]="advancedStatus" (selectionChange)="filterByStatus($event)" placeholder="选择状态"></lib-select>
+              </div>
+              <div class="filter-item">
+                <lib-button variant="ghost" size="sm" (click)="clearFilters()">重置筛选</lib-button>
+              </div>
+            </div>
+          </div>
+        }
       </div>
+
+      <!-- 当前筛选条件 -->
+      @if (selectedModule() || selectedVersion() || selectedStatus() || keywordSearch) {
+        <div class="active-filters">
+          <span class="filter-label">当前筛选:</span>
+          @if (selectedModule()) {
+            <span class="filter-tag">模块: {{ getModuleName(selectedModule()) }} <button (click)="filterByModule('')">×</button></span>
+          }
+          @if (selectedVersion()) {
+            <span class="filter-tag">版本: {{ selectedVersion() }} <button (click)="filterByVersion('')">×</button></span>
+          }
+          @if (selectedStatus()) {
+            <span class="filter-tag">状态: {{ selectedStatus() === 'resolved' ? '已解决' : selectedStatus() === 'pending' ? '处理中' : '已关闭' }} <button (click)="filterByStatus('')">×</button></span>
+          }
+          @if (keywordSearch) {
+            <span class="filter-tag">关键词: {{ keywordSearch }} <button (click)="keywordSearch = ''">×</button></span>
+          }
+          <span class="result-count">找到 {{ filteredFaqs().length }} 条结果</span>
+        </div>
+      }
     </div>
 
     <!-- FAQ 卡片列表 -->

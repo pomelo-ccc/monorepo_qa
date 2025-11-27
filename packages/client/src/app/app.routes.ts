@@ -13,6 +13,7 @@ import { LoginComponent } from './login/login.component';
 import { AdminComponent } from './admin/admin.component';
 import { ConfigManagementComponent } from './admin/config-management/config-management.component';
 import { FlowchartBuilderPageComponent } from './flowchart-builder/flowchart-builder-page.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
 import { AuthService } from './services/auth.service';
 
 // Admin guard function
@@ -32,6 +33,7 @@ const adminGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterS
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: '', component: FaqListComponent },
+  { path: 'dashboard', component: DashboardComponent },
   { path: 'detail/:id', component: FaqDetailComponent },
   { path: 'create', component: FaqEditComponent, canActivate: [adminGuard] },
   { path: 'edit/:id', component: FaqEditComponent, canActivate: [adminGuard] },

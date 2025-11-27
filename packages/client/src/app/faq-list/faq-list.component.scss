@@ -377,3 +377,194 @@
   opacity: 0.5;
   margin-bottom: 1.5rem;
 }
+
+// 统计卡片
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.stat-card {
+  background: var(--color-surfaceHover);
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  border: 1px solid var(--color-border);
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--color-textSecondary);
+    margin-top: 0.25rem;
+  }
+
+  &.resolved .stat-value { color: #22c55e; }
+  &.pending .stat-value { color: #f59e0b; }
+  &.views .stat-value { color: var(--color-primary); }
+}
+
+// 筛选按钮
+.filter-toggle-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--color-textSecondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+
+  &:hover, &.active {
+    background: var(--color-surfaceHover);
+    color: var(--color-primary);
+  }
+}
+
+// 搜索历史
+.search-history-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  overflow: hidden;
+
+  .history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.8rem;
+    color: var(--color-textSecondary);
+  }
+
+  .clear-history-btn {
+    background: none;
+    border: none;
+    color: var(--color-primary);
+    cursor: pointer;
+    font-size: 0.8rem;
+
+    &:hover { text-decoration: underline; }
+  }
+
+  .history-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: none;
+    border: none;
+    color: var(--color-text);
+    cursor: pointer;
+    text-align: left;
+    font-size: 0.9rem;
+    transition: background 0.15s;
+
+    &:hover { background: var(--color-surfaceHover); }
+    svg { color: var(--color-textSecondary); }
+  }
+}
+
+// 高级筛选面板
+.advanced-search-panel {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--color-surfaceHover);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+
+  .filter-row {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .filter-item {
+    flex: 1;
+    min-width: 150px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .filter-item-label {
+      font-size: 0.8rem;
+      color: var(--color-textSecondary);
+      font-weight: 500;
+    }
+  }
+}
+
+// 当前筛选条件
+.active-filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--color-surfaceHover);
+  border-radius: 8px;
+
+  .filter-label {
+    font-size: 0.85rem;
+    color: var(--color-textSecondary);
+    margin-right: 0.5rem;
+  }
+
+  .filter-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.75rem;
+    background: var(--color-primary);
+    color: white;
+    border-radius: 20px;
+    font-size: 0.8rem;
+
+    button {
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      padding: 0;
+      font-size: 1rem;
+      line-height: 1;
+      opacity: 0.8;
+
+      &:hover { opacity: 1; }
+    }
+  }
+
+  .result-count {
+    margin-left: auto;
+    font-size: 0.85rem;
+    color: var(--color-textSecondary);
+  }
+}
+
+// 搜索结果高亮
+:host ::ng-deep .highlight {
+  background: rgba(var(--color-primary-rgb, 79, 70, 229), 0.2);
+  color: var(--color-primary);
+  padding: 0.1em 0.2em;
+  border-radius: 3px;
+}
