@@ -85,6 +85,10 @@ export class ConfigService {
     return this.http.delete<void>(`${API_URL}/tags/${encodeURIComponent(tag)}`);
   }
 
+  saveTags(tags: string[]): Observable<string[]> {
+    return this.http.put<string[]>(`${API_URL}/tags`, tags);
+  }
+
   // Versions
   getVersions(): Observable<Version[]> {
     return this.http.get<Version[]>(`${API_URL}/versions`);
@@ -109,5 +113,9 @@ export class ConfigService {
 
   deleteVersion(id: string): Observable<void> {
     return this.http.delete<void>(`${API_URL}/versions/${id}`);
+  }
+
+  updateVersions(versions: Version[]): Observable<Version[]> {
+    return this.http.put<Version[]>(`${API_URL}/versions`, versions);
   }
 }

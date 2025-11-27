@@ -1,0 +1,194 @@
+<div class="config-page">
+  <!-- 固定顶部栏 -->
+  <div class="sticky-header">
+    <button class="back-btn" (click)="goBack()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 12H5M12 19l-7-7 7-7" />
+      </svg>
+      返回
+    </button>
+    <h1 class="page-title">系统配置</h1>
+    <div class="header-spacer"></div>
+  </div>
+
+  <!-- Tab 导航 -->
+  <div class="tab-bar">
+    <button class="tab-item" [class.active]="activeTab === 'modules'" (click)="activeTab = 'modules'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7"></rect>
+        <rect x="14" y="3" width="7" height="7"></rect>
+        <rect x="14" y="14" width="7" height="7"></rect>
+        <rect x="3" y="14" width="7" height="7"></rect>
+      </svg>
+      模块管理
+    </button>
+    <button class="tab-item" [class.active]="activeTab === 'tags'" (click)="activeTab = 'tags'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+        <line x1="7" y1="7" x2="7.01" y2="7"></line>
+      </svg>
+      标签管理
+    </button>
+    <button class="tab-item" [class.active]="activeTab === 'versions'" (click)="activeTab = 'versions'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="6" y1="3" x2="6" y2="15"></line>
+        <circle cx="18" cy="6" r="3"></circle>
+        <circle cx="6" cy="18" r="3"></circle>
+        <path d="M18 9a9 9 0 0 1-9 9"></path>
+      </svg>
+      版本管理
+    </button>
+  </div>
+
+  <!-- 内容区 -->
+  <main class="main-content">
+    <!-- Modules Management -->
+    @if (activeTab === 'modules') {
+      <div class="tab-content full-height">
+        <lib-card title="模块列表" [hasHeader]="true" class="full-height-card">
+          <ng-container ngProjectAs="[header-extra]">
+            <lib-button variant="primary" (click)="openAddModuleDialog()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              添加模块
+            </lib-button>
+          </ng-container>
+          <div class="table-wrapper">
+            <lib-data-table [columns]="moduleColumns" [data]="flatModules" [actions]="moduleActions" [pagination]="false" [autoHeight]="false"></lib-data-table>
+          </div>
+        </lib-card>
+      </div>
+    }
+
+    <!-- Tags Management -->
+    @if (activeTab === 'tags') {
+      <div class="tab-content">
+        <lib-card title="标签列表" [hasHeader]="true">
+          <div class="add-tag-section">
+            <input [(ngModel)]="newTagName" (keyup.enter)="addTag()" placeholder="输入新标签名称并回车" class="add-input" />
+            <lib-button variant="primary" (click)="addTag()" [disabled]="!newTagName">添加标签</lib-button>
+          </div>
+          <div class="tags-grid">
+            @for (tag of tags; track tag) {
+              <div class="tag-card">
+                @if (editingTag !== tag) {
+                  <div class="tag-view">
+                    <span class="tag-name">{{ tag }}</span>
+                    <div class="tag-actions">
+                      <button class="btn-icon-sm" (click)="startEditTag(tag)">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                      </button>
+                      <button class="btn-icon-sm danger" (click)="deleteTag(tag)">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <line x1="18" y1="6" x2="6" y2="18"></line>
+                          <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                }
+                @if (editingTag === tag) {
+                  <div class="tag-edit">
+                    <input [(ngModel)]="editTagName" (keyup.enter)="saveTagEdit()" (keyup.escape)="cancelEditTag()" class="edit-input-sm" #editInput />
+                    <button class="btn-icon-sm success" (click)="saveTagEdit()">✓</button>
+                    <button class="btn-icon-sm" (click)="cancelEditTag()">✕</button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </lib-card>
+      </div>
+    }
+
+    <!-- Versions Management -->
+    @if (activeTab === 'versions') {
+      <div class="tab-content full-height">
+        <lib-card title="版本列表" [hasHeader]="true" class="full-height-card">
+          <ng-container ngProjectAs="[header-extra]">
+            <div class="header-actions">
+              <lib-button variant="outline" (click)="openBatchAddVersionDialog()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="12" y1="18" x2="12" y2="12"></line>
+                  <line x1="9" y1="15" x2="15" y2="15"></line>
+                </svg>
+                批量添加
+              </lib-button>
+              <lib-button variant="primary" (click)="openAddVersionDialog()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                添加版本
+              </lib-button>
+            </div>
+          </ng-container>
+          <div class="table-wrapper">
+            <lib-data-table [columns]="versionColumns" [data]="versions" [actions]="versionActions" [pagination]="false" [autoHeight]="false"></lib-data-table>
+          </div>
+        </lib-card>
+      </div>
+    }
+  </main>
+
+  <!-- Dialogs -->
+  @if (confirmDialog.visible) {
+    <lib-dialog [title]="confirmDialog.title" confirmVariant="danger" (cancelEvent)="closeConfirmDialog()" (confirmEvent)="onConfirmDialog()">
+      <p>{{ confirmDialog.message }}</p>
+    </lib-dialog>
+  }
+
+  @if (moduleDialog.visible) {
+    <lib-dialog [title]="moduleDialog.isEdit ? '编辑模块' : '添加模块'" (cancelEvent)="closeModuleDialog()" (confirmEvent)="saveModule()">
+      <div class="form-group">
+        <label for="module-id">模块ID</label>
+        <input id="module-id" [(ngModel)]="moduleDialog.data.id" [disabled]="moduleDialog.isEdit" placeholder="输入模块ID (英文)" class="form-input" />
+      </div>
+      <div class="form-group">
+        <label for="module-name">模块名称</label>
+        <input id="module-name" [(ngModel)]="moduleDialog.data.name" placeholder="输入模块名称" class="form-input" />
+      </div>
+      @if (!moduleDialog.isEdit) {
+        <div class="form-group">
+          <label for="module-parent">父模块</label>
+          <select id="module-parent" [(ngModel)]="moduleDialog.data.parentId" class="form-input">
+            <option value="">(无 - 创建顶级模块)</option>
+            @for (m of modules; track m.id) {
+              <option [value]="m.id">{{ m.name }} ({{ m.id }})</option>
+            }
+          </select>
+        </div>
+      }
+    </lib-dialog>
+  }
+
+  @if (versionDialog.visible) {
+    <lib-dialog [title]="versionDialog.isEdit ? '编辑版本' : '添加版本'" (cancelEvent)="closeVersionDialog()" (confirmEvent)="saveVersion()">
+      <div class="form-group">
+        <label for="version-name">版本号</label>
+        <input id="version-name" [(ngModel)]="versionDialog.data.name" placeholder="例如 1.0.0" class="form-input" />
+      </div>
+      <div class="form-group">
+        <label for="version-desc">描述</label>
+        <textarea id="version-desc" [(ngModel)]="versionDialog.data.description" placeholder="版本描述" class="form-input" rows="3"></textarea>
+      </div>
+    </lib-dialog>
+  }
+
+  @if (batchVersionDialog.visible) {
+    <lib-dialog title="批量添加版本" (cancelEvent)="closeBatchVersionDialog()" (confirmEvent)="saveBatchVersions()">
+      <div class="form-group">
+        <label for="batch-version-text">版本列表 (每行一个)</label>
+        <textarea id="batch-version-text" [(ngModel)]="batchVersionDialog.text" placeholder="1.0.0&#10;1.0.1&#10;1.0.2" class="form-input" rows="10"></textarea>
+        <p class="help-text">请输入版本号，每行一个。暂不支持批量输入描述。</p>
+      </div>
+    </lib-dialog>
+  }
+</div>
