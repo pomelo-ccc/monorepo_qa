@@ -299,18 +299,10 @@
 
     <!-- 右侧边栏：流程图构建器 -->
     @if (showFlowchart) {
-      <aside class="right-sidebar" [class.fullscreen-mode]="isFullscreen">
+      <aside class="right-sidebar">
         <div class="flowchart-header">
           <span class="flowchart-title">排查流程图</span>
           <div class="flowchart-actions">
-            <button class="icon-btn" title="全屏" (click)="toggleFullscreen()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <polyline points="15 3 21 3 21 9" />
-                <polyline points="9 21 3 21 3 15" />
-                <line x1="21" y1="3" x2="14" y2="10" />
-                <line x1="3" y1="21" x2="10" y2="14" />
-              </svg>
-            </button>
             <button class="icon-btn" (click)="toggleFlowchart()" title="隐藏">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <polyline points="13 17 18 12 13 7" />

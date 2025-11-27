@@ -34,7 +34,6 @@ export class FaqEditComponent implements OnInit {
   faqId: string | null = null;
   faqData?: FaqItem;
   showFlowchart = true;
-  isFullscreen = false;
   flowchartData: FlowchartData = { nodes: [], connections: [] };
 
   attachments: {
@@ -271,14 +270,7 @@ export class FaqEditComponent implements OnInit {
     this.showFlowchart = !this.showFlowchart;
   }
 
-  toggleFullscreen() {
-    this.isFullscreen = !this.isFullscreen;
-    // 延迟触发 resize 让流程图重新计算尺寸
-    setTimeout(() => {
-      window.dispatchEvent(new Event('resize'));
-    }, 100);
-  }
-
+  
   onSave() {
     if (
       !this.formData.title ||

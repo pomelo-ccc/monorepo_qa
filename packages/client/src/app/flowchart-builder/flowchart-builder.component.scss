@@ -7,6 +7,35 @@
   background: var(--color-background);
 }
 
+:host:fullscreen {
+  width: 100vw !important;
+  height: 100vh !important;
+  background: var(--color-background);
+
+  .flowchart-builder {
+    height: 100vh !important;
+    border: none;
+    border-radius: 0;
+  }
+
+  .main-content {
+    flex: 1;
+    height: calc(100vh - 50px) !important;
+    min-height: calc(100vh - 50px) !important;
+  }
+
+  .canvas-container {
+    width: 100vw !important;
+    height: calc(100vh - 50px) !important;
+    min-height: calc(100vh - 50px) !important;
+  }
+
+  .canvas-container ::ng-deep .lf-graph {
+    width: 100vw !important;
+    height: calc(100vh - 50px) !important;
+  }
+}
+
 .flowchart-builder {
   display: flex;
   flex-direction: column;

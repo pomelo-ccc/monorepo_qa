@@ -1,12 +1,13 @@
 import {
+  AfterViewInit,
   Component,
   ElementRef,
-  ViewChild,
-  input,
-  Output,
   EventEmitter,
-  AfterViewInit,
   OnDestroy,
+  Output,
+  ViewChild,
+  inject,
+  input,
   signal,
   computed,
   effect,
@@ -53,6 +54,7 @@ interface GraphData {
 })
 export class FlowchartBuilderComponent implements AfterViewInit, OnDestroy {
   @ViewChild('canvasContainer') canvasContainer!: ElementRef<HTMLDivElement>;
+  private hostElement = inject(ElementRef);
 
   // Signal-based inputs
   data = input<FlowchartData | null>(null);
@@ -91,6 +93,7 @@ export class FlowchartBuilderComponent implements AfterViewInit, OnDestroy {
   tooltipVisible = signal(false);
   tooltipContent = signal('');
   tooltipPosition = signal({ x: 0, y: 0 });
+  isFullscreen = signal(false);
   codeContent = signal('');
   codeError = signal<string | null>(null);
 
@@ -208,9 +211,9 @@ export class FlowchartBuilderComponent implements AfterViewInit, OnDestroy {
       keyboard: {
         enabled: !this.readonly(),
       },
-      edgeTextDraggable: true, // 允许拖动边文字
+      edgeTextDraggable: true,
       nodeTextDraggable: false,
-      textEdit: !this.readonly(), // 允许编辑边的文字
+      textEdit: false, // 禁用双击编辑文字
       isSilentMode: this.readonly(),
       stopZoomGraph: false,
       stopScrollGraph: false,
@@ -301,17 +304,6 @@ export class FlowchartBuilderComponent implements AfterViewInit, OnDestroy {
     }
 
     this.lf.render({});
-
-    // 禁用节点双击编辑（只允许边的文字编辑）
-    this.lf.on('node:dblclick', () => {
-      // 延迟关闭文字编辑状态
-      setTimeout(() => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (this.lf.graphModel as any).setTextEditable(false);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setTimeout(() => (this.lf.graphModel as any).setTextEditable(true), 0);
-      }, 0);
-    });
 
     // 事件监听
     this.lf.on('node:click', ({ data }: { data: { id: string; text?: { value: string }; properties?: Record<string, unknown> } }) => {
@@ -439,6 +431,39 @@ export class FlowchartBuilderComponent implements AfterViewInit, OnDestroy {
     this.lf.resetZoom();
     this.lf.resetTranslate();
     this.zoomPercent.set(100);
+  }
+
+  toggleFullscreen() {
+    const element = this.hostElement.nativeElement;
+    const goingFullscreen = !this.isFullscreen();
+    
+    if (goingFullscreen) {
+      if (element.requestFullscreen) {
+        element.requestFullscreen();
+      }
+      this.isFullscreen.set(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+      this.isFullscreen.set(false);
+    }
+    
+    // 多次延迟 resize 确保全屏动画完成后正确设置尺寸
+    [100, 300, 600].forEach((delay) => {
+      setTimeout(() => {
+        if (this.lf) {
+          if (goingFullscreen) {
+            // 全屏时使用窗口尺寸
+            this.lf.resize(window.innerWidth, window.innerHeight - 50);
+          } else {
+            // 退出全屏时使用容器尺寸
+            const container = this.canvasContainer.nativeElement;
+            this.lf.resize(container.clientWidth, container.clientHeight);
+          }
+        }
+      }, delay);
+    });
   }
 
   clearSelection() {
