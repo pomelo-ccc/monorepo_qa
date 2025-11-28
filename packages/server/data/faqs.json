@@ -93,10 +93,10 @@
     "troubleshootingFlow": "{\"nodes\":[{\"id\":\"ed06dd92-217f-4ef8-9a92-5e9481f670c8\",\"type\":\"start\",\"text\":\"开始\",\"x\":214.09247274469033,\"y\":184.00281721235874,\"width\":120,\"height\":50,\"fillColor\":\"#10b981\",\"strokeColor\":\"#059669\"},{\"id\":\"ecf71381-5b54-44c1-80e2-6b55889c5f34\",\"type\":\"process\",\"text\":\"流程步骤\",\"x\":399.6301840733829,\"y\":191.81718749475942,\"width\":120,\"height\":50,\"fillColor\":\"#3b82f6\",\"strokeColor\":\"#2563eb\"}],\"connections\":[{\"id\":\"67943dc3-b7ff-4265-9333-078c8bb74f56\",\"from\":{\"nodeId\":\"ed06dd92-217f-4ef8-9a92-5e9481f670c8\",\"position\":\"bottom\"},\"to\":{\"nodeId\":\"ecf71381-5b54-44c1-80e2-6b55889c5f34\",\"position\":\"top\"}}]}",
     "validationMethod": "1",
     "errorCode": "TAB_校验_0812",
-    "views": 114,
+    "views": 115,
     "solveTimeMinutes": 0,
     "id": "1763961167392",
-    "updateTime": "2025-11-27T07:18:58.269Z"
+    "updateTime": "2025-11-28T01:54:22.018Z"
   },
   {
     "title": "ddd",

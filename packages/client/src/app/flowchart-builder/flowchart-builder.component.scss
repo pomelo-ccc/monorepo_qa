@@ -45,13 +45,176 @@
   border: 1px solid var(--color-border);
 }
 
+// ============================================
+// 新工具栏样式 - 按图片设计
+// ============================================
+.toolbar-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  background: #0e0e0e;
+  border-bottom: 1px solid #1a1a1a;
+}
+
+// 节点类型按钮区
+.node-types {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.node-types-row {
+  display: flex;
+  gap: 8px;
+}
+
+.node-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  
+  &:hover { opacity: 0.85; }
+}
+
+.node-default {
+  background: #22c55e;
+  color: #fff;
+}
+
+.node-start {
+  background: #f97316;
+  color: #fff;
+}
+
+.node-process {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.node-decision {
+  background: #eab308;
+  color: #000;
+}
+
+.node-end {
+  background: #ef4444;
+  color: #fff;
+}
+
+.node-image {
+  background: #a855f7;
+  color: #fff;
+}
+
+// 操作工具栏
+.action-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-icon-btn {
+  background: none;
+  border: none;
+  color: #666;
+  padding: 6px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  
+  &:hover {
+    color: #888;
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 2px 4px;
+}
+
+.zoom-value {
+  font-size: 11px;
+  color: #666;
+  min-width: 36px;
+  text-align: center;
+}
+
+// 视图切换和导出
+.view-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.view-tabs {
+  display: flex;
+  background: #1a1a1a;
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.view-tab {
+  padding: 6px 14px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.15s;
+  
+  &:hover {
+    color: #aaa;
+  }
+  
+  &.active {
+    background: #ec4899;
+    color: #fff;
+  }
+}
+
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid #ec4899;
+  border-radius: 6px;
+  color: #ec4899;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  
+  &:hover {
+    background: rgba(236, 72, 153, 0.1);
+  }
+}
+
+// 旧工具栏样式（保留用于只读模式）
 .toolbar {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
+  background: #0e0e0e;
+  border-bottom: 1px solid #1a1a1a;
   flex-wrap: wrap;
 }
 
@@ -63,14 +226,14 @@
 
 .toolbar-label {
   font-size: 0.75rem;
-  color: var(--color-text-secondary);
+  color: #666;
   margin-right: 0.5rem;
 }
 
 .toolbar-divider {
   width: 1px;
   height: 24px;
-  background: var(--color-border);
+  background: #2a2a2a;
   margin: 0 0.5rem;
 }
 
@@ -86,15 +249,15 @@
   background: transparent;
   border: 1px solid transparent;
   border-radius: 6px;
-  color: var(--color-text);
+  color: #888;
   font-size: 0.8rem;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .tool-btn:hover:not(:disabled) {
-  background: var(--color-surface-hover);
-  border-color: var(--color-border);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: #2a2a2a;
 }
 
 .tool-btn:disabled {
@@ -103,15 +266,15 @@
 }
 
 .tool-btn.active {
-  background: var(--color-primary);
+  background: #ec4899;
   color: white;
-  border-color: var(--color-primary);
+  border-color: #ec4899;
 }
 
 .tool-btn.primary {
-  background: var(--color-primary);
+  background: #ec4899;
   color: white;
-  border-color: var(--color-primary);
+  border-color: #ec4899;
 }
 
 .tool-btn.primary:hover {
@@ -120,7 +283,7 @@
 
 .zoom-label {
   font-size: 0.75rem;
-  color: var(--color-text-secondary);
+  color: #666;
   min-width: 40px;
   text-align: center;
 }
@@ -132,14 +295,56 @@
   overflow: hidden;
 }
 
+.canvas-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: #0e0e0e;
+  
+  &.hidden {
+    display: none;
+  }
+}
+
 .canvas-container {
   width: 100%;
   height: 100%;
   min-height: 400px;
+  border: 1px dashed #3a3a3a;
+  border-radius: 8px;
+  margin: 8px;
+  width: calc(100% - 16px);
+  height: calc(100% - 16px);
 }
 
-.canvas-container.hidden {
-  display: none;
+// 空状态
+.empty-state {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.empty-icon {
+  color: #ec4899;
+  opacity: 0.6;
+}
+
+.empty-text {
+  font-size: 13px;
+  color: #888;
+  margin: 0;
+}
+
+.empty-hint {
+  font-size: 12px;
+  color: #555;
+  margin: 0;
 }
 
 /* LogicFlow 样式覆盖 */

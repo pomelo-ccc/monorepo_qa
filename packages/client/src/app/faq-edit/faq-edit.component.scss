@@ -607,13 +607,32 @@
   border-bottom: 1px solid #1a1a1a;
 }
 
+.flowchart-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title-bar {
+  width: 3px;
+  height: 16px;
+  background: #ef4444;
+  border-radius: 2px;
+}
+
 .flowchart-title {
   font-size: 13px;
   font-weight: 500;
   color: #fff;
 }
 
-.collapse-btn {
+.flowchart-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-icon-btn {
   background: none;
   border: none;
   color: #666;
@@ -621,9 +640,11 @@
   padding: 4px;
   display: flex;
   align-items: center;
+  border-radius: 4px;
   
   &:hover {
     color: #888;
+    background: rgba(255, 255, 255, 0.05);
   }
 }
 
