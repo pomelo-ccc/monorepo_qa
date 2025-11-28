@@ -181,6 +181,27 @@
           ></textarea>
         </fieldset>
 
+        <!-- 解决方案 -->
+        <fieldset class="edit-card">
+          <legend class="card-legend">
+            <div class="legend-content">
+              <span class="legend-icon-circle danger">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M9 12l2 2 4-4" />
+                </svg>
+              </span>
+              <span>解决方案</span>
+              <span class="required-mark">*</span>
+            </div>
+          </legend>
+          <textarea
+            [(ngModel)]="formData.solution"
+            placeholder="详细说明如何修复该问题..."
+            class="text-area"
+          ></textarea>
+        </fieldset>
+
         <!-- 附件上传 -->
         <fieldset class="edit-card">
           <legend class="card-legend">
@@ -264,27 +285,6 @@
               </label>
             </div>
           </div>
-        </fieldset>
-
-        <!-- 解决方案 -->
-        <fieldset class="edit-card">
-          <legend class="card-legend">
-            <div class="legend-content">
-              <span class="legend-icon-circle danger">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="M9 12l2 2 4-4" />
-                </svg>
-              </span>
-              <span>解决方案</span>
-              <span class="required-mark">*</span>
-            </div>
-          </legend>
-          <textarea
-            [(ngModel)]="formData.solution"
-            placeholder="详细说明如何修复该问题..."
-            class="text-area"
-          ></textarea>
         </fieldset>
 
       </div>

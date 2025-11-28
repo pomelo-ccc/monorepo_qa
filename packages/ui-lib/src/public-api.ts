@@ -16,3 +16,4 @@ export * from './lib/checkbox/checkbox.component';
 export * from './lib/message/message.component';
 export * from './lib/dialog/dialog.component';
 export * from './lib/dialog/dialog.service';
+export * from './lib/tooltip/tooltip.component';
