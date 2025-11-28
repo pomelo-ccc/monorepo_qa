@@ -149,6 +149,42 @@ export class FaqListComponent implements OnInit {
     return module ? (module.parentName ? `${module.parentName} - ${module.name}` : module.name) : moduleId;
   }
 
+  getModuleCount(moduleId: string): number {
+    return this.faqs().filter((f) => f.component === moduleId).length;
+  }
+
+  getResolveRate(): number {
+    const total = this.stats().total;
+    if (total === 0) return 0;
+    return Math.round((this.stats().resolved / total) * 100);
+  }
+
+  getComponentType(component: string): string {
+    const lower = component.toLowerCase();
+    if (lower.includes('table')) return 'table';
+    if (lower.includes('project')) return 'project';
+    if (lower.includes('backend')) return 'backend';
+    if (lower.includes('other')) return 'other';
+    return 'default';
+  }
+
+  getComponentLabel(component: string): string {
+    const module = this.modules().find((m) => m.id === component);
+    if (!module) return component.toUpperCase();
+    // 返回模块名的大写形式
+    return module.name.toUpperCase();
+  }
+
+  getStatusText(status: string): string {
+    switch (status) {
+      case 'resolved': return '已解决';
+      case 'pending': return '待处理';
+      case 'processing': return '处理中';
+      case 'closed': return '已关闭';
+      default: return status;
+    }
+  }
+
   highlightText(text: string): string {
     if (!this.keywordSearch.trim()) return text;
     const regex = new RegExp(`(${this.escapeRegExp(this.keywordSearch)})`, 'gi');

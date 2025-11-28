@@ -1,47 +1,49 @@
-<div class="faq-container">
+<div class="page-container">
   <!-- 左侧边栏 -->
-  <aside class="sidebar">
-    <!-- 统计卡片 -->
-    <div class="stats-cards">
-      <div class="stat-card">
-        <div class="stat-value">{{ stats().total }}</div>
-        <div class="stat-label">总问题数</div>
-      </div>
-      <div class="stat-card resolved">
-        <div class="stat-value">{{ stats().resolved }}</div>
-        <div class="stat-label">已解决</div>
-      </div>
-      <div class="stat-card pending">
-        <div class="stat-value">{{ stats().pending }}</div>
-        <div class="stat-label">处理中</div>
-      </div>
-      <div class="stat-card views">
-        <div class="stat-value">{{ stats().totalViews }}</div>
-        <div class="stat-label">总浏览</div>
-      </div>
-    </div>
-
+  <aside class="left-sidebar">
+    <!-- 模块分类 -->
     <div class="sidebar-section">
-      <h3 class="sidebar-title">模块分类</h3>
-      <div class="filter-list">
-        <lib-button [variant]="selectedModule() === '' ? 'primary' : 'ghost'" [block]="true" (click)="filterByModule('')" class="filter-btn">
-          全部模块
-        </lib-button>
+      <h3 class="section-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/>
+        </svg>
+        模块分类
+      </h3>
+      <div class="module-list">
+        <button 
+          class="module-item" 
+          [class.active]="selectedModule() === ''"
+          (click)="filterByModule('')"
+        >
+          <span class="module-name">全部模块</span>
+          <span class="module-count">{{ stats().total }}</span>
+        </button>
         @for (mod of usedModules(); track mod.id) {
-          <lib-button [variant]="selectedModule() === mod.id ? 'primary' : 'ghost'" [block]="true" (click)="filterByModule(mod.id)" class="filter-btn">
-            {{ getModuleName(mod.id) }}
-          </lib-button>
+          <button 
+            class="module-item" 
+            [class.active]="selectedModule() === mod.id"
+            (click)="filterByModule(mod.id)"
+          >
+            <span class="module-name">{{ getModuleName(mod.id) }}</span>
+            <span class="module-count">{{ getModuleCount(mod.id) }}</span>
+          </button>
         }
       </div>
     </div>
 
+    <!-- 热门搜索 -->
     <div class="sidebar-section">
-      <h3 class="sidebar-title">热门搜索</h3>
+      <h3 class="section-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+        热门搜索
+      </h3>
       <div class="tag-cloud">
         @for (tag of popularTags(); track tag) {
-          <lib-button variant="outline" size="sm" (click)="searchByTag(tag)">
+          <button class="hot-tag" (click)="searchByTag(tag)">
             {{ tag }}
-          </lib-button>
+          </button>
         }
       </div>
     </div>
@@ -49,141 +51,203 @@
 
   <!-- 主内容区 -->
   <main class="main-content">
-    <!-- 搜索区域 -->
-    <div class="search-section">
-      <div class="search-container">
-        <div class="search-input-wrapper" [class.focused]="searchFocused">
-          <div class="search-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.35-4.35" />
-            </svg>
-          </div>
-          <input type="text" [(ngModel)]="keywordSearch" (focus)="onSearchFocus()" (blur)="onSearchBlur()" (keyup.enter)="onSearchSubmit()" placeholder="搜索问题、错误码或解决方案..." class="search-input" />
-          @if (keywordSearch) {
-            <button class="clear-btn" (click)="keywordSearch = ''">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-          }
-          <button class="filter-toggle-btn" [class.active]="showAdvancedSearch" (click)="toggleAdvancedSearch()" title="高级筛选">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-            </svg>
-          </button>
-
-          <!-- 搜索历史下拉 -->
-          @if (showSearchHistory && searchHistory().length > 0) {
-            <div class="search-history-dropdown">
-              <div class="history-header">
-                <span>搜索历史</span>
-                <button class="clear-history-btn" (click)="clearHistory()">清空</button>
-              </div>
-              @for (item of searchHistory(); track item) {
-                <button class="history-item" (click)="selectHistory(item)">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
-                  </svg>
-                  {{ item }}
-                </button>
-              }
-            </div>
-          }
+    <!-- 统计卡片 - 横向排列 -->
+    <div class="stats-row">
+      <div class="stat-card stat-total">
+        <div class="stat-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <polyline points="10 9 9 9 8 9"/>
+          </svg>
         </div>
-
-        <!-- 高级筛选面板 -->
-        @if (showAdvancedSearch) {
-          <div class="advanced-search-panel">
-            <div class="filter-row">
-              <div class="filter-item">
-                <span class="filter-item-label">版本</span>
-                <lib-select [options]="versionOptions()" [(ngModel)]="advancedVersion" (selectionChange)="filterByVersion($event)" placeholder="选择版本"></lib-select>
-              </div>
-              <div class="filter-item">
-                <span class="filter-item-label">状态</span>
-                <lib-select [options]="statusOptions" [(ngModel)]="advancedStatus" (selectionChange)="filterByStatus($event)" placeholder="选择状态"></lib-select>
-              </div>
-              <div class="filter-item">
-                <lib-button variant="ghost" size="sm" (click)="clearFilters()">重置筛选</lib-button>
-              </div>
-            </div>
-          </div>
-        }
+        <div class="stat-chart">
+          <svg width="48" height="24" viewBox="0 0 48 24">
+            <polyline points="0,20 8,16 16,18 24,12 32,14 40,8 48,10" fill="none" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="stat-value">{{ stats().total }}</div>
+        <div class="stat-label">总问题数</div>
+        <div class="stat-delta">+2 本周</div>
       </div>
 
-      <!-- 当前筛选条件 -->
-      @if (selectedModule() || selectedVersion() || selectedStatus() || keywordSearch) {
-        <div class="active-filters">
-          <span class="filter-label">当前筛选:</span>
-          @if (selectedModule()) {
-            <span class="filter-tag">模块: {{ getModuleName(selectedModule()) }} <button (click)="filterByModule('')">×</button></span>
-          }
-          @if (selectedVersion()) {
-            <span class="filter-tag">版本: {{ selectedVersion() }} <button (click)="filterByVersion('')">×</button></span>
-          }
-          @if (selectedStatus()) {
-            <span class="filter-tag">状态: {{ selectedStatus() === 'resolved' ? '已解决' : selectedStatus() === 'pending' ? '处理中' : '已关闭' }} <button (click)="filterByStatus('')">×</button></span>
-          }
-          @if (keywordSearch) {
-            <span class="filter-tag">关键词: {{ keywordSearch }} <button (click)="keywordSearch = ''">×</button></span>
-          }
-          <span class="result-count">找到 {{ filteredFaqs().length }} 条结果</span>
+      <div class="stat-card stat-resolved">
+        <div class="stat-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
         </div>
-      }
+        <div class="stat-chart">
+          <svg width="48" height="24" viewBox="0 0 48 24">
+            <polyline points="0,18 12,14 24,16 36,10 48,6" fill="none" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="stat-value">{{ stats().resolved }}</div>
+        <div class="stat-label">已解决</div>
+        <div class="stat-delta">{{ getResolveRate() }}% 解决率</div>
+      </div>
+
+      <div class="stat-card stat-pending">
+        <div class="stat-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <div class="stat-chart">
+          <svg width="48" height="24" viewBox="0 0 48 24">
+            <polyline points="0,12 16,14 32,10 48,12" fill="none" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="stat-value">{{ stats().pending }}</div>
+        <div class="stat-label">处理中</div>
+        <div class="stat-delta">平均 2h 响应</div>
+      </div>
+
+      <div class="stat-card stat-views">
+        <div class="stat-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
+        <div class="stat-chart">
+          <svg width="48" height="24" viewBox="0 0 48 24">
+            <polyline points="0,20 12,12 24,16 36,8 48,4" fill="none" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="stat-value">{{ stats().totalViews }}</div>
+        <div class="stat-label">总浏览</div>
+        <div class="stat-delta">+128 本周</div>
+      </div>
     </div>
 
-    <!-- FAQ 卡片列表 -->
+    <!-- 搜索栏 -->
+    <div class="search-bar">
+      <div class="search-input-wrapper">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input 
+          type="text" 
+          class="search-input"
+          [(ngModel)]="keywordSearch" 
+          (keyup.enter)="onSearchSubmit()"
+          placeholder="搜索问题、错误码或解决方案..."
+        />
+        @if (keywordSearch) {
+          <button class="clear-btn" (click)="keywordSearch = ''">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        }
+      </div>
+      <button class="filter-btn" (click)="toggleAdvancedSearch()" [class.active]="showAdvancedSearch">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="4" y1="21" x2="4" y2="14"/>
+          <line x1="4" y1="10" x2="4" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12" y2="3"/>
+          <line x1="20" y1="21" x2="20" y2="16"/>
+          <line x1="20" y1="12" x2="20" y2="3"/>
+          <line x1="1" y1="14" x2="7" y2="14"/>
+          <line x1="9" y1="8" x2="15" y2="8"/>
+          <line x1="17" y1="16" x2="23" y2="16"/>
+        </svg>
+        筛选
+      </button>
+    </div>
+
+    <!-- 结果计数 -->
+    <div class="result-info">
+      找到 <strong>{{ filteredFaqs().length }}</strong> 条结果
+    </div>
+
+    <!-- FAQ 卡片网格 -->
     @if (filteredFaqs().length > 0) {
       <div class="faq-grid">
         @for (faq of filteredFaqs(); track faq.id) {
           <div class="faq-card" [routerLink]="['/detail', faq.id]">
-            <div class="card-content">
+            <!-- 卡片头部 -->
+            <div class="card-header">
               <h3 class="card-title">{{ faq.title }}</h3>
-              <div class="card-meta-row">
-                <div class="badges-wrapper">
-                  <span class="capsule capsule-primary">{{ faq.component }}</span>
-                  <span class="capsule capsule-outline">{{ faq.version }}</span>
-                </div>
-                @if (faq.errorCode) {
-                  <span class="capsule capsule-warning">{{ faq.errorCode }}</span>
+              <div class="status-icon" [class]="'status-' + faq.status">
+                @if (faq.status === 'resolved') {
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                  </svg>
+                } @else if (faq.status === 'pending') {
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                } @else {
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="15" y1="9" x2="9" y2="15"/>
+                    <line x1="9" y1="9" x2="15" y2="15"/>
+                  </svg>
                 }
               </div>
-              <p class="card-summary">{{ faq.summary }}</p>
             </div>
+
+            <!-- 标签行 -->
+            <div class="card-badges">
+              <span class="badge" [class]="'badge-' + getComponentType(faq.component)">
+                {{ getComponentLabel(faq.component) }}
+              </span>
+              <span class="badge badge-version">{{ faq.version }}</span>
+              @if (faq.errorCode) {
+                <span class="badge badge-error">{{ faq.errorCode }}</span>
+              }
+            </div>
+
+            <!-- 摘要 -->
+            <p class="card-summary">{{ faq.summary }}</p>
+
+            <!-- 标签 -->
+            <div class="card-tags">
+              @for (tag of faq.tags.slice(0, 3); track tag) {
+                <span class="tag">#{{ tag }}</span>
+              }
+            </div>
+
+            <!-- 卡片底部 -->
             <div class="card-footer">
-              <div class="tags-wrapper">
-                @for (tag of faq.tags.slice(0, 3); track tag) {
-                  <span class="mini-tag">#{{ tag }}</span>
-                }
-              </div>
-              <div class="stats-wrapper">
-                <span class="stat-item" title="查看次数">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                    <circle cx="12" cy="12" r="3" />
+              <div class="card-stats">
+                <span class="stat">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
                   </svg>
                   {{ faq.views }}
                 </span>
-                <span class="stat-item" title="解决时长">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <circle cx="12" cy="12" r="10" />
-                    <polyline points="12 6 12 12 16 14" />
+                <span class="stat">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                   </svg>
-                  {{ faq.solveTimeMinutes }}m
+                  0
                 </span>
               </div>
+              <span class="status-text" [class]="'text-' + faq.status">
+                {{ getStatusText(faq.status) }}
+              </span>
             </div>
           </div>
         }
       </div>
     } @else {
       <div class="empty-state">
-        <svg class="empty-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <circle cx="11" cy="11" r="8" />
-          <path d="m21 21-4.35-4.35" />
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="m21 21-4.35-4.35"/>
         </svg>
         <h3>未找到相关问题</h3>
         <p>尝试切换模块或修改搜索条件</p>
