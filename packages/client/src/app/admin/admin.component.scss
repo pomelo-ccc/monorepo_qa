@@ -441,6 +441,10 @@
 // 标签云
 .tag-section {
   margin-bottom: 24px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 20px;
 }
 
 .tag-header {
@@ -449,13 +453,16 @@
   gap: 8px;
   margin-bottom: 16px;
   font-size: 14px;
-  color: #666;
+  color: var(--color-textSecondary);
+  
+  svg { color: var(--color-textSecondary); }
   
   .tag-count {
-    background: #f0f0f0;
+    background: var(--color-surfaceHover);
     padding: 2px 8px;
     border-radius: 10px;
     font-size: 12px;
+    color: var(--color-text);
   }
 }
 
@@ -474,8 +481,12 @@
   font-size: 13px;
   cursor: pointer;
   transition: all 0.15s;
+  border: 1px solid transparent;
   
-  &:hover { transform: translateY(-1px); }
+  &:hover { 
+    transform: translateY(-1px); 
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
   
   .tag-hash { font-weight: 600; }
   .tag-usage {
@@ -485,24 +496,27 @@
     background: rgba(0, 0, 0, 0.1);
   }
   
-  &.tag-color-0 { background: #dbeafe; color: #2563eb; }
-  &.tag-color-1 { background: #dcfce7; color: #16a34a; }
-  &.tag-color-2 { background: #fef3c7; color: #d97706; }
-  &.tag-color-3 { background: #fce7f3; color: #db2777; }
-  &.tag-color-4 { background: #f3e8ff; color: #9333ea; }
-  &.tag-color-5 { background: #e0f2fe; color: #0284c7; }
-  &.tag-color-6 { background: #ffedd5; color: #ea580c; }
-  &.tag-color-7 { background: #f3f4f6; color: #4b5563; }
+  &.tag-color-0 { background: rgba(37, 99, 235, 0.15); color: #3b82f6; border-color: rgba(37, 99, 235, 0.2); }
+  &.tag-color-1 { background: rgba(22, 163, 74, 0.15); color: #22c55e; border-color: rgba(22, 163, 74, 0.2); }
+  &.tag-color-2 { background: rgba(217, 119, 6, 0.15); color: #f59e0b; border-color: rgba(217, 119, 6, 0.2); }
+  &.tag-color-3 { background: rgba(219, 39, 119, 0.15); color: #ec4899; border-color: rgba(219, 39, 119, 0.2); }
+  &.tag-color-4 { background: rgba(147, 51, 234, 0.15); color: #a855f7; border-color: rgba(147, 51, 234, 0.2); }
+  &.tag-color-5 { background: rgba(2, 132, 199, 0.15); color: #0ea5e9; border-color: rgba(2, 132, 199, 0.2); }
+  &.tag-color-6 { background: rgba(234, 88, 12, 0.15); color: #f97316; border-color: rgba(234, 88, 12, 0.2); }
+  &.tag-color-7 { background: rgba(75, 85, 99, 0.15); color: #6b7280; border-color: rgba(75, 85, 99, 0.2); }
 }
 
 .tag-input {
   padding: 10px 14px;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   font-size: 13px;
   width: 200px;
+  background: var(--color-surfaceHover);
+  color: var(--color-text);
   
-  &:focus { outline: none; border-color: #0ea5e9; }
+  &::placeholder { color: var(--color-textSecondary); }
+  &:focus { outline: none; border-color: var(--color-primary); background: var(--color-surface); }
 }
 
 // 标签统计
@@ -514,19 +528,20 @@
 
 .stat-card {
   padding: 20px;
-  background: #fafafa;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   
   .stat-value {
     font-size: 32px;
     font-weight: 700;
-    color: #1a1a1a;
+    color: var(--color-text);
     margin-bottom: 4px;
   }
   
   .stat-label {
     font-size: 13px;
-    color: #888;
+    color: var(--color-textSecondary);
   }
 }
 
