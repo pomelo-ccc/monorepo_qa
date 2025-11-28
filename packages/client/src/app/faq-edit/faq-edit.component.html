@@ -72,28 +72,63 @@
           ></lib-select>
         </div>
 
-        <div class="form-group">
+        <div class="form-group tags-section">
           <div class="form-label">相关标签 <span class="required">*</span></div>
 
-          @if (formData.tags.length > 0) {
-            <div class="selected-tags-list">
-              @for (tag of formData.tags; track tag) {
-                <lib-tag [selected]="true" (tagClick)="toggleTag(tag)" class="removable-tag">
-                  {{ tag }} <span class="remove-icon">×</span>
-                </lib-tag>
+          <!-- 已选择区域 -->
+          <div class="selected-area">
+            <div class="selected-header">
+              <span class="selected-title">已选择 ({{ formData.tags.length }})</span>
+              @if (formData.tags.length > 0) {
+                <button class="clear-btn" (click)="clearAllTags()">清空</button>
               }
             </div>
-          }
+            <div class="selected-tags">
+              @for (tag of formData.tags; track tag) {
+                <span class="selected-tag" (click)="toggleTag(tag)" (keydown.enter)="toggleTag(tag)" tabindex="0" role="button">
+                  {{ tag }}
+                  <span class="tag-remove">×</span>
+                </span>
+              }
+            </div>
+          </div>
 
-          <div class="tags-list">
-            @for (tag of tagOptions; track tag.value) {
-              <lib-tag
-                [selectable]="true"
-                [selected]="isTagSelected(tag.value)"
-                (selectedChange)="toggleTag(tag.value)"
-              >
-                {{ tag.label }}
-              </lib-tag>
+          <!-- 搜索框 -->
+          <div class="tag-search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input type="text" placeholder="搜索标签..." [(ngModel)]="tagSearchQuery" />
+          </div>
+
+          <!-- 可选标签 -->
+          <div class="available-area">
+            <div class="available-title">可选标签</div>
+            <div class="available-tags">
+              @for (tag of getFilteredTags(); track tag.value; let i = $index) {
+                @if (i < (showAllTags ? 999 : 8)) {
+                  <span 
+                    class="available-tag" 
+                    [class.selected]="isTagSelected(tag.value)"
+                    (click)="toggleTag(tag.value)" 
+                    (keydown.enter)="toggleTag(tag.value)" 
+                    tabindex="0" 
+                    role="button"
+                  >
+                    <span class="tag-plus">+</span>
+                    {{ tag.label }}
+                  </span>
+                }
+              }
+            </div>
+            @if (getFilteredTags().length > 8) {
+              <button class="expand-btn" (click)="showAllTags = !showAllTags">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline [attr.points]="showAllTags ? '18 15 12 9 6 15' : '6 9 12 15 18 9'" />
+                </svg>
+                {{ showAllTags ? '收起' : '展开更多' }} ({{ getFilteredTags().length - 8 }})
+              </button>
             }
           </div>
         </div>

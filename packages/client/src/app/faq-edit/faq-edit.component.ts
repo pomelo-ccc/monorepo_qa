@@ -4,7 +4,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { FaqService, ConfigService } from '../services';
 import { FaqItem, FlowchartData } from '../models';
-import { ButtonComponent, CardComponent, SelectComponent, TagComponent, MessageService } from '@repo/ui-lib';
+import { ButtonComponent, CardComponent, SelectComponent, MessageService } from '@repo/ui-lib';
 import { FlowchartBuilderComponent } from '../flowchart-builder/flowchart-builder.component';
 
 @Component({
@@ -17,7 +17,6 @@ import { FlowchartBuilderComponent } from '../flowchart-builder/flowchart-builde
     ButtonComponent,
     CardComponent,
     SelectComponent,
-    TagComponent,
     FlowchartBuilderComponent,
   ],
   templateUrl: './faq-edit.component.html',
@@ -72,6 +71,10 @@ export class FaqEditComponent implements OnInit {
   tagOptions: { label: string; value: string }[] = [];
   versionOptions: { label: string; value: string }[] = [];
 
+  // 标签搜索和展开
+  tagSearchQuery = '';
+  showAllTags = false;
+
   ngOnInit() {
     this.loadConfigData();
     this.faqId = this.route.snapshot.paramMap.get('id');
@@ -123,6 +126,20 @@ export class FaqEditComponent implements OnInit {
     } else {
       this.formData.tags.push(tag);
     }
+  }
+
+  clearAllTags() {
+    this.formData.tags = [];
+  }
+
+  getFilteredTags() {
+    if (!this.tagSearchQuery.trim()) {
+      return this.tagOptions.filter((t) => !this.isTagSelected(t.value));
+    }
+    const query = this.tagSearchQuery.toLowerCase();
+    return this.tagOptions.filter(
+      (t) => !this.isTagSelected(t.value) && t.label.toLowerCase().includes(query)
+    );
   }
 
   onStepsKeydown(event: KeyboardEvent) {
