@@ -250,12 +250,12 @@
 .selected-tag {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   background: #ec4899;
   color: #fff;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 12px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
   cursor: pointer;
   transition: opacity 0.15s;
   
@@ -265,7 +265,7 @@
 }
 
 .tag-remove {
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1;
 }
 
@@ -323,13 +323,13 @@
 .available-tag {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   background: transparent;
   border: 1px solid #3a3a3a;
   color: #888;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 12px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
   cursor: pointer;
   transition: all 0.15s;
   
@@ -345,7 +345,7 @@
 
 .tag-plus {
   color: #666;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .expand-btn {
