@@ -557,7 +557,7 @@
     top: 0;
     bottom: 0;
     width: 2px;
-    background: #e5e5e5;
+    background: var(--color-border);
   }
 }
 
@@ -575,11 +575,12 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  border: 2px solid #fff;
+  border: 2px solid var(--color-surface);
+  box-shadow: 0 0 0 2px var(--color-border);
   
-  &.dot-current { background: #0ea5e9; }
-  &.dot-maintenance { background: #22c55e; }
-  &.dot-deprecated { background: #f59e0b; }
+  &.dot-current { background: var(--color-primary); box-shadow: 0 0 0 2px var(--color-primary); }
+  &.dot-maintenance { background: #22c55e; box-shadow: 0 0 0 2px #22c55e; }
+  &.dot-deprecated { background: #f59e0b; box-shadow: 0 0 0 2px #f59e0b; }
 }
 
 .timeline-card {
@@ -587,10 +588,15 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  background: #fff;
-  border: 1px solid #e5e5e5;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   margin-left: 12px;
+  transition: box-shadow 0.2s;
+  
+  &:hover {
+    box-shadow: var(--color-cardShadow);
+  }
   
   .card-left {
     display: flex;
@@ -608,12 +614,12 @@
 .version-icon {
   width: 44px;
   height: 44px;
-  background: #e0f2fe;
+  background: rgba(var(--color-primary-rgb, 14, 165, 233), 0.15);
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #0ea5e9;
+  color: var(--color-primary);
 }
 
 .version-info {
@@ -621,7 +627,7 @@
     margin: 0 0 4px;
     font-size: 16px;
     font-weight: 600;
-    color: #1a1a1a;
+    color: var(--color-text);
   }
   
   .version-date {
@@ -630,13 +636,15 @@
     gap: 6px;
     margin: 0;
     font-size: 12px;
-    color: #888;
+    color: var(--color-textSecondary);
+    
+    svg { color: var(--color-textSecondary); }
   }
 }
 
 .faq-count {
   font-size: 13px;
-  color: #666;
+  color: var(--color-textSecondary);
 }
 
 .version-status {
@@ -645,9 +653,9 @@
   font-size: 12px;
   font-weight: 500;
   
-  &.status-current { background: #dbeafe; color: #2563eb; }
-  &.status-maintenance { background: #dcfce7; color: #16a34a; }
-  &.status-deprecated { background: #fef3c7; color: #d97706; }
+  &.status-current { background: rgba(37, 99, 235, 0.15); color: #3b82f6; }
+  &.status-maintenance { background: rgba(22, 163, 74, 0.15); color: #22c55e; }
+  &.status-deprecated { background: rgba(234, 88, 12, 0.15); color: #f97316; }
 }
 
 // 弹窗
