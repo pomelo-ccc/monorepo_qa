@@ -94,9 +94,7 @@
           </div>
         }
 
-        <div class="content-with-toc">
-          <!-- 核心内容流 -->
-          <article class="article-body">
+        <div class="article-content">
             <!-- 1. 问题概述卡片 -->
             <div class="overview-card" id="section-phenomenon">
               <div class="overview-header">
@@ -250,32 +248,6 @@
                 </div>
               </div>
             </div>
-          </article>
-
-          <!-- 右侧悬浮目录 -->
-          <aside class="toc-sidebar">
-            <div class="toc-container">
-              <h4 class="toc-title">目录</h4>
-              <ul class="toc-list">
-                <li>
-                  <a (click)="scrollToSection('section-phenomenon')" [class.active]="activeSection === 'section-phenomenon'">问题现象</a>
-                </li>
-                @if (faq.attachments && faq.attachments.length > 0) {
-                  <li>
-                    <a (click)="scrollToSection('section-attachments')" [class.active]="activeSection === 'section-attachments'">相关附件</a>
-                  </li>
-                }
-                @if (faq.troubleshootingFlow) {
-                  <li>
-                    <a (click)="scrollToSection('section-flow')" [class.active]="activeSection === 'section-flow'">排查逻辑</a>
-                  </li>
-                }
-                <li>
-                  <a (click)="scrollToSection('section-solution')" [class.active]="activeSection === 'section-solution'">解决方案</a>
-                </li>
-              </ul>
-            </div>
-          </aside>
         </div>
 
         <!-- 底部操作按钮 -->

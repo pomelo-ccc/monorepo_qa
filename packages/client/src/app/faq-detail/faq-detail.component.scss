@@ -259,69 +259,12 @@
 }
 
 // ============================================
-// 内容布局：主内容 + 右侧目录
+// 内容布局
 // ============================================
-.content-with-toc {
-  display: flex;
-  gap: 40px;
-  align-items: flex-start;
-}
-
-.article-body {
-  flex: 1;
-  min-width: 0;
+.article-content {
   display: flex;
   flex-direction: column;
   gap: 20px;
-}
-
-// ============================================
-// 右侧目录
-// ============================================
-.toc-sidebar {
-  width: 120px;
-  flex-shrink: 0;
-  position: sticky;
-  top: 70px;
-}
-
-.toc-container {
-  padding: 0;
-}
-
-.toc-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: #666;
-  margin: 0 0 8px 0;
-}
-
-.toc-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.toc-list li a {
-  display: block;
-  padding: 6px 0;
-  font-size: 13px;
-  color: #666;
-  text-decoration: none;
-  cursor: pointer;
-  border-left: 2px solid transparent;
-  padding-left: 10px;
-  margin-left: -2px;
-  transition: all 0.15s;
-  
-  &:hover {
-    color: #888;
-  }
-  
-  &.active {
-    color: #ef4444;
-    border-left-color: #ef4444;
-  }
 }
 
 // ============================================
