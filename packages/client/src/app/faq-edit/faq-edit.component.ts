@@ -57,8 +57,8 @@ export class FaqEditComponent implements OnInit {
   isFlowchartFullscreen = false;
   flowchartData: FlowchartData = { nodes: [], connections: [] };
 
-  // 拖拽调整宽度
-  flowchartWidth = 500;
+  // 拖拽调整宽度 - 默认占50%
+  flowchartWidth = Math.max(400, (window.innerWidth - 280) * 0.5);
   isResizing = false;
   private startX = 0;
   private startWidth = 0;
@@ -334,8 +334,9 @@ export class FaqEditComponent implements OnInit {
       if (!this.isResizing) return;
       e.preventDefault();
       const diff = this.startX - e.clientX;
-      // 最小300px，最大不超过容器宽度的70%
-      const maxWidth = window.innerWidth * 0.6;
+      // 可用宽度 = 窗口宽度 - 左侧边栏(280) - 分隔条(12) - 最小问题区(300)
+      const availableWidth = window.innerWidth - 280 - 12;
+      const maxWidth = availableWidth - 300;
       const newWidth = Math.max(300, Math.min(maxWidth, this.startWidth + diff));
       this.flowchartWidth = newWidth;
     };
