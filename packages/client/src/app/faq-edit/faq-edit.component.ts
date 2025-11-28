@@ -321,19 +321,27 @@ export class FaqEditComponent implements OnInit {
 
   // 拖拽调整宽度
   startResize(event: MouseEvent) {
+    event.preventDefault();
     this.isResizing = true;
     this.startX = event.clientX;
     this.startWidth = this.flowchartWidth;
 
+    // 添加全局样式防止选中文本
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+
     const onMouseMove = (e: MouseEvent) => {
       if (!this.isResizing) return;
+      e.preventDefault();
       const diff = this.startX - e.clientX;
-      const newWidth = Math.max(300, Math.min(800, this.startWidth + diff));
+      const newWidth = Math.max(350, Math.min(900, this.startWidth + diff));
       this.flowchartWidth = newWidth;
     };
 
     const onMouseUp = () => {
       this.isResizing = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
     };

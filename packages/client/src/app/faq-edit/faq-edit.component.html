@@ -341,8 +341,13 @@
         class="resize-handle"
         (mousedown)="startResize($event)"
         [class.dragging]="isResizing"
+        title="拖拽调整宽度"
       >
-        <div class="resize-line"></div>
+        <div class="resize-grip">
+          <span class="grip-dot"></span>
+          <span class="grip-dot"></span>
+          <span class="grip-dot"></span>
+        </div>
       </div>
     }
 
