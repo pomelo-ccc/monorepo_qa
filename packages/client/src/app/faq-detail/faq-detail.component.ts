@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FaqService, AuthService } from '../services';
 import { FaqItem, FlowchartData, FaqAttachment } from '../models';
@@ -9,7 +10,7 @@ import { FlowchartBuilderComponent } from '../flowchart-builder/flowchart-builde
 @Component({
   selector: 'app-faq-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, TreeComponent, FlowchartBuilderComponent],
+  imports: [CommonModule, FormsModule, RouterModule, TreeComponent, FlowchartBuilderComponent],
   templateUrl: './faq-detail.component.html',
   styleUrls: ['./faq-detail.component.scss'],
 })
@@ -22,6 +23,10 @@ export class FaqDetailComponent implements OnInit {
   activeSection = 'section-phenomenon';
   previewAttachment: FaqAttachment | null = null;
   stepsExpanded = false;
+  searchQuery = '';
+  totalCount = 0;
+  processingCount = 0;
+  private allFaqs: FaqItem[] = [];
 
   get phenomenonSteps(): string[] {
     if (!this.faq?.phenomenon) return [];
@@ -69,6 +74,9 @@ export class FaqDetailComponent implements OnInit {
 
   ngOnInit() {
     this.faqService.getAll().subscribe((faqs: FaqItem[]) => {
+      this.allFaqs = faqs;
+      this.totalCount = faqs.length;
+      this.processingCount = faqs.filter(f => f.status !== 'resolved').length;
       this.buildNavTree(faqs);
     });
 
@@ -210,5 +218,15 @@ export class FaqDetailComponent implements OnInit {
     }
 
     this.messageService.success('开始下载: ' + attachment.name);
+  }
+
+  markAsResolved() {
+    if (!this.faq) return;
+    this.faqService.update(this.faq.id, { status: 'resolved' }).subscribe(() => {
+      if (this.faq) {
+        this.faq.status = 'resolved';
+      }
+      this.messageService.success('问题已标记为已解决');
+    });
   }
 }
