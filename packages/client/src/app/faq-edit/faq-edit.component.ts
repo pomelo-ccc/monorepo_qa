@@ -334,7 +334,9 @@ export class FaqEditComponent implements OnInit {
       if (!this.isResizing) return;
       e.preventDefault();
       const diff = this.startX - e.clientX;
-      const newWidth = Math.max(350, Math.min(900, this.startWidth + diff));
+      // 最小300px，最大不超过容器宽度的70%
+      const maxWidth = window.innerWidth * 0.6;
+      const newWidth = Math.max(300, Math.min(maxWidth, this.startWidth + diff));
       this.flowchartWidth = newWidth;
     };
 
