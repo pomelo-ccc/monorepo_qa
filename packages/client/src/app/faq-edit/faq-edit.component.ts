@@ -54,6 +54,7 @@ export class FaqEditComponent implements OnInit {
   faqId: string | null = null;
   faqData?: FaqItem;
   showFlowchart = true;
+  isFlowchartFullscreen = false;
   flowchartData: FlowchartData = { nodes: [], connections: [] };
 
   attachments: {
@@ -306,6 +307,10 @@ export class FaqEditComponent implements OnInit {
 
   toggleFlowchart() {
     this.showFlowchart = !this.showFlowchart;
+  }
+
+  toggleFlowchartFullscreen() {
+    this.isFlowchartFullscreen = !this.isFlowchartFullscreen;
   }
 
   

@@ -434,6 +434,23 @@
   margin-left: 2px;
 }
 
+.show-flowchart-btn {
+  margin-left: auto;
+  background: none;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: #888;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  
+  &:hover {
+    border-color: #ec4899;
+    color: #ec4899;
+  }
+}
+
 // 文本输入框
 .text-area {
   width: 100%;
@@ -595,6 +612,17 @@
   flex-direction: column;
   min-width: 0;
   border-left: 1px solid #1a1a1a;
+  
+  &.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    background: #0e0e0e;
+    border: none;
+  }
 }
 
 .flowchart-header {
