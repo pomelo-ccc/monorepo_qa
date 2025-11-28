@@ -58,6 +58,13 @@
   --stat-pending-color: #eab308;
   --stat-views-bg: rgba(168, 85, 247, 0.15);
   --stat-views-color: #a855f7;
+  
+  /* 暗色主题模块卡片渐变 */
+  --module-card-blue: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(17, 24, 39, 0.8) 100%);
+  --module-card-pink: linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(17, 24, 39, 0.8) 100%);
+  --module-card-purple: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(17, 24, 39, 0.8) 100%);
+  --module-card-gray: linear-gradient(135deg, rgba(107, 114, 128, 0.2) 0%, rgba(17, 24, 39, 0.8) 100%);
+  --module-card-orange: linear-gradient(135deg, rgba(249, 115, 22, 0.2) 0%, rgba(17, 24, 39, 0.8) 100%);
 }
 
 /* 蓝色渐变主题 (theme-blue) */

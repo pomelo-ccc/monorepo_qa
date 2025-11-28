@@ -369,15 +369,37 @@
 .module-card {
   padding: 20px;
   border-radius: 12px;
-  transition: transform 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid;
   
-  &:hover { transform: translateY(-2px); }
+  &:hover { 
+    transform: translateY(-2px); 
+    box-shadow: var(--color-cardShadow);
+  }
   
-  &.card-blue { background: linear-gradient(135deg, #dbeafe, #eff6ff); }
-  &.card-pink { background: linear-gradient(135deg, #fce7f3, #fdf2f8); }
-  &.card-purple { background: linear-gradient(135deg, #f3e8ff, #faf5ff); }
-  &.card-gray { background: linear-gradient(135deg, #f3f4f6, #f9fafb); }
-  &.card-orange { background: linear-gradient(135deg, #ffedd5, #fff7ed); }
+  // 暗色主题使用渐变背景
+  &.card-blue { 
+    border-left-color: #3b82f6;
+    background: var(--module-card-blue, var(--color-surface));
+  }
+  &.card-pink { 
+    border-left-color: #ec4899;
+    background: var(--module-card-pink, var(--color-surface));
+  }
+  &.card-purple { 
+    border-left-color: #8b5cf6;
+    background: var(--module-card-purple, var(--color-surface));
+  }
+  &.card-gray { 
+    border-left-color: #6b7280;
+    background: var(--module-card-gray, var(--color-surface));
+  }
+  &.card-orange { 
+    border-left-color: #f97316;
+    background: var(--module-card-orange, var(--color-surface));
+  }
   
   .card-icon {
     width: 40px;
@@ -388,30 +410,31 @@
     justify-content: center;
     margin-bottom: 12px;
     
-    &.icon-blue { background: #dbeafe; color: #2563eb; }
-    &.icon-pink { background: #fce7f3; color: #db2777; }
-    &.icon-purple { background: #f3e8ff; color: #9333ea; }
-    &.icon-gray { background: #e5e7eb; color: #4b5563; }
-    &.icon-orange { background: #fed7aa; color: #ea580c; }
+    &.icon-blue { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+    &.icon-pink { background: rgba(236, 72, 153, 0.15); color: #ec4899; }
+    &.icon-purple { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+    &.icon-gray { background: rgba(107, 114, 128, 0.15); color: #6b7280; }
+    &.icon-orange { background: rgba(249, 115, 22, 0.15); color: #f97316; }
   }
   
   .card-title {
     margin: 0 0 4px;
     font-size: 15px;
     font-weight: 600;
-    color: #1a1a1a;
+    color: var(--color-text);
   }
   
   .card-code {
     margin: 0 0 12px;
     font-size: 12px;
-    color: #888;
+    color: var(--color-textSecondary);
   }
   
   .card-count {
     margin: 0;
     font-size: 13px;
-    color: #666;
+    color: var(--color-primary);
+    font-weight: 500;
   }
 }
 
