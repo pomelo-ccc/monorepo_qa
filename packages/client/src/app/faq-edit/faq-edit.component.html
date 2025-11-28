@@ -22,15 +22,6 @@
         </svg>
         取消
       </lib-button>
-      @if (!showFlowchart) {
-        <lib-button variant="ghost" (click)="toggleFlowchart()" title="显示流程图">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-            <line x1="15" y1="3" x2="15" y2="21" />
-          </svg>
-          显示流程图
-        </lib-button>
-      }
       <lib-button variant="primary" (click)="onSave()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
@@ -149,6 +140,7 @@
               </span>
               <span>问题描述</span>
               <span class="required-mark">*</span>
+              <span class="legend-spacer"></span>
               @if (!showFlowchart) {
                 <button class="show-flowchart-btn" (click)="toggleFlowchart()" title="显示流程图">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

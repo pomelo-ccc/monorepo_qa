@@ -440,8 +440,11 @@
   margin-left: 2px;
 }
 
+.legend-spacer {
+  flex: 1;
+}
+
 .show-flowchart-btn {
-  margin-left: auto;
   background: none;
   border: 1px solid #3a3a3a;
   border-radius: 4px;
