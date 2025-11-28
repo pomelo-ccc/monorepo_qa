@@ -2,15 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import {
-  DataTableComponent,
-  TableColumn,
-  TableAction,
-  ButtonComponent,
-  CardComponent,
-  MessageService,
-  DialogService,
-} from '@repo/ui-lib';
+import { MessageService, DialogService } from '@repo/ui-lib';
 import { ConfigService } from '../services/config.service';
 import { FaqService } from '../services/faq.service';
 import { FaqItem } from '../models';
@@ -19,7 +11,8 @@ interface ConfigItem {
   id: string;
   name: string;
   type?: string;
-  parentId?: string; // For modules
+  parentId?: string;
+  parentName?: string;
   description?: string;
 }
 
@@ -33,7 +26,7 @@ interface FormData {
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, DataTableComponent, ButtonComponent, CardComponent],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.scss'],
 })
@@ -50,45 +43,19 @@ export class AdminComponent implements OnInit {
   editingItem: ConfigItem | null = null;
   formData: FormData = {};
 
-  moduleData: ConfigItem[] = [];
-  moduleColumns: TableColumn[] = [
-    { key: 'id', label: 'ID', width: '100px' },
-    { key: 'name', label: '名称' },
-    { key: 'type', label: '类型', width: '150px' },
-  ];
-  moduleActions: TableAction[] = [
-    { label: '编辑', type: 'primary', handler: (row) => this.editItem('module', row) },
-    { label: '删除', type: 'danger', handler: (row) => this.deleteItem('module', row) },
-  ];
+  // 筛选相关
+  faqSearch = '';
+  faqStatusFilter = '';
+  faqModuleFilter = '';
+  pageSize = 10;
+  newTagName = '';
 
-  tagData: ConfigItem[] = [];
-  tagColumns: TableColumn[] = [{ key: 'name', label: '标签名称' }];
-  tagActions: TableAction[] = [
-    { label: '编辑', type: 'primary', handler: (row) => this.editItem('tag', row) },
-    { label: '删除', type: 'danger', handler: (row) => this.deleteItem('tag', row) },
-  ];
-
-  versionData: ConfigItem[] = [];
-  versionColumns: TableColumn[] = [
-    { key: 'name', label: '版本号' },
-    { key: 'description', label: '描述' },
-  ];
-  versionActions: TableAction[] = [
-    { label: '编辑', type: 'primary', handler: (row) => this.editItem('version', row) },
-    { label: '删除', type: 'danger', handler: (row) => this.deleteItem('version', row) },
-  ];
-
+  // 数据
   faqData: FaqItem[] = [];
-  faqColumns: TableColumn[] = [
-    { key: 'title', label: '标题' },
-    { key: 'component', label: '模块', width: '120px' },
-    { key: 'status', label: '状态', width: '100px' },
-    { key: 'views', label: '浏览', width: '80px' },
-  ];
-  faqActions: TableAction[] = [
-    { label: '编辑', type: 'primary', handler: (row) => this.editFaq(row) },
-    { label: '删除', type: 'danger', handler: (row) => this.deleteFaq(row) },
-  ];
+  filteredFaqs: FaqItem[] = [];
+  allModules: ConfigItem[] = [];
+  tagData: ConfigItem[] = [];
+  versionData: ConfigItem[] = [];
 
   ngOnInit() {
     this.loadData();
@@ -101,7 +68,114 @@ export class AdminComponent implements OnInit {
   }
 
   loadFaqs() {
-    this.faqService.getAll().subscribe((faqs) => (this.faqData = faqs));
+    this.faqService.getAll().subscribe((faqs) => {
+      this.faqData = faqs;
+      this.filterFaqs();
+    });
+  }
+
+  filterFaqs() {
+    this.filteredFaqs = this.faqData.filter((faq) => {
+      const matchSearch = !this.faqSearch || faq.title.toLowerCase().includes(this.faqSearch.toLowerCase());
+      const matchStatus = !this.faqStatusFilter || faq.status === this.faqStatusFilter;
+      const matchModule = !this.faqModuleFilter || faq.component === this.faqModuleFilter;
+      return matchSearch && matchStatus && matchModule;
+    });
+  }
+
+  // 辅助方法
+  getIndexColor(i: number): string {
+    const colors = ['blue', 'green', 'orange', 'pink', 'purple'];
+    return colors[i % colors.length];
+  }
+
+  getIndexLabel(i: number): string {
+    const labels = ['配', '1', '3', '1', '[', 'D'];
+    return labels[i % labels.length];
+  }
+
+  getModuleColor(component: string): string {
+    const lower = component.toLowerCase();
+    if (lower.includes('table')) return 'blue';
+    if (lower.includes('project')) return 'pink';
+    if (lower.includes('backend')) return 'purple';
+    if (lower.includes('other')) return 'gray';
+    return 'blue';
+  }
+
+  getModuleShortName(component: string): string {
+    const mod = this.allModules.find((m) => m.id === component);
+    return mod ? mod.name : component;
+  }
+
+  getStatusText(status: string): string {
+    const map: Record<string, string> = { pending: '待处理', resolved: '已解决', processing: '处理中' };
+    return map[status] || status;
+  }
+
+  formatDate(dateStr: string): string {
+    if (!dateStr) return '-';
+    const d = new Date(dateStr);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  getModuleCardColor(i: number): string {
+    const colors = ['blue', 'pink', 'purple', 'gray', 'orange'];
+    return colors[i % colors.length];
+  }
+
+  getModuleFaqCount(moduleId: string): number {
+    return this.faqData.filter((f) => f.component === moduleId).length;
+  }
+
+  // 标签统计
+  getTagUsageCount(tagName: string): number {
+    return this.faqData.filter((f) => f.tags?.includes(tagName)).length;
+  }
+
+  getTotalTagUsage(): number {
+    return this.faqData.reduce((sum, f) => sum + (f.tags?.length || 0), 0);
+  }
+
+  getMaxTagUsage(): number {
+    const counts = this.tagData.map((t) => this.getTagUsageCount(t.name));
+    return Math.max(0, ...counts);
+  }
+
+  getAvgTagUsage(): number {
+    if (this.tagData.length === 0) return 0;
+    return Math.round(this.getTotalTagUsage() / this.tagData.length);
+  }
+
+  // 版本相关
+  getVersionFaqCount(versionName: string): number {
+    return this.faqData.filter((f) => f.version === versionName).length;
+  }
+
+  getVersionStatus(ver: ConfigItem): string {
+    // 简单逻辑：第一个版本是current，其他是维护中或已弃用
+    const idx = this.versionData.indexOf(ver);
+    if (idx === 0) return 'current';
+    if (idx < 3) return 'maintenance';
+    return 'deprecated';
+  }
+
+  getVersionStatusText(ver: ConfigItem, idx: number): string {
+    if (idx === 0) return '当前版本';
+    if (idx < 3) return '维护中';
+    return '已弃用';
+  }
+
+  addTag() {
+    if (!this.newTagName.trim()) return;
+    this.configService.addTag(this.newTagName.trim()).subscribe({
+      next: () => {
+        this.messageService.success('添加成功');
+        this.newTagName = '';
+        this.loadData();
+      },
+      error: (err) => this.messageService.error('添加失败: ' + err.message),
+    });
   }
 
   createFaq() {
@@ -132,11 +206,11 @@ export class AdminComponent implements OnInit {
       modules.forEach((parent) => {
         if (parent.children) {
           parent.children.forEach((child) => {
-            flatModules.push({ id: child.id, name: child.name, type: parent.name, parentId: parent.id });
+            flatModules.push({ id: child.id, name: child.name, type: parent.name, parentId: parent.id, parentName: parent.name });
           });
         }
       });
-      this.moduleData = flatModules;
+      this.allModules = flatModules;
     });
     this.configService.getTags().subscribe((tags) => {
       this.tagData = tags.map((tag) => ({ id: tag, name: tag }));

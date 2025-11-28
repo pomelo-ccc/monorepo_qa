@@ -1,159 +1,378 @@
-<div class="admin-container">
-  <h1>系统配置管理</h1>
+<div class="admin-page">
+  <!-- 页面头部 -->
+  <header class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">系统配置管理</h1>
+      <p class="page-desc">管理问题、模块、标签和版本配置</p>
+    </div>
+  </header>
 
-  <div class="tabs">
-    <button class="tab-btn" [class.active]="activeTab === 'faqs'" (click)="activeTab = 'faqs'; loadFaqs()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10" />
-        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-        <line x1="12" y1="17" x2="12.01" y2="17" />
-      </svg>
-      问题管理
-    </button>
-    <button class="tab-btn" [class.active]="activeTab === 'modules'" (click)="activeTab = 'modules'">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="3" y="3" width="7" height="7" />
-        <rect x="14" y="3" width="7" height="7" />
-        <rect x="14" y="14" width="7" height="7" />
-        <rect x="3" y="14" width="7" height="7" />
-      </svg>
-      模块管理
-    </button>
-    <button class="tab-btn" [class.active]="activeTab === 'tags'" (click)="activeTab = 'tags'">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
-        <line x1="7" y1="7" x2="7.01" y2="7" />
-      </svg>
-      标签管理
-    </button>
-    <button class="tab-btn" [class.active]="activeTab === 'versions'" (click)="activeTab = 'versions'">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="6" y1="3" x2="6" y2="15" />
-        <circle cx="18" cy="6" r="3" />
-        <circle cx="6" cy="18" r="3" />
-        <path d="M18 9a9 9 0 0 1-9 9" />
-      </svg>
-      版本管理
-    </button>
+  <!-- Tab 导航 -->
+  <div class="tabs-wrapper">
+    <div class="tabs">
+      <button class="tab-btn" [class.active]="activeTab === 'faqs'" (click)="activeTab = 'faqs'; loadFaqs()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+        问题管理
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'modules'" (click)="activeTab = 'modules'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7" />
+          <rect x="14" y="3" width="7" height="7" />
+          <rect x="14" y="14" width="7" height="7" />
+          <rect x="3" y="14" width="7" height="7" />
+        </svg>
+        模块管理
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'tags'" (click)="activeTab = 'tags'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+          <line x1="7" y1="7" x2="7.01" y2="7" />
+        </svg>
+        标签管理
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'versions'" (click)="activeTab = 'versions'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="6" y1="3" x2="6" y2="15" />
+          <circle cx="18" cy="6" r="3" />
+          <circle cx="6" cy="18" r="3" />
+          <path d="M18 9a9 9 0 0 1-9 9" />
+        </svg>
+        版本管理
+      </button>
+    </div>
   </div>
 
+  <!-- Tab 内容 -->
   <div class="tab-content">
+    <!-- 问题管理 -->
     @if (activeTab === 'faqs') {
-      <div class="section">
-        <div class="section-header">
-          <h2>问题列表</h2>
-          <lib-button variant="primary" (click)="createFaq()">
+      <div class="content-section">
+        <!-- 筛选栏 -->
+        <div class="filter-bar">
+          <div class="search-box">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+            <input type="text" placeholder="搜索问题..." [(ngModel)]="faqSearch" (input)="filterFaqs()" />
+          </div>
+          <select class="filter-select" [(ngModel)]="faqStatusFilter" (change)="filterFaqs()">
+            <option value="">全部状态</option>
+            <option value="pending">待处理</option>
+            <option value="resolved">已解决</option>
+            <option value="processing">处理中</option>
+          </select>
+          <select class="filter-select" [(ngModel)]="faqModuleFilter" (change)="filterFaqs()">
+            <option value="">全部模块</option>
+            @for (mod of allModules; track mod.id) {
+              <option [value]="mod.id">{{ mod.name }}</option>
+            }
+          </select>
+          <div class="filter-spacer"></div>
+          <button class="primary-btn" (click)="createFaq()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
             新建问题
-          </lib-button>
+          </button>
         </div>
-        <lib-data-table [columns]="faqColumns" [data]="faqData" [actions]="faqActions"></lib-data-table>
+
+        <!-- 问题表格 -->
+        <div class="data-table">
+          <div class="table-header">
+            <div class="th th-title">标题 ↕</div>
+            <div class="th th-module">模块 ↕</div>
+            <div class="th th-status">状态 ↕</div>
+            <div class="th th-views">浏览 ↕</div>
+            <div class="th th-date">创建时间 ↕</div>
+            <div class="th th-actions">操作</div>
+          </div>
+          <div class="table-body">
+            @for (faq of filteredFaqs; track faq.id; let i = $index) {
+              <div class="table-row">
+                <div class="td td-title">
+                  <span class="row-index" [class]="'index-' + getIndexColor(i)">{{ getIndexLabel(i) }}</span>
+                  <span class="title-text">{{ faq.title }}</span>
+                </div>
+                <div class="td td-module">
+                  <span class="module-badge" [class]="'badge-' + getModuleColor(faq.component)">
+                    {{ getModuleShortName(faq.component) }}
+                  </span>
+                </div>
+                <div class="td td-status">
+                  <span class="status-badge" [class]="'status-' + faq.status">
+                    {{ getStatusText(faq.status || '') }}
+                  </span>
+                </div>
+                <div class="td td-views">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                  {{ faq.views }}
+                </div>
+                <div class="td td-date">{{ formatDate(faq.createTime || '') }}</div>
+                <div class="td td-actions">
+                  <button class="action-btn" title="编辑" (click)="editFaq(faq)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                  </button>
+                  <button class="action-btn delete" title="删除" (click)="deleteFaq(faq)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                  </button>
+                  <button class="action-btn" title="更多">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="1"/>
+                      <circle cx="19" cy="12" r="1"/>
+                      <circle cx="5" cy="12" r="1"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- 分页 -->
+        <div class="pagination">
+          <div class="page-info">
+            每页显示
+            <select [(ngModel)]="pageSize">
+              <option [value]="10">10</option>
+              <option [value]="20">20</option>
+              <option [value]="50">50</option>
+            </select>
+            条
+          </div>
+          <div class="page-nav">
+            <span>第 1-{{ filteredFaqs.length }} 条，共 {{ filteredFaqs.length }} 条</span>
+            <button class="page-btn" disabled>«</button>
+            <button class="page-btn" disabled>‹</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn" disabled>›</button>
+            <button class="page-btn" disabled>»</button>
+          </div>
+        </div>
       </div>
     }
 
+    <!-- 模块管理 -->
     @if (activeTab === 'modules') {
-      <div class="section">
+      <div class="content-section">
         <div class="section-header">
-          <h2>模块列表</h2>
-          <lib-button variant="primary" (click)="showAddDialog('module')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <div class="header-info">
+            <h2>模块列表</h2>
+            <p>管理系统中的功能模块分类</p>
+          </div>
+          <button class="primary-btn" (click)="showAddDialog('module')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-            添加模块
-          </lib-button>
+            新建模块
+          </button>
         </div>
-        <lib-data-table [columns]="moduleColumns" [data]="moduleData" [actions]="moduleActions"></lib-data-table>
+
+        <div class="module-grid">
+          @for (mod of allModules; track mod.id; let i = $index) {
+            <div class="module-card" [class]="'card-' + getModuleCardColor(i)">
+              <div class="card-icon" [class]="'icon-' + getModuleCardColor(i)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                </svg>
+              </div>
+              <h3 class="card-title">{{ mod.parentName ? mod.parentName + ' - ' : '' }}{{ mod.name }}</h3>
+              <p class="card-code">代码: {{ mod.id }}</p>
+              <p class="card-count">{{ getModuleFaqCount(mod.id) }} 个问题</p>
+            </div>
+          }
+        </div>
       </div>
     }
 
+    <!-- 标签管理 -->
     @if (activeTab === 'tags') {
-      <div class="section">
+      <div class="content-section">
         <div class="section-header">
-          <h2>标签列表</h2>
-          <lib-button variant="primary" (click)="showAddDialog('tag')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            添加标签
-          </lib-button>
+          <div class="header-info">
+            <h2>标签列表</h2>
+            <p>管理问题的标签分类，便于快速检索</p>
+          </div>
+          <div class="header-actions">
+            <input type="text" class="tag-input" placeholder="输入标签名称..." [(ngModel)]="newTagName" />
+            <button class="primary-btn" (click)="addTag()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              添加标签
+            </button>
+          </div>
         </div>
-        <lib-data-table [columns]="tagColumns" [data]="tagData" [actions]="tagActions"></lib-data-table>
+
+        <!-- 标签云 -->
+        <div class="tag-section">
+          <div class="tag-header">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+              <line x1="7" y1="7" x2="7.01" y2="7"/>
+            </svg>
+            所有标签
+            <span class="tag-count">{{ tagData.length }}</span>
+          </div>
+          <div class="tag-cloud">
+            @for (tag of tagData; track tag.id; let i = $index) {
+              <div class="tag-item" [class]="'tag-color-' + (i % 8)">
+                <span class="tag-hash">#</span>
+                <span class="tag-name">{{ tag.name }}</span>
+                <span class="tag-usage">{{ getTagUsageCount(tag.name) }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- 标签统计 -->
+        <div class="tag-stats">
+          <div class="stat-card">
+            <div class="stat-value">{{ tagData.length }}</div>
+            <div class="stat-label">总标签数</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">{{ getTotalTagUsage() }}</div>
+            <div class="stat-label">标签使用次数</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">{{ getMaxTagUsage() }}</div>
+            <div class="stat-label">最高使用次数</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">{{ getAvgTagUsage() }}</div>
+            <div class="stat-label">平均使用次数</div>
+          </div>
+        </div>
       </div>
     }
 
+    <!-- 版本管理 -->
     @if (activeTab === 'versions') {
-      <div class="section">
+      <div class="content-section">
         <div class="section-header">
-          <h2>版本列表</h2>
-          <lib-button variant="primary" (click)="showAddDialog('version')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <div class="header-info">
+            <h2>版本列表</h2>
+            <p>管理系统版本信息及关联问题</p>
+          </div>
+          <button class="primary-btn" (click)="showAddDialog('version')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-            添加版本
-          </lib-button>
+            新建版本
+          </button>
         </div>
-        <lib-data-table [columns]="versionColumns" [data]="versionData" [actions]="versionActions"></lib-data-table>
+
+        <div class="version-timeline">
+          @for (ver of versionData; track ver.id; let i = $index) {
+            <div class="timeline-item" [class.first]="i === 0">
+              <div class="timeline-dot" [class]="'dot-' + getVersionStatus(ver)"></div>
+              <div class="timeline-card">
+                <div class="card-left">
+                  <div class="version-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="6" y1="3" x2="6" y2="15"/>
+                      <circle cx="18" cy="6" r="3"/>
+                      <circle cx="6" cy="18" r="3"/>
+                      <path d="M18 9a9 9 0 0 1-9 9"/>
+                    </svg>
+                  </div>
+                  <div class="version-info">
+                    <h3 class="version-name">{{ ver.name }}</h3>
+                    <p class="version-date">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                      </svg>
+                      {{ ver.description || '未设置日期' }}
+                    </p>
+                  </div>
+                </div>
+                <div class="card-right">
+                  <span class="faq-count">{{ getVersionFaqCount(ver.name) }} 个问题</span>
+                  <span class="version-status" [class]="'status-' + getVersionStatus(ver)">
+                    {{ getVersionStatusText(ver, i) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
       </div>
     }
   </div>
 
+  <!-- 弹窗 -->
   @if (showDialog) {
-    <div class="dialog-overlay" (click)="closeDialog()" (keyup.escape)="closeDialog()" tabindex="0">
-      <div class="dialog-wrapper" (click)="$event.stopPropagation()" (keyup)="(null)" tabindex="-1">
-        <lib-card [title]="(editingItem ? '编辑' : '添加') + dialogTitle" [hasHeader]="true">
-          <ng-container ngProjectAs="[header-icon]">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+    <div class="dialog-overlay" (click)="closeDialog()" (keyup.escape)="closeDialog()" tabindex="0" role="dialog">
+      <div class="dialog-box" (click)="$event.stopPropagation()" (keyup)="$event.stopPropagation()" tabindex="-1" role="document">
+        <div class="dialog-header">
+          <h3>{{ (editingItem ? '编辑' : '添加') + dialogTitle }}</h3>
+          <button class="close-btn" (click)="closeDialog()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
-          </ng-container>
-
-          <form (ngSubmit)="saveItem()">
-            @if (dialogType === 'module') {
-              <div class="form-group">
-                <label for="module-id">模块ID</label>
-                <input id="module-id" type="text" [(ngModel)]="formData.id" name="id" required [disabled]="!!editingItem" placeholder="输入模块ID" class="form-input" />
-              </div>
-              <div class="form-group">
-                <label for="module-name">名称</label>
-                <input id="module-name" type="text" [(ngModel)]="formData.name" name="name" required placeholder="输入名称" class="form-input" />
-              </div>
-              <div class="form-group">
-                <label for="module-parent">父模块ID (可选，留空为顶级模块)</label>
-                <input id="module-parent" type="text" [(ngModel)]="formData.parentId" name="parentId" placeholder="输入父模块ID" class="form-input" />
-              </div>
-            }
-
-            @if (dialogType === 'tag') {
-              <div class="form-group">
-                <label for="tag-name">标签名称</label>
-                <input id="tag-name" type="text" [(ngModel)]="formData.name" name="name" required placeholder="输入标签名称" class="form-input" />
-              </div>
-            }
-
-            @if (dialogType === 'version') {
-              <div class="form-group">
-                <label for="version-name">版本号</label>
-                <input id="version-name" type="text" [(ngModel)]="formData.name" name="name" required placeholder="例如 1.0.0" class="form-input" />
-              </div>
-              <div class="form-group">
-                <label for="version-desc">描述</label>
-                <textarea id="version-desc" [(ngModel)]="formData.description" name="description" placeholder="版本描述" class="form-input" rows="3"></textarea>
-              </div>
-            }
-
-            <div class="dialog-actions">
-              <lib-button variant="ghost" type="button" (click)="closeDialog()">取消</lib-button>
-              <lib-button variant="primary" type="submit">保存</lib-button>
+          </button>
+        </div>
+        <form (ngSubmit)="saveItem()">
+          @if (dialogType === 'module') {
+            <div class="form-group">
+              <label for="mod-id">模块ID</label>
+              <input id="mod-id" type="text" [(ngModel)]="formData.id" name="id" required [disabled]="!!editingItem" placeholder="输入模块ID" />
             </div>
-          </form>
-        </lib-card>
+            <div class="form-group">
+              <label for="mod-name">名称</label>
+              <input id="mod-name" type="text" [(ngModel)]="formData.name" name="name" required placeholder="输入名称" />
+            </div>
+            <div class="form-group">
+              <label for="mod-parent">父模块ID (可选)</label>
+              <input id="mod-parent" type="text" [(ngModel)]="formData.parentId" name="parentId" placeholder="留空为顶级模块" />
+            </div>
+          }
+
+          @if (dialogType === 'tag') {
+            <div class="form-group">
+              <label for="tag-name">标签名称</label>
+              <input id="tag-name" type="text" [(ngModel)]="formData.name" name="name" required placeholder="输入标签名称" />
+            </div>
+          }
+
+          @if (dialogType === 'version') {
+            <div class="form-group">
+              <label for="ver-name">版本号</label>
+              <input id="ver-name" type="text" [(ngModel)]="formData.name" name="name" required placeholder="例如 3.0.X" />
+            </div>
+            <div class="form-group">
+              <label for="ver-date">发布日期</label>
+              <input id="ver-date" type="text" [(ngModel)]="formData.description" name="description" placeholder="例如 2024-02-26" />
+            </div>
+          }
+
+          <div class="dialog-footer">
+            <button type="button" class="cancel-btn" (click)="closeDialog()">取消</button>
+            <button type="submit" class="submit-btn">保存</button>
+          </div>
+        </form>
       </div>
     </div>
   }

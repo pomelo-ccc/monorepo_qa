@@ -1,13 +1,14 @@
 <div class="page-wrapper">
   <!-- 顶部固定栏 -->
   <header class="top-header">
-    <button class="back-btn" (click)="goBack()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M19 12H5M12 19l-7-7 7-7" />
-      </svg>
-      返回
-    </button>
+    <div class="header-left"></div>
     <div class="header-right">
+      <button class="back-btn" (click)="goBack()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        返回
+      </button>
       @if (authService.isAdmin()) {
         <button class="edit-btn" [routerLink]="['/edit', faq?.id]">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

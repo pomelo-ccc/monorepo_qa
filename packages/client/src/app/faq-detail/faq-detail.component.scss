@@ -29,6 +29,10 @@
   flex-shrink: 0;
 }
 
+.header-left {
+  flex: 1;
+}
+
 .back-btn {
   display: flex;
   align-items: center;
@@ -41,7 +45,7 @@
   font-size: 13px;
   cursor: pointer;
   transition: all 0.15s;
-  
+
   &:hover {
     background: #1a1a1a;
     color: #fff;
@@ -91,6 +95,7 @@
   flex-direction: column;
   flex-shrink: 0;
   overflow: hidden;
+  height: 100%;
 }
 
 .sidebar-title {
@@ -140,10 +145,8 @@
 
 .nav-tree-wrapper {
   flex: 1;
-  overflow-y: auto;
+  overflow: hidden;
   padding: 0 8px;
-  scrollbar-width: thin;
-  scrollbar-color: #333 transparent;
 }
 
 .sidebar-footer {
@@ -621,6 +624,8 @@
   flex-shrink: 0;
   padding: 20px 16px;
   border-left: 1px solid #1a1a1a;
+  overflow: hidden;
+  height: 100%;
 }
 
 .toc-nav {
