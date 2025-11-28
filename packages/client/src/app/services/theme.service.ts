@@ -34,96 +34,81 @@ export interface Theme {
 export const THEMES: Theme[] = [
   {
     id: 'cyberpunk',
-    name: '赛博朋克黑',
+    name: '赛博朋克',
     colors: {
-      primary: '#F06292',
-      primaryLight: '#F48FB1',
-      background: '#1E1E24',
-      surface: '#2B2D31',
-      surfaceHover: '#36383D',
-      text: '#E0E0E0',
-      textSecondary: '#A0A0A0',
-      border: '#3F3F46',
-      accent: '#4DB6AC',
-      success: '#4DB6AC',
-      warning: '#FFD54F',
-      error: '#E57373',
-      glass: 'rgba(30, 30, 36, 0.8)',
+      primary: '#ec4899',
+      primaryLight: '#f472b6',
+      background: '#0a0a0f',
+      surface: '#111118',
+      surfaceHover: '#1a1a24',
+      text: '#f1f5f9',
+      textSecondary: '#888899',
+      border: '#252530',
+      accent: '#22d3ee',
+      success: '#22c55e',
+      warning: '#eab308',
+      error: '#ef4444',
+      glass: 'rgba(17, 17, 24, 0.8)',
     },
   },
   {
-    id: 'elegant',
-    name: '优雅蓝白',
+    id: 'blue',
+    name: '清新蓝',
     colors: {
-      primary: '#5B7DB1',
-      primaryLight: '#7DA0D6',
-      background: '#FAF9F6',
-      surface: '#FFFFFF',
-      surfaceHover: '#F3F4F6',
-      text: '#374151',
-      textSecondary: '#6B7280',
-      border: '#E5E7EB',
-      accent: '#A3C1DA',
-      success: '#10B981',
-      warning: '#F59E0B',
-      error: '#EF4444',
-      glass: 'rgba(255, 255, 255, 0.9)',
+      primary: '#0ea5e9',
+      primaryLight: '#38bdf8',
+      background: 'linear-gradient(180deg, #bae6fd 0%, #e0f2fe 50%, #f0f9ff 100%)',
+      surface: 'rgba(255, 255, 255, 0.85)',
+      surfaceHover: 'rgba(255, 255, 255, 0.95)',
+      text: '#0c4a6e',
+      textSecondary: '#64748b',
+      border: 'rgba(14, 165, 233, 0.2)',
+      accent: '#06b6d4',
+      success: '#22c55e',
+      warning: '#eab308',
+      error: '#ef4444',
+      glass: 'rgba(255, 255, 255, 0.7)',
+      glassBlur: '12px',
     },
   },
   {
-    id: 'glass',
-    name: '拟态玻璃',
+    id: 'mint',
+    name: '薄荷青',
     colors: {
-      // 主色调 - 使用淡蓝色作为主色，更有玻璃质感
-      primary: '#60a5fa',
-      primaryLight: '#93c5fd',
-      // 深色渐变背景，模拟真实环境光
-      background: 'linear-gradient(145deg, #1e3a5f 0%, #0f172a 50%, #1e1b4b 100%)',
-      // 毛玻璃表面 - 更高的透明度和更真实的玻璃效果
-      surface: 'rgba(255, 255, 255, 0.08)',
-      surfaceHover: 'rgba(255, 255, 255, 0.15)',
-      text: '#f8fafc',
-      textSecondary: 'rgba(248, 250, 252, 0.65)',
-      // 玻璃边缘 - 模拟真实玻璃的折射边缘
-      border: 'rgba(255, 255, 255, 0.12)',
-      accent: '#fbbf24',
-      success: '#4ade80',
-      warning: '#fbbf24',
-      error: '#f87171',
-      glass: 'rgba(255, 255, 255, 0.06)',
-      // 拟物化扩展 - 真实玻璃效果
-      glassHighlight: 'rgba(255, 255, 255, 0.25)', // 顶部高光
-      glassShadow: 'rgba(0, 0, 0, 0.4)', // 底部阴影
-      glassInnerShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.1)', // 内部高光
-      glassBorderTop: 'rgba(255, 255, 255, 0.3)', // 顶部边框高光
-      glassBorderBottom: 'rgba(0, 0, 0, 0.2)', // 底部边框阴影
-      glassReflection:
-        'linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 50%)', // 反射渐变
-      glassBlur: '20px', // 模糊程度
-      cardShadow:
-        '0 8px 32px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-      buttonShadow:
-        '0 4px 15px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1)',
-      inputShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(0, 0, 0, 0.1)',
+      primary: '#14b8a6',
+      primaryLight: '#2dd4bf',
+      background: 'linear-gradient(180deg, #99f6e4 0%, #ccfbf1 50%, #f0fdfa 100%)',
+      surface: 'rgba(255, 255, 255, 0.85)',
+      surfaceHover: 'rgba(255, 255, 255, 0.95)',
+      text: '#134e4a',
+      textSecondary: '#64748b',
+      border: 'rgba(20, 184, 166, 0.2)',
+      accent: '#0ea5e9',
+      success: '#22c55e',
+      warning: '#eab308',
+      error: '#ef4444',
+      glass: 'rgba(255, 255, 255, 0.7)',
+      glassBlur: '12px',
     },
   },
   {
-    id: 'sunset',
-    name: '暖色渐变',
+    id: 'warm',
+    name: '暖橙色',
     colors: {
-      primary: '#F6AD55',
-      primaryLight: '#FBD38D',
-      background: '#FFFBF0',
-      surface: '#FFFFFF',
-      surfaceHover: '#FFF5E6',
-      text: '#5D4037',
-      textSecondary: '#8D6E63',
-      border: '#F3E5F5',
-      accent: '#D1913C',
-      success: '#68D391',
-      warning: '#F6E05E',
-      error: '#FC8181',
-      glass: 'rgba(255, 255, 255, 0.6)',
+      primary: '#f97316',
+      primaryLight: '#fb923c',
+      background: 'linear-gradient(180deg, #fed7aa 0%, #ffedd5 50%, #fff7ed 100%)',
+      surface: 'rgba(255, 255, 255, 0.85)',
+      surfaceHover: 'rgba(255, 255, 255, 0.95)',
+      text: '#7c2d12',
+      textSecondary: '#78716c',
+      border: 'rgba(249, 115, 22, 0.2)',
+      accent: '#ea580c',
+      success: '#22c55e',
+      warning: '#eab308',
+      error: '#ef4444',
+      glass: 'rgba(255, 255, 255, 0.7)',
+      glassBlur: '12px',
     },
   },
 ];
@@ -162,8 +147,17 @@ export class ThemeService {
 
   private applyTheme(theme: Theme) {
     const root = document.documentElement;
+    const body = document.body;
 
-    // 先重置所有拟物化变量为默认值（非玻璃主题使用）
+    // 移除所有主题类
+    body.classList.remove('theme-blue', 'theme-mint', 'theme-warm');
+    
+    // 添加对应主题类
+    if (theme.id !== 'cyberpunk') {
+      body.classList.add(`theme-${theme.id}`);
+    }
+
+    // 先重置所有拟物化变量为默认值
     const defaultSkeuomorphicVars = {
       glassHighlight: 'transparent',
       glassShadow: 'transparent',
@@ -171,8 +165,8 @@ export class ThemeService {
       glassBorderTop: 'transparent',
       glassBorderBottom: 'transparent',
       glassReflection: 'none',
-      glassBlur: '0px',
-      cardShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+      glassBlur: theme.colors.glassBlur || '0px',
+      cardShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
       buttonShadow: 'none',
       inputShadow: 'none',
     };
@@ -189,9 +183,10 @@ export class ThemeService {
       }
     });
 
-    // Special handling for glass theme background
-    if (theme.id === 'glass') {
+    // 处理渐变背景
+    if (theme.colors.background.includes('gradient')) {
       root.style.setProperty('--bg-gradient', theme.colors.background);
+      root.style.setProperty('--color-background', 'transparent');
     } else {
       root.style.setProperty('--bg-gradient', 'none');
     }

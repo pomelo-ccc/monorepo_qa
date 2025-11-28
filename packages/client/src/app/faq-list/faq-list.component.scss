@@ -6,6 +6,7 @@
   height: calc(100vh - 56px);
   overflow: hidden;
   background: var(--color-background);
+  background-attachment: fixed;
 }
 
 // ============================================
@@ -199,37 +200,37 @@
   // 总问题数 - 蓝色
   &.stat-total {
     .stat-icon {
-      background: rgba(59, 130, 246, 0.15);
-      color: #3b82f6;
+      background: var(--stat-total-bg);
+      color: var(--stat-total-color);
     }
-    .stat-chart { color: #3b82f6; }
+    .stat-chart { color: var(--stat-total-color); }
   }
   
   // 已解决 - 绿色
   &.stat-resolved {
     .stat-icon {
-      background: rgba(34, 197, 94, 0.15);
-      color: #22c55e;
+      background: var(--stat-resolved-bg);
+      color: var(--stat-resolved-color);
     }
-    .stat-chart { color: #22c55e; }
+    .stat-chart { color: var(--stat-resolved-color); }
   }
   
   // 处理中 - 黄色
   &.stat-pending {
     .stat-icon {
-      background: rgba(234, 179, 8, 0.15);
-      color: #eab308;
+      background: var(--stat-pending-bg);
+      color: var(--stat-pending-color);
     }
-    .stat-chart { color: #eab308; }
+    .stat-chart { color: var(--stat-pending-color); }
   }
   
   // 总浏览 - 紫色
   &.stat-views {
     .stat-icon {
-      background: rgba(168, 85, 247, 0.15);
-      color: #a855f7;
+      background: var(--stat-views-bg);
+      color: var(--stat-views-color);
     }
-    .stat-chart { color: #a855f7; }
+    .stat-chart { color: var(--stat-views-color); }
   }
 }
 
