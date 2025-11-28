@@ -57,6 +57,12 @@ export class FaqEditComponent implements OnInit {
   isFlowchartFullscreen = false;
   flowchartData: FlowchartData = { nodes: [], connections: [] };
 
+  // 拖拽调整宽度
+  flowchartWidth = 500;
+  isResizing = false;
+  private startX = 0;
+  private startWidth = 0;
+
   attachments: {
     id: string;
     name: string;
@@ -311,6 +317,29 @@ export class FaqEditComponent implements OnInit {
 
   toggleFlowchartFullscreen() {
     this.isFlowchartFullscreen = !this.isFlowchartFullscreen;
+  }
+
+  // 拖拽调整宽度
+  startResize(event: MouseEvent) {
+    this.isResizing = true;
+    this.startX = event.clientX;
+    this.startWidth = this.flowchartWidth;
+
+    const onMouseMove = (e: MouseEvent) => {
+      if (!this.isResizing) return;
+      const diff = this.startX - e.clientX;
+      const newWidth = Math.max(300, Math.min(800, this.startWidth + diff));
+      this.flowchartWidth = newWidth;
+    };
+
+    const onMouseUp = () => {
+      this.isResizing = false;
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
   }
 
   

@@ -335,9 +335,20 @@
       </div>
     }
 
+    <!-- 拖拽分隔条 -->
+    @if (showFlowchart) {
+      <div
+        class="resize-handle"
+        (mousedown)="startResize($event)"
+        [class.dragging]="isResizing"
+      >
+        <div class="resize-line"></div>
+      </div>
+    }
+
     <!-- 右侧边栏：流程图构建器 -->
     @if (showFlowchart) {
-      <aside class="right-sidebar" [class.fullscreen]="isFlowchartFullscreen">
+      <aside class="right-sidebar" [class.fullscreen]="isFlowchartFullscreen" [style.width.px]="flowchartWidth">
         <div class="flowchart-header">
           <div class="flowchart-title-group">
             <span class="title-bar"></span>
