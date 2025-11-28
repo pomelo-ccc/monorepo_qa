@@ -28,20 +28,22 @@ import { CommonModule } from '@angular/common';
     
     .tooltip-content {
       position: absolute;
-      background: #333;
+      background: rgba(0, 0, 0, 0.85);
       color: #fff;
-      padding: 6px 10px;
-      border-radius: 4px;
+      padding: 6px 12px;
+      border-radius: 6px;
       font-size: 12px;
       white-space: nowrap;
       z-index: 10000;
       pointer-events: none;
-      animation: fadeIn 0.15s ease;
+      animation: fadeIn 0.1s ease-out;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(4px);
     }
     
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
     
     .tooltip-arrow {
@@ -55,56 +57,56 @@ import { CommonModule } from '@angular/common';
       bottom: 100%;
       left: 50%;
       transform: translateX(-50%);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     
     .tooltip-content.top .tooltip-arrow {
       top: 100%;
       left: 50%;
       transform: translateX(-50%);
-      border-top-color: #333;
+      border-top-color: rgba(0, 0, 0, 0.85);
     }
     
     .tooltip-content.bottom {
       top: 100%;
       left: 50%;
       transform: translateX(-50%);
-      margin-top: 8px;
+      margin-top: 6px;
     }
     
     .tooltip-content.bottom .tooltip-arrow {
       bottom: 100%;
       left: 50%;
       transform: translateX(-50%);
-      border-bottom-color: #333;
+      border-bottom-color: rgba(0, 0, 0, 0.85);
     }
     
     .tooltip-content.left {
       right: 100%;
       top: 50%;
       transform: translateY(-50%);
-      margin-right: 8px;
+      margin-right: 6px;
     }
     
     .tooltip-content.left .tooltip-arrow {
       left: 100%;
       top: 50%;
       transform: translateY(-50%);
-      border-left-color: #333;
+      border-left-color: rgba(0, 0, 0, 0.85);
     }
     
     .tooltip-content.right {
       left: 100%;
       top: 50%;
       transform: translateY(-50%);
-      margin-left: 8px;
+      margin-left: 6px;
     }
     
     .tooltip-content.right .tooltip-arrow {
       right: 100%;
       top: 50%;
       transform: translateY(-50%);
-      border-right-color: #333;
+      border-right-color: rgba(0, 0, 0, 0.85);
     }
   `]
 })
