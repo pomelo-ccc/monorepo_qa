@@ -75,23 +75,23 @@
         <div class="form-group tags-section">
           <div class="form-label">相关标签 <span class="required">*</span></div>
 
-          <!-- 已选择区域 -->
-          <div class="selected-area">
-            <div class="selected-header">
-              <span class="selected-title">已选择 ({{ formData.tags.length }})</span>
-              @if (formData.tags.length > 0) {
+          <!-- 已选择区域 - 有选中标签时才显示 -->
+          @if (formData.tags.length > 0) {
+            <div class="selected-area" @fadeSlide>
+              <div class="selected-header">
+                <span class="selected-title">已选择 ({{ formData.tags.length }})</span>
                 <button class="clear-btn" (click)="clearAllTags()">清空</button>
-              }
+              </div>
+              <div class="selected-tags">
+                @for (tag of formData.tags; track tag) {
+                  <span class="selected-tag" @tagEnter (click)="toggleTag(tag)" (keydown.enter)="toggleTag(tag)" tabindex="0" role="button">
+                    {{ tag }}
+                    <span class="tag-remove">×</span>
+                  </span>
+                }
+              </div>
             </div>
-            <div class="selected-tags">
-              @for (tag of formData.tags; track tag) {
-                <span class="selected-tag" (click)="toggleTag(tag)" (keydown.enter)="toggleTag(tag)" tabindex="0" role="button">
-                  {{ tag }}
-                  <span class="tag-remove">×</span>
-                </span>
-              }
-            </div>
-          </div>
+          }
 
           <!-- 搜索框 -->
           <div class="tag-search">

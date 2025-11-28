@@ -1,4 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { trigger, transition, style, animate } from '@angular/animations';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -21,6 +22,26 @@ import { FlowchartBuilderComponent } from '../flowchart-builder/flowchart-builde
   ],
   templateUrl: './faq-edit.component.html',
   styleUrls: ['./faq-edit.component.scss'],
+  animations: [
+    trigger('fadeSlide', [
+      transition(':enter', [
+        style({ opacity: 0, height: 0, marginBottom: 0 }),
+        animate('200ms ease-out', style({ opacity: 1, height: '*', marginBottom: '12px' })),
+      ]),
+      transition(':leave', [
+        animate('150ms ease-in', style({ opacity: 0, height: 0, marginBottom: 0 })),
+      ]),
+    ]),
+    trigger('tagEnter', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(20px) scale(0.8)' }),
+        animate('250ms ease-out', style({ opacity: 1, transform: 'translateY(0) scale(1)' })),
+      ]),
+      transition(':leave', [
+        animate('150ms ease-in', style({ opacity: 0, transform: 'scale(0.8)' })),
+      ]),
+    ]),
+  ],
 })
 export class FaqEditComponent implements OnInit {
   private route = inject(ActivatedRoute);
