@@ -91,10 +91,54 @@
   flex-shrink: 0;
   padding: 16px 14px;
   overflow-y: auto;
+  
+  // 覆盖 lib-card 样式
+  ::ng-deep lib-card {
+    .card {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      border-radius: 0;
+      
+      &:hover {
+        transform: none;
+        box-shadow: none;
+      }
+      
+      &::before {
+        display: none;
+      }
+    }
+    
+    .card-header {
+      padding: 0 0 12px 0;
+      border-bottom: none;
+      
+      .header-left {
+        gap: 6px;
+        
+        svg {
+          width: 14px;
+          height: 14px;
+          color: #888;
+        }
+      }
+      
+      .card-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #fff;
+      }
+    }
+    
+    .card-body {
+      padding: 0;
+    }
+  }
 }
 
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .form-group .form-label {
