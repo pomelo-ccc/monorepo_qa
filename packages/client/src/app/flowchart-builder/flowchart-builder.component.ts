@@ -20,13 +20,13 @@ import { FlowNode, FlowConnection, FlowNodeType, FlowchartData, PRESET_COLORS } 
 import { FlowchartToolbarComponent } from './components/flowchart-toolbar/flowchart-toolbar.component';
 import { PropertyPanelComponent, NodeAttachment } from './components/property-panel/property-panel.component';
 
-// 自定义节点类型映射 - 浅色背景 + 彩色左边框风格
+// 自定义节点类型映射 - 暗色主题风格
 const NODE_STYLES: Record<FlowNodeType, { fill: string; stroke: string }> = {
-  start: { fill: '#dcfce7', stroke: '#22c55e' },      // 浅绿背景 + 绿色边框
-  process: { fill: '#dbeafe', stroke: '#3b82f6' },    // 浅蓝背景 + 蓝色边框
-  decision: { fill: '#fef3c7', stroke: '#f59e0b' },   // 浅黄背景 + 橙色边框
-  end: { fill: '#fee2e2', stroke: '#ef4444' },        // 浅红背景 + 红色边框
-  image: { fill: '#f1f5f9', stroke: '#64748b' },      // 浅灰背景 + 灰色边框
+  start: { fill: '#1a2e1a', stroke: '#22c55e' },      // 暗绿背景 + 绿色边框
+  process: { fill: '#0f1729', stroke: '#3b82f6' },    // 暗蓝背景 + 蓝色边框
+  decision: { fill: '#2a2510', stroke: '#eab308' },   // 暗黄背景 + 黄色边框
+  end: { fill: '#2a1515', stroke: '#ef4444' },        // 暗红背景 + 红色边框
+  image: { fill: '#1f1a2e', stroke: '#a855f7' },      // 暗紫背景 + 紫色边框
 };
 
 interface GraphData {

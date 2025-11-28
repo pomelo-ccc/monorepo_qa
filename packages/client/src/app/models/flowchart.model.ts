@@ -52,13 +52,13 @@ export interface ConnectionPath {
   labelY: number;
 }
 
-/** 节点默认配置 */
+/** 节点默认配置 - 暗色主题 */
 export const NODE_DEFAULTS: Record<FlowNodeType, { width: number; height: number; fillColor: string; strokeColor: string }> = {
-  start: { width: 120, height: 50, fillColor: '#10b981', strokeColor: '#059669' },
-  process: { width: 140, height: 60, fillColor: '#3b82f6', strokeColor: '#2563eb' },
-  decision: { width: 140, height: 80, fillColor: '#f59e0b', strokeColor: '#d97706' },
-  end: { width: 120, height: 50, fillColor: '#ef4444', strokeColor: '#dc2626' },
-  image: { width: 160, height: 120, fillColor: '#64748b', strokeColor: '#475569' },
+  start: { width: 120, height: 50, fillColor: '#1a2e1a', strokeColor: '#22c55e' },
+  process: { width: 140, height: 60, fillColor: '#0f1729', strokeColor: '#3b82f6' },
+  decision: { width: 140, height: 80, fillColor: '#2a2510', strokeColor: '#eab308' },
+  end: { width: 120, height: 50, fillColor: '#2a1515', strokeColor: '#ef4444' },
+  image: { width: 160, height: 120, fillColor: '#1f1a2e', strokeColor: '#a855f7' },
 };
 
 /** 预设颜色 */
